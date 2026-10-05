@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-10-05
+
+- Formulario sin resumen breve: nombre, descripción, fechas, horarios, lugar y dirección, departamento/localidad, Instagram, web opcional y entradas.
+- Horario común o independiente por día; opcional si aún no se confirmó. Se conserva y muestra en detalle/API.
+- Radio Gratis / Con entrada, con enlace obligatorio para entradas y validación del lado servidor.
+- Google Places Autocomplete restringido a Uruguay; obtiene dirección, departamento, localidad y coordenadas. Conserva ingreso manual como alternativa.
+- Reutiliza clave local de Google sin incluirla en Git. Requiere habilitar Places API (New) en el proyecto de Google Cloud; diagnóstico local: servicio deshabilitado (403).
+- Esquema 3 incremental; mantiene eventos, propuestas y precios históricos sin asumir que son gratuitos.
+- 44 pruebas de integración y 19 HTTP; verificación visual de horarios y campos condicionales.
+
 ## 0.2.1 — 2026-10-05
 
 - Recuperación de Instagram y sitio web de los eventos originales de Eventchamp.

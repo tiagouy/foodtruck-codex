@@ -19,9 +19,21 @@ class FTUY_Admin {
     }
     public static function labels() { return array( 'pending' => 'Pendiente', 'corrections' => 'Requiere correcciones', 'published' => 'Publicado', 'rejected' => 'Rechazado', 'superseded' => 'Reemplazado' ); }
     public static function fields( $data = array(), $public = false ) {
-        $fields = array( 'title' => 'Nombre del evento', 'summary' => 'Resumen breve', 'description' => 'Descripción', 'start_date' => 'Fecha de inicio', 'end_date' => 'Fecha de finalización', 'start_time' => 'Hora de inicio (opcional)', 'end_time' => 'Hora de finalización (opcional)', 'department' => 'Departamento', 'locality' => 'Localidad', 'venue' => 'Nombre del lugar', 'address' => 'Dirección', 'organizer' => 'Organizador', 'website' => 'Sitio web', 'instagram' => 'Instagram (@usuario o enlace al perfil)', 'tickets_url' => 'Enlace de entradas', 'price' => 'Entrada / precio', 'latitude' => 'Latitud (opcional)', 'longitude' => 'Longitud (opcional)' );
+        FTUY_Form::assets();
+        $fields = array( 'title' => 'Nombre del evento', 'description' => 'Descripción', 'start_date' => 'Fecha de inicio', 'end_date' => 'Fecha de finalización', 'start_time' => 'Hora de apertura (opcional)', 'end_time' => 'Hora de cierre (opcional)', 'venue' => 'Nombre del lugar', 'address' => 'Dirección', 'department' => 'Departamento', 'locality' => 'Localidad', 'instagram' => 'Instagram (@usuario o enlace al perfil)', 'website' => 'Sitio web (opcional)', 'tickets_url' => 'Enlace de entradas', 'organizer' => 'Organizador (opcional)' );
+        $entry = $data['entry_type'] ?? '';
+        if ( ! $entry ) { $entry = ! empty( $data['tickets_url'] ) ? 'paid' : ( empty( $data['id'] ) || preg_match( '/gratis|free|gratuit/i', $data['price'] ?? '' ) ? 'free' : '' ); }
+        echo '<input type="hidden" name="schedule_json" value="' . esc_attr( ( $data['schedule_json'] ?? '' ) ?: '[]' ) . '"><input type="hidden" name="price" value="' . esc_attr( $data['price'] ?? '' ) . '">';
+        foreach ( array( 'latitude', 'longitude' ) as $coordinate ) { echo '<input type="hidden" name="' . esc_attr( $coordinate ) . '" value="' . esc_attr( $data[$coordinate] ?? '' ) . '">'; }
         echo '<div class="ft-form-grid">';
         foreach ( $fields as $key => $label ) {
+            if ( $key === 'start_time' ) {
+                echo '<fieldset class="ft-hours-mode"><legend>Horarios</legend><p>Podés dejarlos vacíos si todavía no están confirmados.</p><label><input type="radio" name="hours_mode" value="same" checked> Mismo horario todos los días</label> <label><input type="radio" name="hours_mode" value="daily"> Horarios distintos por día</label></fieldset><div class="ft-daily-hours" hidden></div>';
+            }
+            if ( $key === 'address' ) { echo '<div class="ft-place-search"><label>Buscar dirección en Google</label><div id="ft-place-widget"></div><small class="ft-place-status" role="status">Podés completar la dirección manualmente si no encontrás el lugar.</small></div>'; }
+            if ( $key === 'tickets_url' ) {
+                echo '<fieldset class="ft-entry"><legend>Entrada *</legend><label><input type="radio" name="entry_type" value="free" required ' . checked( $entry, 'free', false ) . '> Gratis</label> <label><input type="radio" name="entry_type" value="paid" required ' . checked( $entry, 'paid', false ) . '> Con entrada</label></fieldset>';
+            }
             $value = $data[$key] ?? '';
             $required = in_array( $key, array( 'title', 'description', 'start_date', 'end_date', 'department', 'locality', 'address' ), true ) ? ' required' : '';
             echo '<label class="ft-field ft-field-' . esc_attr( $key ) . '"><span>' . esc_html( $label ) . ( $required ? ' *' : '' ) . '</span>';
@@ -40,7 +52,9 @@ class FTUY_Admin {
         $image_id = absint( $data['image_id'] ?? 0 );
         echo '<label class="ft-field"><span>Imagen principal ' . ( $image_id ? '(opcional: reemplazar)' : '*' ) . '</span><input type="file" name="event_image" accept="image/jpeg,image/png,image/webp"' . ( ! $image_id ? ' required' : '' ) . '><small>JPG, PNG o WebP, máximo 5 MB. Recomendado 4:5; se conserva el afiche completo.</small></label>';
         if ( $image_id ) { echo '<div>' . wp_get_attachment_image( $image_id, 'thumbnail' ) . '</div>'; }
-        echo '<label class="ft-field"><span><input type="checkbox" name="cancelled" value="1" ' . checked( ! empty( $data['cancelled'] ), true, false ) . '> Evento cancelado</span></label></div>';
+        if ( ! empty( $data['id'] ) ) { echo '<label class="ft-field"><span><input type="checkbox" name="cancelled" value="1" ' . checked( ! empty( $data['cancelled'] ), true, false ) . '> Evento cancelado</span></label>'; }
+        echo '</div>';
+        if ( ! $public ) { wp_print_scripts( 'ftuy-event-form' ); }
     }
     public static function image( $existing = 0 ) {
         if ( empty( $_FILES['event_image']['name'] ) ) { return $existing; }

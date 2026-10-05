@@ -33,8 +33,11 @@ try {
     list( $code, $body ) = $call( '/sugerir-evento/', $cookie );
     $assert( $code === 200 && strpos( $body, 'Enviar a revisión' ) !== false, 'Formulario autenticado.' );
     $form_nonce = $nonce( $body );
+    $assert( strpos( $body, 'name="summary"' ) === false && strpos( $body, 'name="entry_type"' ) !== false && strpos( $body, 'event-form.js' ) !== false, 'Formulario simplificado con entradas y horarios.' );
     $today = FTUY_Events::now()->format( 'Y-m-d' );
     $fields = array( '_wpnonce' => $form_nonce, 'title' => $title, 'description' => 'Evento de prueba HTTP.', 'start_date' => $today, 'end_date' => $today, 'department' => 'Montevideo', 'locality' => 'Montevideo', 'address' => 'Dirección de prueba', 'event_image' => new CURLFile( get_attached_file( $seed['image_id'] ), 'image/jpeg', 'afiche.jpg' ) );
+    $fields['entry_type'] = 'paid'; $fields['tickets_url'] = 'https://example.com/entradas';
+    $fields['schedule_json'] = wp_json_encode( array( array( 'date' => $today, 'start' => '10:00', 'end' => '20:00' ) ) );
     $bad = $fields; $bad['_wpnonce'] = 'invalid';
     list( $code ) = $call( '/sugerir-evento/', $cookie, $bad );
     $assert( $code === 403, 'Rechaza CSRF.' );
@@ -67,8 +70,10 @@ try {
     list( $code, $json ) = $call( '/wp-json/foodtrucks-uy/v1/events/' . $event['slug'] );
     $decoded = json_decode( $json, true );
     $assert( $code === 200 && $decoded && $decoded['title'] === $title, 'API HTTP JSON válido tras aprobar.' );
+    $assert( $decoded['entry_type'] === 'paid' && $decoded['tickets_url'] === $fields['tickets_url'] && $decoded['schedule'][0]['end'] === '20:00', 'Horarios por día y entradas conservados hasta la API.' );
     list( $code, $body ) = $call( '/evento/' . $event['slug'] . '/' );
     $assert( $code === 200 && strpos( $body, $title ) !== false, 'Detalle público nuevo.' );
+    $assert( strpos( $body, '10:00 — 20:00' ) !== false && strpos( $body, 'Con entrada' ) !== false, 'Detalle muestra horarios y tipo de entrada.' );
     list( $code, $body ) = $call( '/eventos/pasados/?departamento=Canelones' );
     $assert( $code === 200 && strpos( $body, '0 eventos' ) !== false, 'Filtro HTTP sin resultados.' );
     echo "OK: $count comprobaciones HTTP, incluida carga real de imagen.\n";

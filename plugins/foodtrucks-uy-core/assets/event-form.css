@@ -1,0 +1,14 @@
+.ft-form-grid [hidden]{display:none!important}
+.ft-form-grid fieldset{grid-column:1/-1;border:1px solid #d7dde0;border-radius:6px;padding:18px;margin:0;min-width:0}
+.ft-form-grid legend{font-weight:650;font-size:16px;padding:0 6px}
+.ft-form-grid fieldset label{display:inline-flex;align-items:center;gap:8px;margin:8px 24px 0 0;font-size:14px;cursor:pointer}
+.ft-form-grid input[type=radio]{accent-color:#e56632;width:18px;height:18px}
+.ft-hours-mode p{margin:0;color:#627078;font-size:13px}
+.ft-daily-hours,.ft-place-search,.ft-field-venue,.ft-field-address,.ft-field-tickets_url{grid-column:1/-1}
+.ft-day-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid #e0e5e7}
+.ft-day-row label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.ft-day-row input{font:inherit;width:100%;padding:10px;border:1px solid #cdd3d6;border-radius:3px;background:white}
+.ft-place-search>label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
+.ft-place-search gmp-place-autocomplete{width:100%;color-scheme:light}
+.ft-place-status{display:block;color:#627078;margin-top:8px;font-size:13px;line-height:1.5}
+@media(max-width:650px){.ft-day-row{grid-template-columns:1fr 1fr}.ft-day-row strong{grid-column:1/-1}.ft-form-grid fieldset label{display:flex}}

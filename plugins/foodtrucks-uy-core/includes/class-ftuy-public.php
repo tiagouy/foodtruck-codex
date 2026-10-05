@@ -88,6 +88,7 @@ class FTUY_Public {
         if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' ) { return; }
         if ( ! wp_verify_nonce( $_POST['_wpnonce'] ?? '', 'ftuy_suggest' ) ) { wp_die( 'La sesión del formulario venció.', '', array( 'response' => 403 ) ); }
         self::$form_data = array_merge( self::$form_data, wp_unslash( $_POST ) );
+        self::$form_data['cancelled'] = empty( $_POST['cancelled'] ) ? 0 : 1;
         // Evita ráfagas de carga sin impedir la corrección de validaciones.
         $key = 'ftuy_submit_' . get_current_user_id();
         if ( get_transient( $key ) ) { self::$error = 'Esperá un minuto antes de enviar otra propuesta.'; return; }

@@ -29,6 +29,8 @@ class FTUY_Events {
             end_date date NOT NULL,
             start_time varchar(5) NOT NULL DEFAULT '',
             end_time varchar(5) NOT NULL DEFAULT '',
+            schedule_json longtext NOT NULL,
+            entry_type varchar(12) NOT NULL DEFAULT '',
             department varchar(64) NOT NULL DEFAULT '',
             locality varchar(191) NOT NULL DEFAULT '',
             venue varchar(255) NOT NULL DEFAULT '',
@@ -90,7 +92,8 @@ class FTUY_Events {
             foreach ( $links as $key => $value ) { if ( ! $event[$key] && $value ) { $changes[$key] = $value; } }
             if ( $changes ) { $wpdb->update( $events, $changes, array( 'id' => $event['id'] ) ); }
         }
-        update_option( 'ftuy_schema_version', '2', false );
+        if ( ! $wpdb->get_var( "SHOW COLUMNS FROM $events LIKE 'schedule_json'" ) || ! $wpdb->get_var( "SHOW COLUMNS FROM $events LIKE 'entry_type'" ) ) { return; }
+        update_option( 'ftuy_schema_version', '3', false );
     }
 
     public static function now() { return new DateTimeImmutable( 'now', new DateTimeZone( 'America/Montevideo' ) ); }
@@ -155,6 +158,30 @@ class FTUY_Events {
             if ( $data[$key] && ! preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', $data[$key] ) ) { return new WP_Error( 'time', 'Los horarios no son válidos.' ); }
         }
         if ( $data['end_date'] < $data['start_date'] || ( $data['end_date'] === $data['start_date'] && $data['start_time'] && $data['end_time'] && $data['end_time'] < $data['start_time'] ) ) { return new WP_Error( 'range', 'El final debe ser posterior al inicio.' ); }
+        if ( strlen( $input['schedule_json'] ?? '' ) > 50000 ) { return new WP_Error( 'schedule', 'Los horarios superan el largo permitido.' ); }
+        $schedule = json_decode( ( $input['schedule_json'] ?? '' ) ?: '[]', true );
+        if ( ! is_array( $schedule ) || count( $schedule ) > 366 ) { return new WP_Error( 'schedule', 'Los horarios por día no son válidos.' ); }
+        $clean = array(); $seen = array();
+        foreach ( $schedule as $row ) {
+            if ( ! is_array( $row ) || ! isset( $row['date'], $row['start'], $row['end'] ) || ! is_string( $row['date'] ) || ! is_string( $row['start'] ) || ! is_string( $row['end'] ) ) { return new WP_Error( 'schedule', 'Los horarios por día no son válidos.' ); }
+            $day = DateTimeImmutable::createFromFormat( '!Y-m-d', $row['date'] );
+            if ( ! $day || $day->format( 'Y-m-d' ) !== $row['date'] || $row['date'] < $data['start_date'] || $row['date'] > $data['end_date'] || isset( $seen[$row['date']] ) ) { return new WP_Error( 'schedule', 'Revisá las fechas de los horarios por día.' ); }
+            foreach ( array( 'start', 'end' ) as $key ) { if ( $row[$key] !== '' && ! preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', $row[$key] ) ) { return new WP_Error( 'schedule', 'Revisá los horarios por día.' ); } }
+            if ( $row['start'] && $row['end'] && $row['end'] < $row['start'] ) { return new WP_Error( 'schedule', 'La hora de cierre debe ser posterior a la de apertura del mismo día.' ); }
+            $seen[$row['date']] = true; $clean[] = array_intersect_key( $row, array_flip( array( 'date', 'start', 'end' ) ) );
+        }
+        usort( $clean, function ( $a, $b ) { return strcmp( $a['date'], $b['date'] ); } );
+        $data['schedule_json'] = wp_json_encode( $clean );
+        if ( $clean ) {
+            $data['start_time'] = ''; $data['end_time'] = '';
+            foreach ( $clean as $row ) { if ( $row['date'] === $data['start_date'] ) { $data['start_time'] = $row['start']; } if ( $row['date'] === $data['end_date'] ) { $data['end_time'] = $row['end']; } }
+        }
+        // Sin clasificación explícita, conservar el precio histórico sin asumir gratuidad.
+        $data['entry_type'] = sanitize_key( $input['entry_type'] ?? '' );
+        if ( ! in_array( $data['entry_type'], array( '', 'free', 'paid' ), true ) ) { return new WP_Error( 'entry', 'Elegí Gratis o Con entrada.' ); }
+        if ( $data['entry_type'] === 'paid' && ! $data['tickets_url'] ) { return new WP_Error( 'tickets', 'Agregá el enlace de entradas.' ); }
+        if ( $data['entry_type'] === 'free' ) { $data['tickets_url'] = ''; $data['price'] = 'Gratis'; }
+        if ( $data['entry_type'] === 'paid' && preg_match( '/^(gratis|free|gratuito)$/i', $data['price'] ) ) { $data['price'] = ''; }
         if ( $image_required && ! wp_attachment_is_image( $data['image_id'] ) ) { return new WP_Error( 'image', 'Cargá una imagen válida para el evento.' ); }
         if ( ! $data['summary'] ) { $data['summary'] = wp_trim_words( wp_strip_all_tags( $data['description'] ), 28, '…' ); }
         return $data;
@@ -240,7 +267,8 @@ class FTUY_Events {
     }
 
     public static function public_data( $e, $detail = false ) {
-        $data = array_intersect_key( $e, array_flip( array( 'id', 'slug', 'title', 'summary', 'start_date', 'end_date', 'start_time', 'end_time', 'department', 'locality', 'venue', 'address', 'cancelled' ) ) );
+        $e['schedule'] = json_decode( $e['schedule_json'] ?? '[]', true ) ?: array();
+        $data = array_intersect_key( $e, array_flip( array( 'id', 'slug', 'title', 'summary', 'start_date', 'end_date', 'start_time', 'end_time', 'schedule', 'entry_type', 'department', 'locality', 'venue', 'address', 'cancelled' ) ) );
         $data['id'] = (int) $e['id']; $data['cancelled'] = (bool) $e['cancelled'];
         $data['temporal_status'] = self::temporal( $e ); $data['url'] = self::url( $e );
         $data['image'] = array( 'thumbnail' => wp_get_attachment_image_url( $e['image_id'], 'medium_large' ) ?: null, 'full' => wp_get_attachment_image_url( $e['image_id'], 'full' ) ?: null );
