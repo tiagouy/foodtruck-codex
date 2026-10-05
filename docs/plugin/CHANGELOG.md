@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — 2026-10-05
+
+- Directorio `/foodtrucks/` con tarjetas, filtros por departamento/rubro, paginación y estado vacío.
+- Detalle `/foodtruck/{slug}/` con portada, logo, descripción, oferta gastronómica, galería oficial, modalidades y contactos WhatsApp/Instagram.
+- Navegación compartida con eventos, presentación responsive y enlaces a imágenes completas.
+- Catálogo y detalles privados de propuestas mediante permisos y nonce, no indexables; enlazados desde administración sin publicar muestras.
+- Solo fichas aprobadas en páginas públicas. Fichas pendientes/inexistentes devuelven 404 sin mostrar datos ni redirigir a Eventchamp.
+- 42 comprobaciones HTTP, además de 35 de foodtrucks y 44 de eventos. Revisión visual de catálogo/detalle en escritorio y móvil sin desbordamiento horizontal.
+
 ## 0.4.0 — 2026-10-05
 
 - Tablas propias de foodtrucks, rubros, relaciones, medios oficiales y propuestas de revisión; esquema independiente del módulo de eventos.

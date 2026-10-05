@@ -34,7 +34,14 @@ WP-CLI: `wp ftuy sample-foodtrucks` (solo localhost). Fuente exacta: cuatro post
 - `GET /wp-json/foodtrucks-uy/v1/foodtrucks/{slug}`: ficha aprobada, rubros y medios.
 - Pendientes/rechazados sin versión pública devuelven 404. No incluye responsables, notas, trazas de muestra ni email.
 
-Listado y detalle públicos del sitio no se han implementado todavía: las fichas se revisan mediante el preview privado de WordPress. La API queda preparada para sitio y app sin decidir estética ni shortcodes en esta etapa.
+## Páginas web · actualización 0.5.0
+
+- `/foodtrucks/`: listado público de fichas aprobadas, doce por página, filtros `departamento` y `rubro` (ID gastronómico). No son páginas con shortcode: son rutas y plantillas del plugin, como eventos.
+- `/foodtruck/{slug}/`: detalle aprobado con medios oficiales, qué sirven, descripción, base, modalidades y enlaces WhatsApp/Instagram cuando están cargados. La base no se presenta como ubicación actual. No muestra cuenta responsable, notas ni email.
+- Ficha pendiente o inexistente: 404 propio, sin redirecciones automáticas a fichas antiguas.
+- En administración hay botones «Ver página pública» y «Vista privada del catálogo con muestras». La vista privada requiere sesión con `manage_ft_foodtrucks` y nonce. Usa las propuestas guardadas, marca claramente la vista previa y responde noindex/nofollow.
+- El botón de preview de cada ficha abre ahora el diseño real del detalle web. Los enlaces de las tarjetas privadas conservan autorización para navegar entre catálogo y detalles. Al aprobar la ficha aparece en el catálogo público; no se aprobaron automáticamente las cuatro muestras.
+- Las páginas de eventos enlazan al nuevo directorio. Estética definitiva, shortcode para home y formulario público de carga siguen pendientes.
 
 ## Pruebas
 

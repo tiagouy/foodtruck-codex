@@ -39,6 +39,7 @@ Para la prueba inicial son obligatorios nombre, descripción, qué sirven, depar
 - [x] Implementar tablas, administración, moderación, preview privado y API pública de lectura dentro del plugin (0.4.0).
 - [x] Cargar cuatro fichas históricas como pendientes: Robin, Shufa Deli, Route y Scaronne.
 - [x] Consulta opcional de nombre/foto pública de Instagram con confirmación explícita, carga manual alternativa y copia del logo a medios al guardar.
+- [x] Directorio y detalle web con filtros; vista privada de muestras/propuestas sin publicación automática (0.5.0).
 - [ ] Revisar y confirmar datos/imágenes de las cuatro muestras; no están publicadas automáticamente.
 - [ ] Validar la ficha antes de continuar con catálogo completo y estética.
 - [ ] Formulario público para que los responsables carguen y gestionen sus fichas; todavía se administra desde WordPress.

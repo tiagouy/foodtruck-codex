@@ -1,0 +1,18 @@
+.ft-truck-filters{display:flex;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:24px}
+.ft-truck-filters label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;flex:1;min-width:200px}
+.ft-truck-filters select{font:inherit;border:1px solid #cdd3d6;border-radius:3px;padding:13px;background:white;width:100%;color:var(--ft-ink)}
+.ft-truck-filters>a{font-size:13px;margin-bottom:12px}
+.ft-truck-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.ft-truck-card{border:1px solid var(--ft-line);background:white;min-width:0}
+.ft-truck-card-cover{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;background:#f1f2f0;overflow:hidden}
+.ft-truck-card-cover img{width:100%;height:100%;object-fit:cover}
+.ft-truck-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:56px;font-weight:800;color:#b33e19;background:#fff0e8}
+.ft-truck-card-body{padding:23px}.ft-truck-rubros{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--ft-orange);margin:0 0 8px;overflow-wrap:anywhere}
+.ft-truck-card h2{font-size:23px;line-height:1.3;margin:0 0 10px;overflow-wrap:anywhere}.ft-truck-base{font-size:13px;color:var(--ft-muted);margin:0 0 12px}
+.ft-truck-offering{font-size:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 18px}
+.ft-truck-cover{display:flex;justify-content:center;background:#f1f2f0;border:1px solid var(--ft-line)}.ft-truck-cover img{width:100%;height:auto;max-height:520px;object-fit:contain}
+.ft-truck-identity{display:flex;gap:20px;align-items:center;padding:26px 0;border-bottom:1px solid var(--ft-line)}.ft-truck-logo{width:95px;height:95px;object-fit:contain;border:1px solid var(--ft-line);border-radius:8px;background:white}
+.ft-truck-identity h2{font-size:26px;line-height:1.3;margin:0;overflow-wrap:anywhere}.ft-truck-text{padding:22px 0;overflow-wrap:anywhere}.ft-truck-text h2{font-size:22px}.ft-truck-text img{max-width:100%;height:auto}.ft-truck-text a{color:var(--ft-orange);text-decoration:underline}
+.ft-truck-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.ft-truck-gallery img{display:block;width:100%;height:170px;object-fit:cover}.ft-truck-help{font-size:13px;color:var(--ft-muted)}
+@media(max-width:950px){.ft-truck-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.ft-truck-cards{grid-template-columns:1fr}.ft-truck-filters{gap:12px}.ft-truck-filters label{min-width:100%}.ft-truck-filters button{width:100%}.ft-truck-detail{display:block}.ft-truck-identity{gap:14px}.ft-truck-logo{width:75px;height:75px;flex-shrink:0}.ft-truck-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.ft-truck-gallery img{height:140px}}

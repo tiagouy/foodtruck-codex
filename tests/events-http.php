@@ -83,6 +83,10 @@ try {
     list( $code, $body ) = $call( '/wp-admin/admin.php?page=ftuy-foodtrucks&new=1', $admin_cookie );
     $assert( $code === 200 && strpos( $body, 'Proponer nombre y logo desde Instagram' ) !== false && strpos( $body, 'name="email"' ) === false, 'Formulario foodtruck con Instagram sin email.' );
     $truck_nonce = $nonce( $body );
+    preg_match( '/href="([^"]+foodtrucks\/\?ft_truck_preview[^\"]+)"/', $body, $truck_preview_match );
+    $truck_preview_url = html_entity_decode( $truck_preview_match[1] ?? '' );
+    $truck_preview_path = str_replace( home_url(), '', $truck_preview_url );
+    $assert( $truck_preview_path && strpos( $truck_preview_path, '_wpnonce=' ) !== false, 'Panel enlaza catálogo privado con nonce.' );
     preg_match( '/var ftuyTruck = (\{[^\n]+\});/', $body, $truck_js ); $ig_config = json_decode( $truck_js[1] ?? '', true );
     $assert( ! empty( $ig_config['nonce'] ), 'Consulta Instagram con nonce.' );
     list( $code, $json ) = $call( '/wp-admin/admin-ajax.php', $cookie, array( 'action' => 'ftuy_instagram_preview', 'nonce' => $ig_config['nonce'], 'instagram' => '@quechurrouy' ) );
@@ -90,6 +94,7 @@ try {
     list( $code, $json ) = $call( '/wp-admin/admin-ajax.php', $admin_cookie, array( 'action' => 'ftuy_instagram_preview', 'nonce' => $ig_config['nonce'], 'instagram' => 'https://127.0.0.1/private' ) );
     $assert( $code === 422 && ! json_decode( $json, true )['success'], 'Instagram rechaza URL privada sin consultarla.' );
     $truck_fields = array( 'action' => 'ftuy_foodtruck', '_wpnonce' => $truck_nonce, 'name' => $title, 'description' => 'Prueba foodtruck HTTP', 'food_offering' => 'Churros', 'department' => 'Montevideo', 'locality' => 'Montevideo', 'cuisine_ids[0]' => FTUY_Foodtrucks::cuisines()[0]['id'], 'serves_events' => '1', 'responsible_user_id' => $uid, 'decision' => 'pending', 'truck_logo' => new CURLFile( get_attached_file( $seed['image_id'] ), 'image/jpeg', 'logo-prueba.jpg' ) );
+    $truck_fields['whatsapp'] = '099 123 456'; $truck_fields['instagram'] = '@quechurrouy';
     list( $code ) = $call( '/wp-admin/admin-post.php', $admin_cookie, $truck_fields );
     $assert( $code === 302, 'Foodtruck enviado con logo real.' );
     $truck = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table() . ' WHERE responsible_user_id=%d', $uid ), ARRAY_A );
@@ -97,12 +102,23 @@ try {
     $payload = json_decode( $truck_review['payload'], true ); $truck_media = array_column( $payload['images'], 'attachment_id' );
     $assert( $truck['status'] === 'pending' && $payload['images'][0]['role'] === 'logo', 'Propuesta conserva rol de logo.' );
     list( $code ) = $call( '/wp-json/foodtrucks-uy/v1/foodtrucks/' . $truck['slug'] ); $assert( $code === 404, 'API no expone foodtruck pendiente.' );
+    list( $code, $body ) = $call( '/foodtruck/' . $truck['slug'] . '/' ); $assert( $code === 404 && strpos( $body, $title ) === false, 'Detalle público no filtra pendientes ni redirige a fichas viejas.' );
+    list( $code, $body ) = $call( '/foodtrucks/' ); $assert( $code === 200 && strpos( $body, $title ) === false && strpos( $body, 'Rubro gastronómico' ) !== false, 'Directorio público con filtros oculta pendientes.' );
+    list( $code ) = $call( $truck_preview_path ); $assert( $code === 403, 'Catálogo privado rechaza anónimos.' );
+    list( $code ) = $call( $truck_preview_path, $cookie ); $assert( $code === 403, 'Catálogo privado rechaza suscriptores.' );
+    list( $code, $body ) = $call( $truck_preview_path, $admin_cookie ); $assert( $code === 200 && strpos( $body, $title ) !== false && strpos( $body, 'noindex,nofollow' ) !== false, 'Admin ve propuestas en catálogo privado no indexable.' );
+    $preview_detail = '/foodtruck/' . $truck['slug'] . '/?' . wp_parse_url( $truck_preview_url, PHP_URL_QUERY );
+    list( $code, $body ) = $call( $preview_detail, $admin_cookie ); $assert( $code === 200 && strpos( $body, $title ) !== false && strpos( $body, 'Sobre este foodtruck' ) !== false, 'Preview usa diseño del detalle público.' );
     list( $code, $body ) = $call( '/wp-admin/admin.php?page=ftuy-foodtrucks&edit=' . $truck['id'] . '&preview=1', $admin_cookie );
     $assert( $code === 200 && strpos( $body, 'Vista previa privada' ) !== false && strpos( $body, $title ) !== false, 'Preview foodtruck privado.' );
     unset( $truck_fields['truck_logo'] ); $truck_fields['foodtruck_id'] = $truck['id']; $truck_fields['decision'] = 'published'; $truck_fields['keep_images[0]'] = 'logo:' . $truck_media[0];
     list( $code ) = $call( '/wp-admin/admin-post.php', $admin_cookie, $truck_fields ); $assert( $code === 302, 'Aprobación foodtruck por formulario.' );
     list( $code, $json ) = $call( '/wp-json/foodtrucks-uy/v1/foodtrucks/' . $truck['slug'] ); $public = json_decode( $json, true );
     $assert( $code === 200 && $public['images'][0]['role'] === 'logo' && ! isset( $public['responsible_user_id'], $public['email'] ), 'API foodtruck aprobada sin datos privados.' );
+    list( $code, $body ) = $call( '/foodtrucks/?departamento=Montevideo&rubro=' . $truck_fields['cuisine_ids[0]'] ); $assert( $code === 200 && strpos( $body, $title ) !== false, 'Directorio filtra por departamento y rubro.' );
+    list( $code, $body ) = $call( '/foodtrucks/?departamento=Artigas' ); $assert( $code === 200 && strpos( $body, $title ) === false, 'Filtro excluye otra base.' );
+    list( $code, $body ) = $call( '/foodtruck/' . $truck['slug'] . '/' ); $assert( $code === 200 && strpos( $body, 'wa.me/59899123456' ) !== false && strpos( $body, 'https://www.instagram.com/quechurrouy/' ) !== false && strpos( $body, 'responsible_user_id' ) === false, 'Detalle publicado muestra contactos sin gestión privada.' );
+    list( $code ) = $call( '/foodtruck/no-existe-' . wp_generate_uuid4() . '/' ); $assert( $code === 404, 'Ficha inexistente devuelve 404 real.' );
     echo "OK: $count comprobaciones HTTP, incluida carga real de imagen.\n";
 } finally {
     if ( $uid && ! is_wp_error( $uid ) ) {
