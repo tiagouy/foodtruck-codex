@@ -2,17 +2,21 @@
 defined( 'ABSPATH' ) || exit;
 $truck = FTUY_Foodtruck_Public::$foodtruck; $preview = FTUY_Foodtruck_Public::$preview;
 $not_found = FTUY_Foodtruck_Public::$not_found;
-$title = $not_found ? 'Foodtruck no encontrado' : ( $truck ? $truck['name'] : 'Foodtrucks' );
+$view = FTUY_Foodtruck_Public::$view;
+$private = in_array( $view, array( 'add', 'mine' ), true );
+$title = $view === 'add' ? 'Agregar mi foodtruck' : ( $view === 'mine' ? 'Mis foodtrucks' : ( $not_found ? 'Foodtruck no encontrado' : ( $truck ? $truck['name'] : 'Foodtrucks' ) ) );
 $catalog_url = $preview ? FTUY_Foodtruck_Public::preview_url() : home_url( '/foodtrucks/' );
 ?>
 <!doctype html><html lang="es-UY"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?php echo esc_html( $title ); ?> · Foodtrucks Uruguay</title>
-<?php if ( $preview || $not_found ) : ?><meta name="robots" content="noindex,nofollow"><?php else : ?><link rel="canonical" href="<?php echo esc_url( $truck ? FTUY_Foodtruck_Public::url( $truck ) : $catalog_url ); ?>"><meta name="description" content="<?php echo esc_attr( $truck ? wp_trim_words( wp_strip_all_tags( $truck['food_offering'] ), 25 ) : 'Descubrí foodtrucks por rubro gastronómico y departamento. Conocé qué sirven y contactalos para tu evento.' ); ?>"><?php endif; ?>
-<?php wp_print_styles( 'ftuy-foodtrucks' ); ?></head><body class="ft-site">
-<header class="ft-header"><div class="ft-container ft-header-inner"><a class="ft-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">FOODTRUCKS<span>URUGUAY</span></a><nav aria-label="Navegación principal"><a href="<?php echo esc_url( home_url( '/foodtrucks/' ) ); ?>">Foodtrucks</a><a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Eventos</a><a href="<?php echo esc_url( home_url( '/eventos/pasados/' ) ); ?>">Pasados</a><a class="ft-button" href="<?php echo esc_url( home_url( '/sugerir-evento/' ) ); ?>">Sugerir evento</a></nav></div></header>
+<?php if ( $preview || $not_found || $private ) : ?><meta name="robots" content="noindex,nofollow"><?php else : ?><link rel="canonical" href="<?php echo esc_url( $truck ? FTUY_Foodtruck_Public::url( $truck ) : $catalog_url ); ?>"><meta name="description" content="<?php echo esc_attr( $truck ? wp_trim_words( wp_strip_all_tags( $truck['food_offering'] ), 25 ) : 'Descubrí foodtrucks por rubro gastronómico y departamento. Conocé qué sirven y contactalos para tu evento.' ); ?>"><?php endif; ?>
+<?php wp_print_styles( array( 'ftuy-foodtrucks', 'ftuy-truck-form' ) ); ?></head><body class="ft-site">
+<header class="ft-header"><div class="ft-container ft-header-inner"><a class="ft-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">FOODTRUCKS<span>URUGUAY</span></a><nav aria-label="Navegación principal"><a href="<?php echo esc_url( home_url( '/foodtrucks/' ) ); ?>">Foodtrucks</a><a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Eventos</a><a href="<?php echo esc_url( home_url( '/eventos/pasados/' ) ); ?>">Pasados</a><a href="<?php echo esc_url( home_url( '/mis-foodtrucks/' ) ); ?>">Mis foodtrucks</a><a class="ft-button" href="<?php echo esc_url( home_url( '/agregar-foodtruck/' ) ); ?>">Agregar mi foodtruck</a></nav></div></header>
 <?php if ( $preview ) : ?><div class="ft-preview">Vista previa privada · Incluye propuestas pendientes y muestras históricas. No es el catálogo público.</div><?php endif; ?>
-<section class="ft-titlebar"><div class="ft-container"><p class="ft-eyebrow">Sabores sobre ruedas</p><h1><?php echo esc_html( $title ); ?></h1><?php if ( ! $truck ) : ?><p>Conocé qué sirven y encontrá una propuesta para tu próximo evento.</p><?php endif; ?></div></section>
+<section class="ft-titlebar"><div class="ft-container"><p class="ft-eyebrow">Sabores sobre ruedas</p><h1><?php echo esc_html( $title ); ?></h1><?php if ( ! $truck ) : ?><p><?php echo esc_html( $view === 'add' ? 'Compartí tu propuesta gastronómica con la comunidad.' : ( $view === 'mine' ? 'Gestioná tus fichas y seguí el estado de revisión.' : 'Conocé qué sirven y encontrá una propuesta para tu próximo evento.' ) ); ?></p><?php endif; ?></div></section>
 <main class="ft-container ft-main">
 <?php if ( $not_found ) : ?><div class="ft-empty"><h2>Esta ficha no está disponible</h2><p>Podés explorar los foodtrucks publicados en el directorio.</p><a class="ft-button" href="<?php echo esc_url( $catalog_url ); ?>">Ver foodtrucks</a></div>
+<?php elseif ( $view === 'add' ) : FTUY_Foodtruck_Submissions::form(); ?>
+<?php elseif ( $view === 'mine' ) : FTUY_Foodtruck_Submissions::mine(); ?>
 <?php elseif ( ! $truck ) :
     $department = sanitize_text_field( wp_unslash( $_GET['departamento'] ?? '' ) ); if ( ! in_array( $department, FTUY_Events::departments(), true ) ) { $department = ''; }
     $cuisine = absint( $_GET['rubro'] ?? 0 ); if ( ! in_array( $cuisine, array_map( 'intval', array_column( FTUY_Foodtrucks::cuisines(), 'id' ) ), true ) ) { $cuisine = 0; }
@@ -40,4 +44,4 @@ $catalog_url = $preview ? FTUY_Foodtruck_Public::preview_url() : home_url( '/foo
 <?php if ( $truck['instagram'] ) : ?><a class="ft-button ft-outline" href="<?php echo esc_url( $truck['instagram'] ); ?>" target="_blank" rel="noopener">Ver Instagram ↗</a><?php endif; ?>
 <?php if ( ! $truck['whatsapp'] && ! $truck['instagram'] ) : ?><p>Este foodtruck todavía no tiene un contacto público cargado.</p><?php endif; ?>
 </aside></div>
-<?php endif; ?></main><footer class="ft-footer"><div class="ft-container"><strong>Foodtrucks Uruguay</strong><p>Una comunidad para encontrarnos alrededor de la comida.</p><a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Explorá los próximos eventos.</a></div></footer></body></html>
+<?php endif; ?></main><footer class="ft-footer"><div class="ft-container"><strong>Foodtrucks Uruguay</strong><p>Una comunidad para encontrarnos alrededor de la comida.</p><a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Explorá los próximos eventos.</a></div></footer><?php if ( $view === 'add' && is_user_logged_in() ) { wp_print_scripts( 'ftuy-trucks' ); } ?></body></html>

@@ -1,0 +1,7 @@
+.ft-truck-form{max-width:950px}.ft-truck-form .ft-field-name,.ft-truck-form .ft-field-description,.ft-truck-form .ft-field-food_offering{grid-column:1/-1}.ft-truck-form h2{font-size:22px;margin-top:32px}.ft-truck-form .ft-truck-existing{width:100px;height:100px;object-fit:contain}
+.ft-truck-form .button{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border:1px solid #e34e1c;background:white;color:#b43d17;border-radius:3px;font:inherit;font-size:14px;cursor:pointer;line-height:1.5}
+.ft-truck-form .button:disabled{opacity:.6;cursor:default}.ft-truck-form [data-instagram-result]{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.ft-truck-form [data-instagram-result] p{width:100%;margin:8px 0}
+.ft-truck-form input[type=checkbox]{accent-color:#e34e1c}.ft-truck-form [data-instagram-status]{font-size:13px;color:#627078}.ft-truck-form textarea{font-family:inherit}
+.ft-truck-help-box{border:1px solid #e6e8e9;background:#f5f6f7;padding:18px;margin:24px 0}.ft-truck-help-box p{margin:0}
+.ft-truck-account-links{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.ft-truck-mine-status{display:inline-block;background:#fff0e8;color:#ac3c18;padding:4px 10px;font-size:13px}
+@media(max-width:650px){.ft-truck-form .ft-form-grid{grid-template-columns:1fr}.ft-truck-form [data-instagram-result] .button{width:100%}}

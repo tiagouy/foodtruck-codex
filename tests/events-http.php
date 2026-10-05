@@ -119,6 +119,36 @@ try {
     list( $code, $body ) = $call( '/foodtrucks/?departamento=Artigas' ); $assert( $code === 200 && strpos( $body, $title ) === false, 'Filtro excluye otra base.' );
     list( $code, $body ) = $call( '/foodtruck/' . $truck['slug'] . '/' ); $assert( $code === 200 && strpos( $body, 'wa.me/59899123456' ) !== false && strpos( $body, 'https://www.instagram.com/quechurrouy/' ) !== false && strpos( $body, 'responsible_user_id' ) === false, 'Detalle publicado muestra contactos sin gestión privada.' );
     list( $code ) = $call( '/foodtruck/no-existe-' . wp_generate_uuid4() . '/' ); $assert( $code === 404, 'Ficha inexistente devuelve 404 real.' );
+    list( $code, $body ) = $call( '/agregar-foodtruck/' );
+    $assert( $code === 200 && strpos( $body, 'Iniciar sesión' ) !== false && strpos( $body, 'name="name"' ) === false, 'Alta pública exige login sin exponer formulario.' );
+    list( $code, $body ) = $call( '/mis-foodtrucks/' ); $assert( $code === 200 && strpos( $body, $title ) === false, 'Mis foodtrucks anónimo no expone fichas propias.' );
+    list( $code, $body ) = $call( '/agregar-foodtruck/', $cookie );
+    $assert( $code === 200 && strpos( $body, 'Enviar a revisión' ) !== false && strpos( $body, 'name="responsible_user_id"' ) === false && strpos( $body, 'Aprobar y publicar' ) === false && strpos( $body, 'name="email"' ) === false, 'Alta de suscriptor sin campos administrativos/email.' );
+    $public_nonce = $nonce( $body ); preg_match( '/var ftuyTruck = (\{[^\n]+\});/', $body, $public_js ); $public_ig = json_decode( $public_js[1] ?? '', true );
+    $assert( $public_ig['action'] === 'ftuy_instagram_public_preview', 'Formulario usa consulta pública autenticada de Instagram.' );
+    list( $code ) = $call( '/wp-admin/admin-ajax.php', '', array( 'action' => $public_ig['action'], 'nonce' => $public_ig['nonce'], 'instagram' => '@quechurrouy' ) ); $assert( $code === 403, 'Instagram del formulario no admite anónimos.' );
+    list( $code ) = $call( '/wp-admin/admin-ajax.php', $cookie, array( 'action' => $public_ig['action'], 'nonce' => $public_ig['nonce'], 'instagram' => 'https://127.0.0.1/private' ) ); $assert( $code === 422, 'Suscriptor autorizado para consulta, no para URLs privadas.' );
+    $submission = array( '_wpnonce' => $public_nonce, 'name' => $title . ' propietario', 'description' => 'Ficha del propietario', 'food_offering' => 'Churros', 'department' => 'Montevideo', 'locality' => 'Montevideo', 'cuisine_ids[0]' => FTUY_Foodtrucks::cuisines()[0]['id'], 'serves_events' => '1', 'responsible_user_id' => $admin->ID, 'decision' => 'published', 'status' => 'published' );
+    $bad = $submission; $bad['_wpnonce'] = 'invalid'; list( $code ) = $call( '/agregar-foodtruck/', $cookie, $bad ); $assert( $code === 403, 'Alta pública rechaza CSRF.' );
+    $bad = $submission; $bad['description'] = ''; list( $code, $body ) = $call( '/agregar-foodtruck/', $cookie, $bad ); $assert( $code === 200 && strpos( $body, 'Completá nombre' ) !== false && strpos( $body, $submission['name'] ) !== false, 'Errores conservan datos escritos.' );
+    $bad = $submission; $bad['keep_images[0]'] = 'logo:' . $seed['image_id']; list( $code, $body ) = $call( '/agregar-foodtruck/', $cookie, $bad ); $assert( $code === 200 && strpos( $body, 'No podés usar esa imagen' ) !== false, 'No puede apropiarse de medios de otra ficha.' );
+    $submission['truck_logo'] = new CURLFile( get_attached_file( $seed['image_id'] ), 'image/jpeg', 'logo-propietario.jpg' );
+    list( $code ) = $call( '/agregar-foodtruck/', $cookie, $submission ); $assert( $code === 302, 'Suscriptor carga ficha y logo sin panel administrativo.' );
+    $owned = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table() . ' WHERE responsible_user_id=%d ORDER BY id DESC LIMIT 1', $uid ), ARRAY_A );
+    $assert( $owned['name'] === $submission['name'] && $owned['status'] === 'pending' && (int) $owned['responsible_user_id'] === (int) $uid, 'Ignora responsable, estado y decisión manipulados.' );
+    list( $code, $body ) = $call( '/mis-foodtrucks/', $cookie ); $assert( $code === 200 && strpos( $body, $owned['name'] ) !== false && strpos( $body, 'Pendiente' ) !== false, 'Autor ve propuesta y estado.' );
+    list( $code ) = $call( '/agregar-foodtruck/?edit=1', $cookie ); $assert( $code === 403, 'Autor no puede editar muestra ajena.' );
+    list( $code ) = $call( '/foodtruck/' . $owned['slug'] . '/' ); $assert( $code === 404, 'Alta propia pendiente no se publica.' );
+    $own_review = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table( 'foodtruck_reviews' ) . ' WHERE foodtruck_id=%d ORDER BY id DESC LIMIT 1', $owned['id'] ), ARRAY_A );
+    $own_media = json_decode( $own_review['payload'], true )['images'][0]['attachment_id'];
+    list( $code, $body ) = $call( '/agregar-foodtruck/?edit=' . $owned['id'], $cookie ); $assert( $code === 200 && strpos( $body, 'logo:' . $own_media ) !== false, 'Edición recupera logo y datos pendientes.' );
+    delete_transient( 'ftuy_truck_submit_' . $uid );
+    unset( $submission['truck_logo'] ); $submission['keep_images[0]'] = 'logo:' . $own_media;
+    $approve = $submission; $approve['_wpnonce'] = $truck_nonce; $approve['action'] = 'ftuy_foodtruck'; $approve['foodtruck_id'] = $owned['id']; $approve['responsible_user_id'] = $uid; $approve['decision'] = 'published';
+    list( $code ) = $call( '/wp-admin/admin-post.php', $admin_cookie, $approve ); $assert( $code === 302, 'Revisor aprueba alta enviada por propietario.' );
+    $submission['name'] .= ' editado'; list( $code ) = $call( '/agregar-foodtruck/?edit=' . $owned['id'], $cookie, $submission ); $assert( $code === 302, 'Propietario propone cambios conservando logo.' );
+    $assert( FTUY_Foodtrucks::get( $owned['id'] )['name'] !== $submission['name'], 'Cambios pendientes no pisan ficha aprobada.' );
+    list( $code, $body ) = $call( '/mis-foodtrucks/', $cookie ); $assert( $code === 200 && strpos( $body, 'La versión aprobada sigue publicada' ) !== false, 'Estado distingue publicado y cambio pendiente.' );
     echo "OK: $count comprobaciones HTTP, incluida carga real de imagen.\n";
 } finally {
     if ( $uid && ! is_wp_error( $uid ) ) {
@@ -131,6 +161,7 @@ try {
         $wpdb->delete( FTUY_Events::table( 'event_mail' ), array( 'recipient' => $user->user_email ) );
         $wpdb->delete( FTUY_Events::table( 'event_mail' ), array( 'subject' => 'Evento pendiente: ' . $title ) );
         delete_transient( 'ftuy_submit_' . $uid );
+        delete_transient( 'ftuy_truck_submit_' . $uid ); delete_transient( 'ftuy_ig_rate_' . $uid );
         require_once ABSPATH . 'wp-admin/includes/user.php'; wp_delete_user( $uid );
     }
     foreach ( $tokens as $session ) { WP_Session_Tokens::get_instance( $session[0] )->destroy( $session[1] ); }

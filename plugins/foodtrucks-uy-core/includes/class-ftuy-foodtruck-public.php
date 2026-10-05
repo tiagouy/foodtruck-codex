@@ -5,10 +5,13 @@ class FTUY_Foodtruck_Public {
     public static $foodtruck = null;
     public static $preview = false;
     public static $not_found = false;
+    public static $view = 'catalog';
     public static function init() {
         add_action( 'init', function () {
             add_rewrite_rule( '^foodtrucks/?$', 'index.php?ft_view=foodtrucks', 'top' );
             add_rewrite_rule( '^foodtruck/([^/]+)/?$', 'index.php?ft_view=foodtruck', 'top' );
+            add_rewrite_rule( '^agregar-foodtruck/?$', 'index.php?ft_view=add-foodtruck', 'top' );
+            add_rewrite_rule( '^mis-foodtrucks/?$', 'index.php?ft_view=my-foodtrucks', 'top' );
         } );
         add_action( 'template_redirect', array( __CLASS__, 'route' ), 0 );
     }
@@ -46,18 +49,22 @@ class FTUY_Foodtruck_Public {
     public static function route() {
         $path = trim( rawurldecode( wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ) ), '/' ); $base = trim( wp_parse_url( home_url(), PHP_URL_PATH ) ?: '', '/' );
         if ( $base && strpos( $path, $base . '/' ) === 0 ) { $path = substr( $path, strlen( $base ) + 1 ); }
-        if ( $path !== 'foodtrucks' && ! preg_match( '#^foodtruck/([^/]+)$#', $path, $m ) ) { return; }
+        $account_paths = array( 'agregar-foodtruck' => 'add', 'mis-foodtrucks' => 'mine' );
+        if ( $path !== 'foodtrucks' && ! isset( $account_paths[$path] ) && ! preg_match( '#^foodtruck/([^/]+)$#', $path, $m ) ) { return; }
+        self::$view = $account_paths[$path] ?? ( $path === 'foodtrucks' ? 'catalog' : 'detail' );
         self::$preview = ! empty( $_GET['ft_truck_preview'] );
         $nonce = $_GET['_wpnonce'] ?? '';
         if ( self::$preview && ( ! current_user_can( 'manage_ft_foodtrucks' ) || ! is_string( $nonce ) || ! wp_verify_nonce( $nonce, 'ftuy_truck_preview' ) ) ) { wp_die( 'Vista previa privada.', '', array( 'response' => 403 ) ); }
         self::$foodtruck = null;
-        if ( $path !== 'foodtrucks' ) {
+        if ( self::$view === 'detail' ) {
             global $wpdb;
             $id = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . FTUY_Foodtrucks::table() . ' WHERE slug=%s' . ( self::$preview ? '' : " AND status='published'" ), sanitize_title( $m[1] ) ) );
             if ( ! $id ) { self::$not_found = true; global $wp_query; $wp_query->set_404(); }
             else { self::$foodtruck = FTUY_Foodtrucks::get( $id ); if ( self::$preview ) { self::$foodtruck = self::proposed( self::$foodtruck ); } }
         }
-        status_header( self::$not_found ? 404 : 200 ); nocache_headers(); if ( self::$preview || self::$not_found ) { header( 'X-Robots-Tag: noindex, nofollow' ); }
+        if ( self::$view === 'add' ) { FTUY_Foodtruck_Submissions::prepare(); if ( is_user_logged_in() ) { FTUY_Foodtruck_Form::assets( true ); } }
+        if ( self::$view === 'mine' ) { wp_enqueue_style( 'ftuy-truck-form', FTUY_URL . 'assets/foodtruck-form.css', array(), FOODTRUCKS_UY_CORE_VERSION ); }
+        status_header( self::$not_found ? 404 : 200 ); nocache_headers(); if ( self::$preview || self::$not_found || isset( $account_paths[$path] ) ) { header( 'X-Robots-Tag: noindex, nofollow' ); }
         wp_enqueue_style( 'ftuy-events', FTUY_URL . 'assets/events.css', array(), FOODTRUCKS_UY_CORE_VERSION );
         wp_enqueue_style( 'ftuy-foodtrucks', FTUY_URL . 'assets/foodtrucks.css', array( 'ftuy-events' ), FOODTRUCKS_UY_CORE_VERSION );
         include FTUY_PATH . 'templates/foodtrucks.php'; exit;

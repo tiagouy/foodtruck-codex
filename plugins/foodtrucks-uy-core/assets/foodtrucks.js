@@ -9,7 +9,7 @@
     button.addEventListener('click', async () => {
         button.disabled = true; field('instagram_token').value = ''; output.replaceChildren(); status.textContent = 'Consultando el perfil público…';
         try {
-            const response = await fetch(ftuyTruck.ajax, {method: 'POST', credentials: 'same-origin', body: new URLSearchParams({action: 'ftuy_instagram_preview', nonce: ftuyTruck.nonce, instagram: field('instagram').value})});
+            const response = await fetch(ftuyTruck.ajax, {method: 'POST', credentials: 'same-origin', body: new URLSearchParams({action: ftuyTruck.action || 'ftuy_instagram_preview', nonce: ftuyTruck.nonce, instagram: field('instagram').value})});
             const result = await response.json();
             if (!result.success) throw new Error(result.data?.message || 'Instagram no respondió. Completá los datos manualmente.');
             const data = result.data;

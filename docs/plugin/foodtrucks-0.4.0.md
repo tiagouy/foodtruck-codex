@@ -1,6 +1,6 @@
 # Foodtrucks · operación 0.4.0
 
-En WordPress: **Foodtrucks UY → Foodtrucks**. Capacidad específica `manage_ft_foodtrucks`, otorgada a administradores al instalar el esquema. Usuarios de comunidad no acceden a esta administración. No hay todavía formulario público de alta, reclamación ni notificaciones de foodtrucks: siguiente etapa tras validar la ficha.
+En WordPress: **Foodtrucks UY → Foodtrucks**. Capacidad específica `manage_ft_foodtrucks`, otorgada a administradores al instalar el esquema. Usuarios de comunidad no acceden a esta administración. Desde 0.6.0 existe alta/gestión en la web, sin panel administrativo; reclamación de fichas y notificaciones de foodtrucks siguen pendientes.
 
 ## Tablas
 
@@ -41,7 +41,18 @@ WP-CLI: `wp ftuy sample-foodtrucks` (solo localhost). Fuente exacta: cuatro post
 - Ficha pendiente o inexistente: 404 propio, sin redirecciones automáticas a fichas antiguas.
 - En administración hay botones «Ver página pública» y «Vista privada del catálogo con muestras». La vista privada requiere sesión con `manage_ft_foodtrucks` y nonce. Usa las propuestas guardadas, marca claramente la vista previa y responde noindex/nofollow.
 - El botón de preview de cada ficha abre ahora el diseño real del detalle web. Los enlaces de las tarjetas privadas conservan autorización para navegar entre catálogo y detalles. Al aprobar la ficha aparece en el catálogo público; no se aprobaron automáticamente las cuatro muestras.
-- Las páginas de eventos enlazan al nuevo directorio. Estética definitiva, shortcode para home y formulario público de carga siguen pendientes.
+- Las páginas de eventos enlazan al nuevo directorio. Estética definitiva y shortcode para home siguen pendientes.
+
+## Alta y gestión web · actualización 0.6.0
+
+- `/agregar-foodtruck/`: ingresar con cuenta WordPress existente, completar ficha y enviar propuesta pendiente. Responsable se asigna desde la sesión, no desde campos del navegador. Sin email público, botones de aprobación ni selección de responsables.
+- `/mis-foodtrucks/`: solo fichas de la cuenta actual, veinte por página; muestra estado de revisión y permite editar mediante `/agregar-foodtruck/?edit={id}`. Correcciones/rechazo muestran el mensaje correspondiente; un cambio pendiente no elimina la ficha aprobada.
+- Los rubros y modalidades son múltiples. Medios propios nuevos y medios ya asociados a la ficha pueden conservarse; no admite adjuntar IDs de otras fichas por manipulación del formulario. Al fallar un envío se eliminan únicamente las imágenes nuevas de ese intento, no las históricas.
+- Consulta opcional de Instagram para usuarios logueados: AJAX `ftuy_instagram_public_preview`, nonce `ftuy_instagram_public`; mismo límite de consultas y token temporal del panel, sin otorgar capacidades administrativas. La acción del panel conserva su requisito de administrador de foodtrucks.
+- Máximo un envío correcto por minuto/cuenta; validaciones de campos no consumen el límite. Nonce obligatorio, cuenta y estado inmutables desde el formulario. Altas y cambios nunca se aprueban automáticamente, incluso si el usuario del formulario es administrador.
+- Estas páginas son privadas/noindex y no almacenables en caché. La API pública sigue mostrando solo fichas aprobadas, no propuestas.
+- Login mediante WordPress con `redirect_to` de vuelta a la página. Crear cuenta aparece solo si `users_can_register` está habilitado; en MAMP actualmente no lo está. No se cambió ese ajuste ni se agregaron flujos de registro, reactivación o sesiones de app. Usuarios históricos todavía no se migraron; no alterar IDs ni fotos.
+- No se implementó carga de fotos de comunidad en el sitio: las imágenes del formulario son oficiales del foodtruck. Publicaciones de usuarios siguen reservadas a la app.
 
 ## Pruebas
 

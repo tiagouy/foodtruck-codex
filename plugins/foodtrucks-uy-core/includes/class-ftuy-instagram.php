@@ -2,10 +2,22 @@
 defined( 'ABSPATH' ) || exit;
 
 class FTUY_Instagram {
-    public static function init() { add_action( 'wp_ajax_ftuy_instagram_preview', array( __CLASS__, 'ajax' ) ); }
+    public static function init() {
+        add_action( 'wp_ajax_ftuy_instagram_preview', array( __CLASS__, 'ajax' ) );
+        add_action( 'wp_ajax_ftuy_instagram_public_preview', array( __CLASS__, 'ajax_public' ) );
+        add_action( 'wp_ajax_nopriv_ftuy_instagram_public_preview', array( __CLASS__, 'ajax_public' ) );
+    }
+    public static function ajax_public() {
+        if ( ! is_user_logged_in() ) { wp_send_json_error( array( 'message' => 'Ingresá para consultar Instagram.' ), 403 ); }
+        check_ajax_referer( 'ftuy_instagram_public', 'nonce' );
+        self::respond();
+    }
     public static function ajax() {
         if ( ! current_user_can( 'manage_ft_foodtrucks' ) ) { wp_send_json_error( array( 'message' => 'Sin permiso.' ), 403 ); }
         check_ajax_referer( 'ftuy_instagram', 'nonce' );
+        self::respond();
+    }
+    private static function respond() {
         $key = 'ftuy_ig_rate_' . get_current_user_id(); $count = (int) get_transient( $key );
         if ( $count >= 10 ) { wp_send_json_error( array( 'message' => 'Esperá unos minutos antes de volver a consultar.' ), 429 ); }
         set_transient( $key, $count + 1, 10 * MINUTE_IN_SECONDS );

@@ -93,6 +93,11 @@ class FTUY_Foodtrucks {
         $data = self::validate( $input ); if ( is_wp_error( $data ) ) { return $data; }
         if ( ! $manager ) {
             $allowed = array_map( 'intval', array_column( $existing['images'] ?? array(), 'attachment_id' ) );
+            if ( $existing ) {
+                $latest = $wpdb->get_var( $wpdb->prepare( 'SELECT payload FROM ' . self::table( 'foodtruck_reviews' ) . ' WHERE foodtruck_id=%d ORDER BY id DESC LIMIT 1', $id ) );
+                $latest = json_decode( $latest ?: '{}', true );
+                $allowed = array_merge( $allowed, array_map( 'intval', array_column( $latest['images'] ?? array(), 'attachment_id' ) ) );
+            }
             foreach ( $data['images'] as $image ) { if ( (int) get_post_field( 'post_author', $image['attachment_id'] ) !== (int) $actor && ! in_array( $image['attachment_id'], $allowed, true ) ) { return new WP_Error( 'image_owner', 'No podés usar ese medio en tu ficha.' ); } }
         }
         $data['responsible_user_id'] = $responsible; $now = current_time( 'mysql', true ); $table = self::table();

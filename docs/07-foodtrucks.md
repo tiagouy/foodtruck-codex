@@ -42,4 +42,5 @@ Para la prueba inicial son obligatorios nombre, descripción, qué sirven, depar
 - [x] Directorio y detalle web con filtros; vista privada de muestras/propuestas sin publicación automática (0.5.0).
 - [ ] Revisar y confirmar datos/imágenes de las cuatro muestras; no están publicadas automáticamente.
 - [ ] Validar la ficha antes de continuar con catálogo completo y estética.
-- [ ] Formulario público para que los responsables carguen y gestionen sus fichas; todavía se administra desde WordPress.
+- [x] Formulario web `/agregar-foodtruck/` y `/mis-foodtrucks/` para cuentas existentes, con edición propia y revisión (0.6.0).
+- [ ] Registro/verificación, reactivación y recuperación adaptados al sitio/app; migración de usuarios e IDs vinculados a fotos.

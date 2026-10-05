@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 — 2026-10-05
+
+- Formulario web `/agregar-foodtruck/` para cuentas WordPress existentes, sin acceso al panel ni campos de gestión.
+- `/mis-foodtrucks/`: fichas de la cuenta, edición, estado de revisión y mensajes de correcciones/rechazo; no expone fichas ajenas.
+- Altas y cambios pendientes conservan versión publicada y responsable real; el formulario ignora manipulaciones de estado, cuenta y decisión.
+- Imágenes propias/asociadas a la ficha, límite de envíos y limpieza de cargas nuevas fallidas.
+- Consulta opcional de Instagram para usuarios autenticados mediante acción y nonce propios; carga manual alternativa.
+- Formulario de datos compartido con administración, manteniendo las acciones de revisión exclusivamente en el panel.
+- Login nativo con retorno a la página; registro se ofrece solo si está habilitado, sin cambiar ajustes ni implementar la migración/activación de cuentas en esta etapa.
+- 61 comprobaciones HTTP, 35 de foodtrucks y 44 de eventos; revisión visual del formulario y de Instagram como suscriptor, en escritorio y celular.
+
 ## 0.5.0 — 2026-10-05
 
 - Directorio `/foodtrucks/` con tarjetas, filtros por departamento/rubro, paginación y estado vacío.
