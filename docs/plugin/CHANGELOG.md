@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 — 2026-10-05
+
+- Tablas propias de foodtrucks, rubros, relaciones, medios oficiales y propuestas de revisión; esquema independiente del módulo de eventos.
+- Administración Foodtrucks UY → Foodtrucks con cuenta responsable, WhatsApp, Instagram, rubros múltiples, modalidades, logo/portada/galería y preview privado.
+- Moderación de propuestas; mantiene la versión publicada hasta aprobar cambios.
+- API paginada de lectura `/foodtrucks` y `/foodtrucks/{slug}`; solo fichas publicadas, sin email, cuenta responsable o notas internas.
+- Consulta opcional de metadata pública de Instagram con propuesta de nombre e imagen confirmada antes de usar; tokens temporales ligados a cuenta/perfil, importación de logo a medios y carga manual alternativa.
+- Cuatro muestras locales pendientes; comando idempotente limitado a esas fichas, sin importación masiva.
+- 35 pruebas de foodtrucks, 44 de eventos y 31 HTTP; consulta real de QueChurro probada desde el formulario.
+
 ## 0.3.1 — 2026-10-05
 
 - El bloque «Dónde será» del detalle y preview muestra primero el nombre del lugar y después la dirección, evitando duplicarlos si coinciden. El enlace al mapa conserva las coordenadas seleccionadas.

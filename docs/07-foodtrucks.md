@@ -30,12 +30,15 @@ Mantener la convención del plugin: prefijo WordPress + `ft_`, entidades descrip
 
 No crear otra tabla de cuentas: la cuenta responsable se referencia mediante el ID de usuario WordPress. Los nombres históricos `servicios`, `offers`, `categories`, `speakers` no se reutilizan como entidades nuevas ni se renombran dentro del respaldo original.
 
-No se definieron todavía campos obligatorios ni límites de fotos. Una dirección de punto fijo, sus horarios, la participación en eventos y las publicaciones de comunidad se definirán por separado, sin ampliar esta ficha automáticamente.
+Para la prueba inicial son obligatorios nombre, descripción, qué sirven, departamento/localidad, al menos un rubro y una modalidad. WhatsApp, Instagram y medios son opcionales. Límite técnico inicial: diez imágenes por ficha, incluyendo un logo y una portada, hasta 5 MB y 40 megapíxeles por archivo. Estos criterios se pueden ajustar al probar la ficha. Una dirección de punto fijo, sus horarios, la participación en eventos y las publicaciones de comunidad se definirán por separado.
 
 ## Estado
 
 - [x] Auditoría de las dos fuentes históricas.
 - [x] Campos y alcance de muestra acordados.
-- [ ] Implementar tablas y gestión dentro del plugin.
-- [ ] Cargar muestra de tres o cuatro fichas y revisar datos/imágenes.
+- [x] Implementar tablas, administración, moderación, preview privado y API pública de lectura dentro del plugin (0.4.0).
+- [x] Cargar cuatro fichas históricas como pendientes: Robin, Shufa Deli, Route y Scaronne.
+- [x] Consulta opcional de nombre/foto pública de Instagram con confirmación explícita, carga manual alternativa y copia del logo a medios al guardar.
+- [ ] Revisar y confirmar datos/imágenes de las cuatro muestras; no están publicadas automáticamente.
 - [ ] Validar la ficha antes de continuar con catálogo completo y estética.
+- [ ] Formulario público para que los responsables carguen y gestionen sus fichas; todavía se administra desde WordPress.

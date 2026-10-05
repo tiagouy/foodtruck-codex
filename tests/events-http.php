@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) || wp_parse_url( home_url(), PHP_URL_HOST ) !== 'loc
 global $wpdb;
 $count = 0;
 $assert = function ( $yes, $message ) use ( &$count ) { if ( ! $yes ) { throw new RuntimeException( $message ); } $count++; };
-$uid = 0; $tokens = array(); $title = 'Prueba HTTP ' . wp_generate_uuid4();
+$uid = 0; $tokens = array(); $truck_media = array(); $title = 'Prueba HTTP ' . wp_generate_uuid4();
 $call = function ( $path, $cookie = '', $data = null ) {
     $ch = curl_init( home_url( $path ) );
     curl_setopt_array( $ch, array( CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20, CURLOPT_FOLLOWLOCATION => false, CURLOPT_COOKIE => $cookie ) );
@@ -78,9 +78,36 @@ try {
     $assert( preg_match( '/<section class="ft-location">.*?<strong>Lugar HTTP de prueba<\/strong>.*?Dirección de prueba/s', $body ), 'Dónde será muestra lugar antes de dirección.' );
     list( $code, $body ) = $call( '/eventos/pasados/?departamento=Canelones' );
     $assert( $code === 200 && strpos( $body, '0 eventos' ) !== false, 'Filtro HTTP sin resultados.' );
+    list( $code ) = $call( '/wp-admin/admin.php?page=ftuy-foodtrucks&new=1', $cookie );
+    $assert( $code === 403, 'Suscriptor no puede administrar foodtrucks.' );
+    list( $code, $body ) = $call( '/wp-admin/admin.php?page=ftuy-foodtrucks&new=1', $admin_cookie );
+    $assert( $code === 200 && strpos( $body, 'Proponer nombre y logo desde Instagram' ) !== false && strpos( $body, 'name="email"' ) === false, 'Formulario foodtruck con Instagram sin email.' );
+    $truck_nonce = $nonce( $body );
+    preg_match( '/var ftuyTruck = (\{[^\n]+\});/', $body, $truck_js ); $ig_config = json_decode( $truck_js[1] ?? '', true );
+    $assert( ! empty( $ig_config['nonce'] ), 'Consulta Instagram con nonce.' );
+    list( $code, $json ) = $call( '/wp-admin/admin-ajax.php', $cookie, array( 'action' => 'ftuy_instagram_preview', 'nonce' => $ig_config['nonce'], 'instagram' => '@quechurrouy' ) );
+    $assert( $code === 403, 'Consulta Instagram requiere permisos.' );
+    list( $code, $json ) = $call( '/wp-admin/admin-ajax.php', $admin_cookie, array( 'action' => 'ftuy_instagram_preview', 'nonce' => $ig_config['nonce'], 'instagram' => 'https://127.0.0.1/private' ) );
+    $assert( $code === 422 && ! json_decode( $json, true )['success'], 'Instagram rechaza URL privada sin consultarla.' );
+    $truck_fields = array( 'action' => 'ftuy_foodtruck', '_wpnonce' => $truck_nonce, 'name' => $title, 'description' => 'Prueba foodtruck HTTP', 'food_offering' => 'Churros', 'department' => 'Montevideo', 'locality' => 'Montevideo', 'cuisine_ids[0]' => FTUY_Foodtrucks::cuisines()[0]['id'], 'serves_events' => '1', 'responsible_user_id' => $uid, 'decision' => 'pending', 'truck_logo' => new CURLFile( get_attached_file( $seed['image_id'] ), 'image/jpeg', 'logo-prueba.jpg' ) );
+    list( $code ) = $call( '/wp-admin/admin-post.php', $admin_cookie, $truck_fields );
+    $assert( $code === 302, 'Foodtruck enviado con logo real.' );
+    $truck = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table() . ' WHERE responsible_user_id=%d', $uid ), ARRAY_A );
+    $truck_review = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table( 'foodtruck_reviews' ) . ' WHERE foodtruck_id=%d ORDER BY id DESC LIMIT 1', $truck['id'] ), ARRAY_A );
+    $payload = json_decode( $truck_review['payload'], true ); $truck_media = array_column( $payload['images'], 'attachment_id' );
+    $assert( $truck['status'] === 'pending' && $payload['images'][0]['role'] === 'logo', 'Propuesta conserva rol de logo.' );
+    list( $code ) = $call( '/wp-json/foodtrucks-uy/v1/foodtrucks/' . $truck['slug'] ); $assert( $code === 404, 'API no expone foodtruck pendiente.' );
+    list( $code, $body ) = $call( '/wp-admin/admin.php?page=ftuy-foodtrucks&edit=' . $truck['id'] . '&preview=1', $admin_cookie );
+    $assert( $code === 200 && strpos( $body, 'Vista previa privada' ) !== false && strpos( $body, $title ) !== false, 'Preview foodtruck privado.' );
+    unset( $truck_fields['truck_logo'] ); $truck_fields['foodtruck_id'] = $truck['id']; $truck_fields['decision'] = 'published'; $truck_fields['keep_images[0]'] = 'logo:' . $truck_media[0];
+    list( $code ) = $call( '/wp-admin/admin-post.php', $admin_cookie, $truck_fields ); $assert( $code === 302, 'Aprobación foodtruck por formulario.' );
+    list( $code, $json ) = $call( '/wp-json/foodtrucks-uy/v1/foodtrucks/' . $truck['slug'] ); $public = json_decode( $json, true );
+    $assert( $code === 200 && $public['images'][0]['role'] === 'logo' && ! isset( $public['responsible_user_id'], $public['email'] ), 'API foodtruck aprobada sin datos privados.' );
     echo "OK: $count comprobaciones HTTP, incluida carga real de imagen.\n";
 } finally {
     if ( $uid && ! is_wp_error( $uid ) ) {
+        foreach ( $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM ' . FTUY_Foodtrucks::table() . ' WHERE responsible_user_id=%d', $uid ) ) as $truck_id ) { foreach ( array( 'foodtruck_reviews', 'foodtruck_images', 'foodtruck_cuisines' ) as $table ) { $wpdb->delete( FTUY_Foodtrucks::table( $table ), array( 'foodtruck_id' => $truck_id ) ); } $wpdb->delete( FTUY_Foodtrucks::table(), array( 'id' => $truck_id ) ); }
+        foreach ( $truck_media as $image ) { wp_delete_attachment( $image, true ); }
         $events = $wpdb->get_results( $wpdb->prepare( 'SELECT id FROM ' . FTUY_Events::table() . ' WHERE author_id=%d', $uid ), ARRAY_A );
         foreach ( $events as $e ) { $wpdb->delete( FTUY_Events::table( 'event_reviews' ), array( 'event_id' => $e['id'] ) ); $wpdb->delete( FTUY_Events::table(), array( 'id' => $e['id'] ) ); }
         foreach ( get_posts( array( 'post_type' => 'attachment', 'author' => $uid, 'post_status' => 'inherit', 'numberposts' => -1 ) ) as $attachment ) { wp_delete_attachment( $attachment->ID, true ); }
