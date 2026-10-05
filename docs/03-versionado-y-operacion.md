@@ -19,7 +19,7 @@ La versión del esquema y la API (`v1`) son independientes de la versión del pl
 
 ## Git y despliegue
 
-Rama inicial `main`. Los snapshots, SQL y la app histórica están excluidos mediante `.gitignore`. El remoto se configurará cuando se defina el repositorio; no existe despliegue automático.
+Rama inicial `main`. Los snapshots, SQL y la app histórica están excluidos mediante `.gitignore`. El remoto es `https://github.com/tiagouy/foodtruck-codex.git`; no existe despliegue automático.
 
 Antes de publicar: validar en WordPress local, respaldar base y plugin de producción, empaquetar el tag y subir únicamente el plugin a `wp-content/plugins/`. Verificar la actualización y las migraciones. Un rollback de archivos no revierte cambios de base; cada release con migraciones debe definir su recuperación.
 
