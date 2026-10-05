@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 — 2026-10-05
+
+- El bloque «Dónde será» del detalle y preview muestra primero el nombre del lugar y después la dirección, evitando duplicarlos si coinciden. El enlace al mapa conserva las coordenadas seleccionadas.
+
 ## 0.3.0 — 2026-10-05
 
 - Formulario sin resumen breve: nombre, descripción, fechas, horarios, lugar y dirección, departamento/localidad, Instagram, web opcional y entradas.
