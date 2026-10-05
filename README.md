@@ -1,0 +1,19 @@
+# Foodtrucks Uruguay — reconstrucción
+
+Este repositorio separa la reconstrucción del producto de los materiales históricos que sirven de referencia.
+
+| Área | Ubicación | Propósito |
+| --- | --- | --- |
+| Documentación del proyecto | `docs/` | Decisiones, modelo de datos, migración y evolución. |
+| Aplicación móvil nueva | `apps/mobile/` | Cliente móvil nuevo; todavía sin tecnología decidida. |
+| Plugin WordPress | `plugins/foodtrucks-uy-core/` | Dominio, panel administrativo, cuentas, API y migración. |
+| Material histórico | `Cosas viejas/`, `foodtruckuruguay.com/`, `Bds/` | Solo consulta: no continuar desarrollo allí. |
+| Guía de referencia BuenCafé | `BUENCAFE_APP_NUEVA.md` | Patrón técnico para una reconstrucción moderna. |
+
+## Regla de trabajo
+
+El código nuevo se crea únicamente en `apps/` y `plugins/`. La copia completa de hosting y las bases SQL permanecen intactas mientras se analizan y se migran de forma controlada.
+
+## Punto de partida
+
+La arquitectura propuesta, el alcance inicial y las decisiones que quedan abiertas están en [docs/01-vision-y-arquitectura.md](docs/01-vision-y-arquitectura.md). El plan de los datos históricos está en [docs/02-migracion-de-datos.md](docs/02-migracion-de-datos.md).

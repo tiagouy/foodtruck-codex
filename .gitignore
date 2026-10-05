@@ -1,0 +1,21 @@
+.DS_Store
+/Bds/
+/Cosas viejas/
+/foodtruckuruguay.com/
+/wp-admin/
+/wp-activate.php
+/tyc.html
+*.sql
+*.sql.gz
+*.keystore
+*.jks
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+wp-config.php
+node_modules/
+vendor/
+dist/
+build/
