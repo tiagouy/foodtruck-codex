@@ -8,7 +8,7 @@ Este repositorio separa la reconstrucción del producto de los materiales histó
 | Aplicación móvil nueva | `apps/mobile/` | Cliente móvil nuevo; todavía sin tecnología decidida. |
 | Plugin WordPress | `plugins/foodtrucks-uy-core/` | Dominio, panel administrativo, cuentas, API y migración. |
 | Material histórico | `Cosas viejas/`, `foodtruckuruguay.com/`, `Bds/` | Solo consulta: no continuar desarrollo allí. |
-| Guía de referencia BuenCafé | `BUENCAFE_APP_NUEVA.md` | Patrón técnico para una reconstrucción moderna. |
+| Guía de referencia BuenCafé | `docs/referencias/BUENCAFE_APP_NUEVA.md` | Patrón técnico para una reconstrucción moderna. |
 
 ## Regla de trabajo
 
@@ -16,4 +16,6 @@ El código nuevo se crea únicamente en `apps/` y `plugins/`. La copia completa 
 
 ## Punto de partida
 
-La arquitectura propuesta, el alcance inicial y las decisiones que quedan abiertas están en [docs/01-vision-y-arquitectura.md](docs/01-vision-y-arquitectura.md). El plan de los datos históricos está en [docs/02-migracion-de-datos.md](docs/02-migracion-de-datos.md).
+La arquitectura propuesta y el alcance están en [visión y arquitectura](01-vision-y-arquitectura.md). El plan de los datos históricos está en [migración](02-migracion-de-datos.md) y las reglas de releases en [versionado y operación](03-versionado-y-operacion.md).
+
+La documentación específica está en [app móvil](app/README.md), [plugin](plugin/README.md), [changelog del plugin](plugin/CHANGELOG.md) y [material histórico](legacy/README.md).

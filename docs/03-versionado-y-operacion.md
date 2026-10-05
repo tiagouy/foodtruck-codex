@@ -13,7 +13,7 @@
 
 Versión inicial `0.1.0`. Usar `MAJOR.MINOR.PATCH`: cambios incompatibles incrementan MAJOR, funcionalidades MINOR y correcciones PATCH. Durante `0.x`, documentar explícitamente incompatibilidades.
 
-Actualizar juntos la cabecera PHP, `FOODTRUCKS_UY_CORE_VERSION` y `CHANGELOG.md`. Cada release se identifica mediante commit y tag anotado `foodtrucks-uy-core-vX.Y.Z`. `0.1.0` es una base sin funcionalidad de negocio.
+Actualizar juntos la cabecera PHP, `FOODTRUCKS_UY_CORE_VERSION` y `docs/plugin/CHANGELOG.md`. Cada release se identifica mediante commit y tag anotado `foodtrucks-uy-core-vX.Y.Z`. `0.1.0` es una base sin funcionalidad de negocio.
 
 La versión del esquema y la API (`v1`) son independientes de la versión del plugin. Los cambios de tablas requieren migraciones incrementales e idempotentes que conserven datos. Desactivar el plugin conserva sus tablas.
 
