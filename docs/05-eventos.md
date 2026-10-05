@@ -60,9 +60,11 @@ La API filtra publicados, permite departamento y vista temporal, y devuelve pagi
 
 - [ ] Acordar campos obligatorios, proporción de imagen y requisitos de cuenta.
 - [ ] Comparar eventos WordPress/Eventchamp con `tipsSalud` de la app y deduplicar.
-- [ ] Diseñar tablas y versión publicada/cambios pendientes.
-- [ ] Implementar formulario, medios, validaciones y control de propiedad.
-- [ ] Implementar bandeja de revisión, preview privado y emails.
-- [ ] Implementar ficha y tarjetas, próximos/pasados y departamentos.
-- [ ] Implementar API y probar que no exponga pendientes ni datos privados.
-- [ ] Verificar eventos de varios días, sin hora, cancelados, cambios pendientes y fallos de correo.
+- [x] Diseñar tablas y versión publicada/cambios pendientes.
+- [x] Implementar formulario, medios, validaciones y control de propiedad usando sesiones WordPress existentes.
+- [x] Implementar bandeja de revisión, preview privado y captura local de emails.
+- [x] Implementar ficha y tarjetas, próximos/pasados y departamentos.
+- [x] Implementar API de lectura y probar que no exponga pendientes ni datos privados.
+- [ ] Verificar entrega/reintentos de correo real en el hosting; los flujos locales y estados temporales ya se probaron.
+
+La primera implementación y sus límites están detallados en [Eventos 0.2.0](plugin/eventos-0.2.0.md). Se migraron cuatro registros de Eventchamp; el resto del histórico queda para la siguiente etapa.
