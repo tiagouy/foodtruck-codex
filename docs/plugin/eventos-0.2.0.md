@@ -1,5 +1,7 @@
 # Eventos 0.2.0: operación local
 
+Actualización 0.2.1: esquema versión `2`, con campo propio `instagram`. La migración recupera Instagram y web de `social-links` de Eventchamp para los cuatro registros, conservando valores que ya estén cargados. Formularios aceptan @usuario o enlace al perfil; detalle y API exponen Instagram por separado del sitio web.
+
 ## Instalación y datos
 
 El plugin está activado en `/Users/Santi/CLIENTES/_localhost/foodtruck/wp-content/plugins/foodtrucks-uy-core/`. El código versionado está en `plugins/foodtrucks-uy-core/` de este repositorio; la instalación MAMP usa una copia que debe sincronizarse después de editar.

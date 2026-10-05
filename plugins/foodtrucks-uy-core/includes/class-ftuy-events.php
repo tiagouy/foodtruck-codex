@@ -37,6 +37,7 @@ class FTUY_Events {
             longitude decimal(10,7) DEFAULT NULL,
             organizer varchar(255) NOT NULL DEFAULT '',
             website varchar(500) NOT NULL DEFAULT '',
+            instagram varchar(500) NOT NULL DEFAULT '',
             tickets_url varchar(500) NOT NULL DEFAULT '',
             price varchar(191) NOT NULL DEFAULT '',
             image_id bigint(20) unsigned NOT NULL DEFAULT 0,
@@ -82,7 +83,14 @@ class FTUY_Events {
             if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) !== $table ) { return; }
         }
         if ( $role = get_role( 'administrator' ) ) { $role->add_cap( 'manage_ft_events' ); }
-        update_option( 'ftuy_schema_version', '1', false );
+        if ( ! $wpdb->get_var( "SHOW COLUMNS FROM $events LIKE 'instagram'" ) ) { return; }
+        // Completar enlaces omitidos en 0.2.0 sin reemplazar valores editados.
+        foreach ( $wpdb->get_results( "SELECT id,legacy_post_id,website,instagram FROM $events WHERE legacy_post_id IS NOT NULL", ARRAY_A ) as $event ) {
+            $links = self::legacy_links( $event['legacy_post_id'] ); $changes = array();
+            foreach ( $links as $key => $value ) { if ( ! $event[$key] && $value ) { $changes[$key] = $value; } }
+            if ( $changes ) { $wpdb->update( $events, $changes, array( 'id' => $event['id'] ) ); }
+        }
+        update_option( 'ftuy_schema_version', '2', false );
     }
 
     public static function now() { return new DateTimeImmutable( 'now', new DateTimeZone( 'America/Montevideo' ) ); }
@@ -121,6 +129,9 @@ class FTUY_Events {
         foreach ( array( 'title', 'summary', 'department', 'locality', 'venue', 'address', 'organizer', 'price', 'start_date', 'end_date', 'start_time', 'end_time' ) as $key ) { $data[$key] = sanitize_text_field( $input[$key] ?? '' ); }
         $data['description'] = wp_kses_post( $input['description'] ?? '' );
         foreach ( array( 'website', 'tickets_url' ) as $key ) { $data[$key] = esc_url_raw( $input[$key] ?? '', array( 'http', 'https' ) ); }
+        $instagram = self::instagram_url( $input['instagram'] ?? '' );
+        if ( is_wp_error( $instagram ) ) { return $instagram; }
+        $data['instagram'] = $instagram;
         $data['cancelled'] = empty( $input['cancelled'] ) ? 0 : 1;
         foreach ( array( 'title' => 255, 'summary' => 1200, 'description' => 50000, 'locality' => 191, 'venue' => 255, 'address' => 255, 'organizer' => 255, 'price' => 191, 'website' => 500, 'tickets_url' => 500 ) as $key => $max ) {
             $length = function_exists( 'mb_strlen' ) ? mb_strlen( $data[$key] ) : strlen( $data[$key] );
@@ -188,7 +199,7 @@ class FTUY_Events {
         $wpdb->query( 'START TRANSACTION' );
         $r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table( 'event_reviews' ) . ' WHERE id=%d FOR UPDATE', $id ), ARRAY_A );
         if ( ! $r || ! in_array( $r['status'], array( 'pending', 'corrections' ), true ) ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'review', 'Esta propuesta ya fue revisada.' ); }
-        $data = json_decode( $r['payload'], true );
+        $data = array_merge( self::get( $r['event_id'] ), json_decode( $r['payload'], true ) );
         if ( $decision === 'published' ) {
             $data = self::validate( $data );
             if ( is_wp_error( $data ) ) { $wpdb->query( 'ROLLBACK' ); return $data; }
@@ -234,7 +245,7 @@ class FTUY_Events {
         $data['temporal_status'] = self::temporal( $e ); $data['url'] = self::url( $e );
         $data['image'] = array( 'thumbnail' => wp_get_attachment_image_url( $e['image_id'], 'medium_large' ) ?: null, 'full' => wp_get_attachment_image_url( $e['image_id'], 'full' ) ?: null );
         if ( $detail ) {
-            foreach ( array( 'description', 'organizer', 'website', 'tickets_url', 'price', 'latitude', 'longitude' ) as $key ) { $data[$key] = $e[$key]; }
+            foreach ( array( 'description', 'organizer', 'website', 'instagram', 'tickets_url', 'price', 'latitude', 'longitude' ) as $key ) { $data[$key] = $e[$key]; }
         }
         return $data;
     }
@@ -255,6 +266,7 @@ class FTUY_Events {
             $department = '';
             foreach ( self::departments() as $dep ) { if ( stripos( $address . ' ' . implode( ' ', $locations ), $dep ) !== false ) { $department = $dep; break; } }
             $data = array( 'title' => $p->post_title, 'description' => $p->post_content, 'summary' => $p->post_excerpt, 'start_date' => $meta( 'event_start_date' ), 'end_date' => $meta( 'event_end_date' ), 'start_time' => $meta( 'event_start_time' ), 'end_time' => $meta( 'event_end_time' ), 'department' => $department, 'locality' => $department === 'Montevideo' ? 'Montevideo' : implode( ', ', $locations ), 'address' => $address, 'organizer' => implode( ', ', $organizers ), 'price' => $meta( 'event-ticket-main-price' ), 'image_id' => get_post_thumbnail_id( $p->ID ), 'latitude' => $meta( 'event-map-lat' ), 'longitude' => $meta( 'event-map-lng' ) );
+            $data = array_merge( $data, self::legacy_links( $p->ID ) );
             $valid = self::validate( $data );
             if ( is_wp_error( $valid ) ) { $report['errors'][] = array( 'post_id' => $p->ID, 'title' => $p->post_title, 'error' => $valid->get_error_message() ); continue; }
             $valid = array_merge( $valid, array( 'slug' => $p->post_name, 'legacy_post_id' => $p->ID, 'author_id' => $p->post_author, 'status' => 'published', 'created_at' => $p->post_date_gmt, 'updated_at' => current_time( 'mysql', true ), 'published_at' => $p->post_date_gmt ) );
@@ -262,5 +274,32 @@ class FTUY_Events {
             $report['created']++; $report['items'][] = array( 'post_id' => $p->ID, 'title' => $p->post_title, 'slug' => $p->post_name );
         }
         return $report;
+    }
+
+    public static function instagram_url( $value ) {
+        $value = trim( sanitize_text_field( $value ) );
+        if ( $value === '' ) { return ''; }
+        $handle = ltrim( $value, '@' );
+        if ( preg_match( '/^[a-zA-Z0-9._]{1,30}$/', $handle ) ) { return 'https://www.instagram.com/' . $handle . '/'; }
+        if ( preg_match( '#^(?:www\.)?instagram\.com/#i', $value ) ) { $value = 'https://' . $value; }
+        $host = strtolower( wp_parse_url( $value, PHP_URL_HOST ) ?: '' );
+        $path = trim( wp_parse_url( $value, PHP_URL_PATH ) ?: '', '/' );
+        if ( in_array( $host, array( 'instagram.com', 'www.instagram.com' ), true ) && preg_match( '/^[a-zA-Z0-9._]{1,30}$/', $path ) ) { return 'https://www.instagram.com/' . $path . '/'; }
+        return new WP_Error( 'instagram', 'Ingresá un @usuario o el enlace al perfil de Instagram.' );
+    }
+
+    public static function legacy_links( $post_id ) {
+        $result = array( 'website' => '', 'instagram' => '' );
+        $links = get_post_meta( $post_id, 'social-links', true );
+        if ( ! is_array( $links ) ) { return $result; }
+        foreach ( $links as $link ) {
+            if ( ! is_array( $link ) ) { continue; }
+            $url = esc_url_raw( $link['url'] ?? '', array( 'http', 'https' ) );
+            if ( in_array( strtolower( wp_parse_url( $url, PHP_URL_HOST ) ?: '' ), array( 'instagram.com', 'www.instagram.com' ), true ) ) {
+                $normalized = self::instagram_url( $url );
+                if ( ! is_wp_error( $normalized ) ) { $result['instagram'] = $normalized; }
+            } elseif ( stripos( $link['title'] ?? '', 'web' ) !== false || ( $link['icon'] ?? '' ) === 'link-1' ) { $result['website'] = $url; }
+        }
+        return $result;
     }
 }

@@ -19,7 +19,7 @@ class FTUY_Admin {
     }
     public static function labels() { return array( 'pending' => 'Pendiente', 'corrections' => 'Requiere correcciones', 'published' => 'Publicado', 'rejected' => 'Rechazado', 'superseded' => 'Reemplazado' ); }
     public static function fields( $data = array(), $public = false ) {
-        $fields = array( 'title' => 'Nombre del evento', 'summary' => 'Resumen breve', 'description' => 'Descripción', 'start_date' => 'Fecha de inicio', 'end_date' => 'Fecha de finalización', 'start_time' => 'Hora de inicio (opcional)', 'end_time' => 'Hora de finalización (opcional)', 'department' => 'Departamento', 'locality' => 'Localidad', 'venue' => 'Nombre del lugar', 'address' => 'Dirección', 'organizer' => 'Organizador', 'website' => 'Web o Instagram', 'tickets_url' => 'Enlace de entradas', 'price' => 'Entrada / precio', 'latitude' => 'Latitud (opcional)', 'longitude' => 'Longitud (opcional)' );
+        $fields = array( 'title' => 'Nombre del evento', 'summary' => 'Resumen breve', 'description' => 'Descripción', 'start_date' => 'Fecha de inicio', 'end_date' => 'Fecha de finalización', 'start_time' => 'Hora de inicio (opcional)', 'end_time' => 'Hora de finalización (opcional)', 'department' => 'Departamento', 'locality' => 'Localidad', 'venue' => 'Nombre del lugar', 'address' => 'Dirección', 'organizer' => 'Organizador', 'website' => 'Sitio web', 'instagram' => 'Instagram (@usuario o enlace al perfil)', 'tickets_url' => 'Enlace de entradas', 'price' => 'Entrada / precio', 'latitude' => 'Latitud (opcional)', 'longitude' => 'Longitud (opcional)' );
         echo '<div class="ft-form-grid">';
         foreach ( $fields as $key => $label ) {
             $value = $data[$key] ?? '';
@@ -104,7 +104,7 @@ class FTUY_Admin {
         $r = isset( $_GET['review'] ) ? FTUY_Events::review( absint( $_GET['review'] ) ) : null;
         $event = isset( $_GET['edit'] ) ? FTUY_Events::get( absint( $_GET['edit'] ) ) : null;
         if ( $r || $event || isset( $_GET['new'] ) ) {
-            $data = $r ? json_decode( $r['payload'], true ) : ( $event ?: array() );
+            $data = $r ? array_merge( FTUY_Events::get( $r['event_id'] ), json_decode( $r['payload'], true ) ) : ( $event ?: array() );
             echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=ftuy-events' ) ) . '">← Todos los eventos</a></p>';
             if ( $r ) {
                 echo '<p>Estado: <strong>' . esc_html( self::labels()[$r['status']] ?? $r['status'] ) . '</strong></p>';

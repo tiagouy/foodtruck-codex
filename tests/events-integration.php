@@ -28,6 +28,11 @@ try {
     $assert( is_wp_error( FTUY_Events::validate( $bad ) ), 'Rechaza input compuesto.' );
     $bad = $data; $bad['image_id'] = 0;
     $assert( is_wp_error( FTUY_Events::validate( $bad ) ), 'Imagen obligatoria.' );
+    $assert( FTUY_Events::instagram_url( '@expocafeuruguay' ) === 'https://www.instagram.com/expocafeuruguay/', 'Normaliza usuario Instagram.' );
+    $assert( is_wp_error( FTUY_Events::instagram_url( 'https://instagram.com.ejemplo.com/perfil/' ) ), 'Rechaza dominio engañoso.' );
+    $assert( FTUY_Events::instagram_url( 'https://www.instagram.com/garage_gourmet/?utm_source=test' ) === 'https://www.instagram.com/garage_gourmet/', 'Normaliza URL sin tracking.' );
+    $assert( FTUY_Events::legacy_links( $seed['legacy_post_id'] )['instagram'] === $seed['instagram'] && ! empty( $seed['website'] ), 'Recupera enlaces originales.' );
+    $data['instagram'] = '@expocafeuruguay';
     wp_set_current_user( $user_id );
     $review_id = FTUY_Events::suggest( $data, $user_id );
     $assert( ! is_wp_error( $review_id ), 'Alta de propuesta.' );
@@ -60,6 +65,7 @@ try {
     $assert( FTUY_Events::moderate( $next_id, 'published', '' ) === true, 'Cambio aprobado.' );
     $public = FTUY_Events::public_data( FTUY_Events::get( $event_id ), true );
     $assert( $public['cancelled'] && ! isset( $public['author_id'], $public['legacy_post_id'] ), 'Contrato público explícito.' );
+    $assert( $public['instagram'] === 'https://www.instagram.com/expocafeuruguay/', 'Instagram en API y moderación.' );
     $request = new WP_REST_Request( 'GET', '/foodtrucks-uy/v1/events' ); $request->set_param( 'view', 'past' ); $request->set_param( 'per_page', 2 );
     $response = rest_do_request( $request );
     $assert( $response->get_status() === 200 && count( $response->get_data()['items'] ) === 2 && $response->get_data()['pages'] >= 2, 'Paginación.' );

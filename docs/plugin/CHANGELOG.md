@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 — 2026-10-05
+
+- Recuperación de Instagram y sitio web de los eventos originales de Eventchamp.
+- Instagram como campo independiente en formularios, detalle y API; admite @usuario o URL de perfil.
+- Migración incremental al esquema 2, conservando datos y enlaces ya editados.
+
 ## 0.2.0 — 2026-10-05
 
 - Tablas propias de eventos, propuestas de revisión y notificaciones de correo.

@@ -83,7 +83,7 @@ class FTUY_Public {
             $existing = FTUY_Events::get( $id );
             if ( ! $existing || (int) $existing['author_id'] !== get_current_user_id() ) { wp_die( 'No podés editar este evento.', '', array( 'response' => 403 ) ); }
             $review = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Events::table( 'event_reviews' ) . ' WHERE event_id=%d ORDER BY id DESC LIMIT 1', $id ), ARRAY_A );
-            self::$form_data = $review && $review['status'] !== 'published' ? json_decode( $review['payload'], true ) : $existing;
+            self::$form_data = $review && $review['status'] !== 'published' ? array_merge( $existing, json_decode( $review['payload'], true ) ) : $existing;
         }
         if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' ) { return; }
         if ( ! wp_verify_nonce( $_POST['_wpnonce'] ?? '', 'ftuy_suggest' ) ) { wp_die( 'La sesión del formulario venció.', '', array( 'response' => 403 ) ); }
