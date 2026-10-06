@@ -1,7 +1,7 @@
 <?php
 /** Run with WP-CLI eval-file on the local installation only. */
 if ( ! defined( 'ABSPATH' ) || wp_parse_url( home_url(), PHP_URL_HOST ) !== 'localhost' ) { throw new RuntimeException( 'Solo en localhost.' ); }
-$count = 0; $ids = array(); $source = null;
+$count = 0; $ids = array(); $source = null; $oversized = null;
 $assert = function ( $ok, $message ) use ( &$count ) { if ( ! $ok ) { throw new RuntimeException( $message ); } $count++; };
 try {
     require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -25,10 +25,16 @@ try {
     }
     $assert( hash_file( 'sha256', $source ) === $hash, 'No altera el original.' );
     $assert( is_wp_error( FTUY_Foodtruck_Images::process( $source, 'cover' ) ), 'No admite nuevas portadas.' );
+    $oversized = wp_tempnam( 'ftuy-oversized-test' ); $handle = fopen( $oversized, 'wb' ); ftruncate( $handle, 5 * MB_IN_BYTES + 1 ); fclose( $handle );
+    $error = FTUY_Foodtruck_Images::process( $oversized, 'logo' );
+    $assert( is_wp_error( $error ) && $error->get_error_message() === 'La imagen pesa demasiado. Elegí un archivo de hasta 5 MB.', 'Error claro para archivos mayores a 5 MB.' );
+    $error = FTUY_Foodtruck_Images::upload( array( 'error' => UPLOAD_ERR_INI_SIZE ), 'logo' );
+    $assert( is_wp_error( $error ) && strpos( $error->get_error_message(), 'pesa demasiado' ) !== false, 'Error claro cuando PHP rechaza por tamaño.' );
     $legacy = FTUY_Foodtruck_Images::normalize( array( array( 'role' => 'official', 'attachment_id' => 1 ), array( 'role' => 'cover', 'attachment_id' => 2 ) ) );
     $assert( count( $legacy ) === 1 && $legacy[0]['role'] === 'truck_photo' && $legacy[0]['attachment_id'] === 2, 'Compatibilidad histórica sin galería.' );
     echo "OK: $count comprobaciones de imágenes.\n";
 } finally {
     foreach ( $ids as $id ) { wp_delete_attachment( $id, true ); }
     if ( $source ) { wp_delete_file( $source ); }
+    if ( $oversized ) { wp_delete_file( $oversized ); }
 }

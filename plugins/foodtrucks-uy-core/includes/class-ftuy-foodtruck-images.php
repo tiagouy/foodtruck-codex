@@ -34,8 +34,10 @@ class FTUY_Foodtruck_Images {
     public static function process( $path, $role, $name = 'foodtruck' ) {
         require_once ABSPATH . 'wp-admin/includes/file.php';
         if ( ! in_array( $role, array( 'logo', 'truck_photo' ), true ) ) { return new WP_Error( 'role', 'Tipo de imagen inválido.' ); }
+        if ( filesize( $path ) > 5 * MB_IN_BYTES ) { return new WP_Error( 'weight', 'La imagen pesa demasiado. Elegí un archivo de hasta 5 MB.' ); }
         $info = wp_getimagesize( $path );
-        if ( ! $info || ! in_array( $info['mime'], array( 'image/jpeg', 'image/png', 'image/webp' ), true ) || $info[0] * $info[1] > 40000000 || filesize( $path ) > 5 * MB_IN_BYTES ) { return new WP_Error( 'image', 'Usá JPG, PNG o WebP de hasta 5 MB y 40 megapíxeles. El archivo se reducirá antes de guardarse.' ); }
+        if ( ! $info || ! in_array( $info['mime'], array( 'image/jpeg', 'image/png', 'image/webp' ), true ) ) { return new WP_Error( 'image', 'No pudimos leer esa imagen. Probá con un archivo JPG, PNG o WebP.' ); }
+        if ( $info[0] * $info[1] > 40000000 ) { return new WP_Error( 'image', 'No pudimos procesar esa imagen. Probá con otra más liviana.' ); }
         $filter = function () { return array( 'FTUY_Truck_Editor_GD', 'FTUY_Truck_Editor_Imagick' ); };
         add_filter( 'wp_image_editors', $filter );
         try { $editor = wp_get_image_editor( $path ); } finally { remove_filter( 'wp_image_editors', $filter ); }
@@ -69,6 +71,7 @@ class FTUY_Foodtruck_Images {
         return $id;
     }
     public static function upload( $file, $role ) {
+        if ( is_array( $file ) && isset( $file['error'] ) && in_array( $file['error'], array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) ) { return new WP_Error( 'weight', 'La imagen pesa demasiado. Elegí un archivo de hasta 5 MB.' ); }
         if ( ! is_array( $file ) || ! isset( $file['tmp_name'], $file['error'] ) || $file['error'] !== UPLOAD_ERR_OK || ! is_string( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) ) { return new WP_Error( 'upload', 'La imagen no pudo cargarse.' ); }
         return self::process( $file['tmp_name'], $role, pathinfo( $file['name'], PATHINFO_FILENAME ) );
     }

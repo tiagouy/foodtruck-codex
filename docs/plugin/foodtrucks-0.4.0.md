@@ -16,6 +16,8 @@ El proceso se aplica tanto en administración como en el formulario de propietar
 
 WhatsApp uruguayo `09…` se normaliza a `5989…`; formatos internacionales se ingresan con código de país. No se interpreta un teléfono histórico como WhatsApp confirmado.
 
+Desde 0.7.1 el formulario no muestra tamaños finales, dpi, compresión ni requisitos de dimensiones: solo Logo y Foto del foodtruck. Todo el procesamiento es automático. Si el archivo supera 5 MB, se muestra «La imagen pesa demasiado. Elegí un archivo de hasta 5 MB.» tanto al seleccionarlo en el navegador como en la validación de servidor.
+
 ## Instagram
 
 Ingresar perfil y pulsar «Proponer nombre y logo desde Instagram». Se consulta solo metadata de la página pública, sin cookies, credenciales, APIs privadas o elusión de restricciones. Si responde, muestra propuesta; pulsar «Usar nombre y foto como logo» confirma. Los campos siguen editables. Una carga manual de logo prevalece sobre la propuesta al guardar.

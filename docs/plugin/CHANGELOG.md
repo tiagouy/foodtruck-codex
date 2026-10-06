@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.1 — 2026-10-06
+
+- Formulario sin dimensiones, pesos finales ni explicación técnica: solo Logo y Foto del foodtruck. Redimensionado/compresión permanecen internos.
+- Error claro al seleccionar un archivo de más de 5 MB; validación equivalente en servidor. Elegir otro archivo válido elimina el error.
+
 ## 0.7.0 — 2026-10-06
 
 - Solo logo y foto del foodtruck; retiradas portada y galería del formulario y detalle, tarjetas cuadradas.

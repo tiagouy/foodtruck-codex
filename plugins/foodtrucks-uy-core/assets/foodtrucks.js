@@ -1,6 +1,13 @@
 (() => {
     'use strict';
     const form = document.querySelector('.ft-truck-form'); if (!form) return;
+    form.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', () => {
+            const tooLarge = Array.from(input.files || []).some(file => file.size > 5 * 1024 * 1024);
+            input.setCustomValidity(tooLarge ? 'La imagen pesa demasiado. Elegí un archivo de hasta 5 MB.' : '');
+            if (tooLarge) input.reportValidity();
+        });
+    });
     const button = form.querySelector('[data-instagram-lookup]');
     const output = form.querySelector('[data-instagram-result]');
     const status = form.querySelector('[data-instagram-status]');
