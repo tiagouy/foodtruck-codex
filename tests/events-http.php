@@ -124,6 +124,7 @@ try {
     list( $code, $body ) = $call( '/mis-foodtrucks/' ); $assert( $code === 200 && strpos( $body, $title ) === false, 'Mis foodtrucks anónimo no expone fichas propias.' );
     list( $code, $body ) = $call( '/agregar-foodtruck/', $cookie );
     $assert( $code === 200 && strpos( $body, 'Enviar a revisión' ) !== false && strpos( $body, 'name="responsible_user_id"' ) === false && strpos( $body, 'Aprobar y publicar' ) === false && strpos( $body, 'name="email"' ) === false, 'Alta de suscriptor sin campos administrativos/email.' );
+    $assert( strpos( $body, '900 × 900' ) !== false && strpos( $body, '500 × 500' ) !== false && strpos( $body, 'name="truck_truck_photo"' ) !== false && strpos( $body, 'name="truck_cover"' ) === false && strpos( $body, 'name="truck_photos[]"' ) === false, 'Formulario fija tamaños y retira portada/galería.' );
     $public_nonce = $nonce( $body ); preg_match( '/var ftuyTruck = (\{[^\n]+\});/', $body, $public_js ); $public_ig = json_decode( $public_js[1] ?? '', true );
     $assert( $public_ig['action'] === 'ftuy_instagram_public_preview', 'Formulario usa consulta pública autenticada de Instagram.' );
     list( $code ) = $call( '/wp-admin/admin-ajax.php', '', array( 'action' => $public_ig['action'], 'nonce' => $public_ig['nonce'], 'instagram' => '@quechurrouy' ) ); $assert( $code === 403, 'Instagram del formulario no admite anónimos.' );
@@ -133,6 +134,7 @@ try {
     $bad = $submission; $bad['description'] = ''; list( $code, $body ) = $call( '/agregar-foodtruck/', $cookie, $bad ); $assert( $code === 200 && strpos( $body, 'Completá nombre' ) !== false && strpos( $body, $submission['name'] ) !== false, 'Errores conservan datos escritos.' );
     $bad = $submission; $bad['keep_images[0]'] = 'logo:' . $seed['image_id']; list( $code, $body ) = $call( '/agregar-foodtruck/', $cookie, $bad ); $assert( $code === 200 && strpos( $body, 'No podés usar esa imagen' ) !== false, 'No puede apropiarse de medios de otra ficha.' );
     $submission['truck_logo'] = new CURLFile( get_attached_file( $seed['image_id'] ), 'image/jpeg', 'logo-propietario.jpg' );
+    $submission['truck_truck_photo'] = new CURLFile( get_attached_file( $seed['image_id'] ), 'image/jpeg', 'foto-propietario.jpg' );
     list( $code ) = $call( '/agregar-foodtruck/', $cookie, $submission ); $assert( $code === 302, 'Suscriptor carga ficha y logo sin panel administrativo.' );
     $owned = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table() . ' WHERE responsible_user_id=%d ORDER BY id DESC LIMIT 1', $uid ), ARRAY_A );
     $assert( $owned['name'] === $submission['name'] && $owned['status'] === 'pending' && (int) $owned['responsible_user_id'] === (int) $uid, 'Ignora responsable, estado y decisión manipulados.' );
@@ -140,10 +142,16 @@ try {
     list( $code ) = $call( '/agregar-foodtruck/?edit=1', $cookie ); $assert( $code === 403, 'Autor no puede editar muestra ajena.' );
     list( $code ) = $call( '/foodtruck/' . $owned['slug'] . '/' ); $assert( $code === 404, 'Alta propia pendiente no se publica.' );
     $own_review = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table( 'foodtruck_reviews' ) . ' WHERE foodtruck_id=%d ORDER BY id DESC LIMIT 1', $owned['id'] ), ARRAY_A );
-    $own_media = json_decode( $own_review['payload'], true )['images'][0]['attachment_id'];
+    $own_images = json_decode( $own_review['payload'], true )['images']; $own_media = $own_images[0]['attachment_id'];
+    foreach ( $own_images as $image ) {
+        $path = get_attached_file( $image['attachment_id'] ); $info = wp_getimagesize( $path ); list( $edge, $limit ) = FTUY_Foodtruck_Images::settings( $image['role'] );
+        $assert( $info[0] === $edge && $info[1] === $edge && filesize( $path ) <= $limit && $info['mime'] === 'image/jpeg', 'Subida real optimizada: ' . $image['role'] );
+    }
+    $assert( count( $own_images ) === 2, 'Guarda solo logo y foto del foodtruck.' );
     list( $code, $body ) = $call( '/agregar-foodtruck/?edit=' . $owned['id'], $cookie ); $assert( $code === 200 && strpos( $body, 'logo:' . $own_media ) !== false, 'Edición recupera logo y datos pendientes.' );
     delete_transient( 'ftuy_truck_submit_' . $uid );
-    unset( $submission['truck_logo'] ); $submission['keep_images[0]'] = 'logo:' . $own_media;
+    unset( $submission['truck_logo'], $submission['truck_truck_photo'] ); $submission['keep_images[0]'] = 'logo:' . $own_media;
+    $submission['keep_images[1]'] = 'truck_photo:' . $own_images[1]['attachment_id'];
     $approve = $submission; $approve['_wpnonce'] = $truck_nonce; $approve['action'] = 'ftuy_foodtruck'; $approve['foodtruck_id'] = $owned['id']; $approve['responsible_user_id'] = $uid; $approve['decision'] = 'published';
     list( $code ) = $call( '/wp-admin/admin-post.php', $admin_cookie, $approve ); $assert( $code === 302, 'Revisor aprueba alta enviada por propietario.' );
     $submission['name'] .= ' editado'; list( $code ) = $call( '/agregar-foodtruck/?edit=' . $owned['id'], $cookie, $submission ); $assert( $code === 302, 'Propietario propone cambios conservando logo.' );

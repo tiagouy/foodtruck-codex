@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 — 2026-10-06
+
+- Solo logo y foto del foodtruck; retiradas portada y galería del formulario y detalle, tarjetas cuadradas.
+- Subidas procesadas antes de incorporarse a medios WordPress: logo JPEG 500×500 px/120 KB y foto JPEG 900×900 px/300 KB, recorte centrado, orientación EXIF, fondo blanco y densidad 72 dpi.
+- Compresión adaptativa y rechazo si no cumple dimensiones/peso. Nunca se guarda el original grande de una nueva subida. Logos de Instagram usan el mismo proceso.
+- Compatibilidad con roles históricos y conversión por copia al volver a guardar una ficha, sin borrar archivos anteriores ni conversión masiva.
+- Pruebas específicas de tamaños, peso, dpi, transparencia y originales, más subidas HTTP reales de los dos roles.
+- 15 comprobaciones de imágenes, 65 HTTP, 35 de foodtrucks y 44 de eventos, usando GD en MAMP.
+
 ## 0.6.0 — 2026-10-05
 
 - Formulario web `/agregar-foodtruck/` para cuentas WordPress existentes, sin acceso al panel ni campos de gestión.

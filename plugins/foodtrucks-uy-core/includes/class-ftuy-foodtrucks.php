@@ -51,6 +51,7 @@ class FTUY_Foodtrucks {
         if ( ! $e ) { return null; }
         $e['cuisine_ids'] = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT cuisine_id FROM ' . self::table( 'foodtruck_cuisines' ) . ' WHERE foodtruck_id=%d', $id ) ) );
         $e['images'] = $wpdb->get_results( $wpdb->prepare( 'SELECT attachment_id,role,sort_order FROM ' . self::table( 'foodtruck_images' ) . ' WHERE foodtruck_id=%d ORDER BY sort_order,id', $id ), ARRAY_A );
+        $e['images'] = FTUY_Foodtruck_Images::normalize( $e['images'] );
         return $e;
     }
     public static function validate( $input ) {
@@ -75,12 +76,15 @@ class FTUY_Foodtrucks {
         $data['cuisine_ids'] = array_values( array_unique( array_map( 'absint', $ids ) ) );
         $known = array_map( 'intval', array_column( self::cuisines(), 'id' ) );
         if ( ! $ids || array_diff( $data['cuisine_ids'], $known ) ) { return new WP_Error( 'cuisine', 'Seleccioná uno o varios rubros válidos.' ); }
-        $images = $input['images'] ?? array(); if ( ! is_array( $images ) || count( $images ) > 10 ) { return new WP_Error( 'image', 'Máximo diez imágenes por ficha, incluyendo logo y portada.' ); }
+        $images = $input['images'] ?? array(); if ( ! is_array( $images ) || count( $images ) > 10 ) { return new WP_Error( 'image', 'Imágenes inválidas.' ); }
+        foreach ( $images as $image ) { if ( ! is_array( $image ) || ! isset( $image['role'], $image['attachment_id'] ) || ! is_scalar( $image['role'] ) || ! is_scalar( $image['attachment_id'] ) || ! in_array( $image['role'], array( 'logo', 'truck_photo', 'cover', 'official' ), true ) ) { return new WP_Error( 'image', 'Imagen inválida.' ); } }
+        $images = FTUY_Foodtruck_Images::normalize( $images );
+        if ( count( $images ) > 2 ) { return new WP_Error( 'image', 'Usá un logo y una foto del foodtruck.' ); }
         $data['images'] = array(); $single = array();
         foreach ( $images as $i => $image ) {
             if ( ! is_array( $image ) || ! isset( $image['attachment_id'], $image['role'] ) || ! is_scalar( $image['attachment_id'] ) || ! is_scalar( $image['role'] ) ) { return new WP_Error( 'image', 'Imagen inválida.' ); }
             $id = absint( $image['attachment_id'] ); $role = $image['role'];
-            if ( ! in_array( $role, array( 'logo', 'cover', 'official' ), true ) || ! wp_attachment_is_image( $id ) || ( $role !== 'official' && isset( $single[$role] ) ) ) { return new WP_Error( 'image', 'Revisá los medios: un logo, una portada y fotos oficiales.' ); }
+            if ( ! in_array( $role, array( 'logo', 'truck_photo' ), true ) || ! wp_attachment_is_image( $id ) || isset( $single[$role] ) ) { return new WP_Error( 'image', 'Revisá los medios: un logo y una foto del foodtruck.' ); }
             $single[$role] = true; $data['images'][] = array( 'attachment_id' => $id, 'role' => $role, 'sort_order' => $i );
         }
         return $data;

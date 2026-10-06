@@ -10,7 +10,9 @@ Con el prefijo WordPress del entorno: `ft_foodtrucks`, `ft_cuisine_categories`, 
 
 Guardar propuesta crea una revisión pendiente; no reemplaza una ficha pública. Aprobar aplica campos, rubros y medios dentro de una transacción. Correcciones/rechazo dejan intacta la versión publicada. Desmarcar «Conservar» quita el vínculo en la propuesta; no elimina archivos antiguos de la biblioteca.
 
-Imágenes opcionales: un logo, una portada y fotos oficiales hasta diez medios totales, JPG/PNG/WebP ≤5 MB y ≤40 MP por archivo. No se reutiliza ni mezcla automáticamente la galería de publicaciones de usuarios. Campos mínimos y límites están en [definición](../07-foodtrucks.md).
+Desde 0.7.0 las imágenes opcionales son un logo y una foto del foodtruck, sin portada ni galería. Logo: 500×500 px/120 KB; foto: 900×900 px/300 KB. Se recibe JPG/PNG/WebP ≤5 MB y ≤40 MP, se corrige orientación EXIF, se recorta centrado y se guarda únicamente JPEG reducido con densidad 72 dpi, sin metadatos EXIF; transparencias sobre blanco. No se reutiliza ni mezcla la galería de publicaciones de usuarios. Los dpi no reducen el peso: lo hacen dimensiones y compresión. Campos mínimos y límites están en [definición](../07-foodtrucks.md).
+
+El proceso se aplica tanto en administración como en el formulario de propietarios y en logos importados de Instagram. Las imágenes existentes se convierten al volver a guardar la ficha: se crea un medio nuevo, sin modificar ni borrar el original histórico. Para compatibilidad, una portada antigua se interpreta como foto del foodtruck; si no hay portada, se toma la primera foto oficial. No se ejecutó una conversión masiva. El servidor necesita GD o Imagick; ante fallos se rechaza la imagen, nunca se conserva el archivo grande como alternativa. Probado localmente con GD; Imagick no está instalado en MAMP.
 
 WhatsApp uruguayo `09…` se normaliza a `5989…`; formatos internacionales se ingresan con código de país. No se interpreta un teléfono histórico como WhatsApp confirmado.
 
@@ -56,4 +58,4 @@ WP-CLI: `wp ftuy sample-foodtrucks` (solo localhost). Fuente exacta: cuatro post
 
 ## Pruebas
 
-Ejecutar en localhost con plugin activo: `wp eval-file tests/foodtrucks-integration.php`, `wp eval-file tests/events-integration.php`, `wp eval-file tests/events-http.php`. Crean registros temporales y los limpian, sin alterar las cuatro muestras ni eventos reales. Prueba de importación de logo usa respuestas HTTP controladas; la búsqueda real de Instagram se verificó también visualmente en el formulario.
+Ejecutar en localhost con plugin activo: `wp eval-file tests/foodtrucks-integration.php`, `wp eval-file tests/events-integration.php`, `wp eval-file tests/events-http.php` y `wp eval-file tests/foodtruck-images.php`. Crean registros temporales y los limpian, sin alterar las cuatro muestras ni eventos reales. La prueba de imágenes verifica dimensiones, peso, JPEG/72 dpi, transparencia blanca, conservación de originales e idempotencia. Prueba de importación de logo usa respuestas HTTP controladas; la búsqueda real de Instagram se verificó también visualmente en el formulario.

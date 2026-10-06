@@ -18,11 +18,8 @@ class FTUY_Foodtruck_Admin {
             } ) );
         } );
     }
-    public static function upload( $file ) {
-        $previous = $_FILES['event_image'] ?? null; $_FILES['event_image'] = $file;
-        $result = FTUY_Admin::image();
-        if ( $previous === null ) { unset( $_FILES['event_image'] ); } else { $_FILES['event_image'] = $previous; }
-        return $result;
+    public static function upload( $file, $role = 'logo' ) {
+        return FTUY_Foodtruck_Images::upload( $file, $role );
     }
     public static function handle() {
         if ( ! current_user_can( 'manage_ft_foodtrucks' ) ) { wp_die( 'Sin permiso.', '', array( 'response' => 403 ) ); }
@@ -31,15 +28,15 @@ class FTUY_Foodtruck_Admin {
         if ( $id && ! FTUY_Foodtrucks::get( $id ) ) { wp_die( 'Ficha inexistente.' ); }
         $input['images'] = array();
         foreach ( (array) ( $input['keep_images'] ?? array() ) as $value ) {
-            if ( ! is_string( $value ) || ! preg_match( '/^(logo|cover|official):(\d+)$/', $value, $m ) ) { wp_die( 'Referencia de imagen inválida.' ); }
+            if ( ! is_string( $value ) || ! preg_match( '/^(logo|truck_photo|cover):(\d+)$/', $value, $m ) ) { wp_die( 'Referencia de imagen inválida.' ); }
             $input['images'][] = array( 'role' => $m[1], 'attachment_id' => (int) $m[2] );
         }
         $valid = FTUY_Foodtrucks::validate( $input ); if ( is_wp_error( $valid ) ) { wp_die( esc_html( $valid->get_error_message() ) ); }
         $fail = function ( $error ) use ( &$new_images ) { foreach ( $new_images as $image ) { wp_delete_attachment( $image, true ); } wp_die( esc_html( $error->get_error_message() ) ); };
-        foreach ( array( 'logo', 'cover' ) as $role ) {
+        foreach ( array( 'logo', 'truck_photo' ) as $role ) {
             $file = $_FILES['truck_' . $role] ?? null;
             if ( $file && ! empty( $file['name'] ) ) {
-                $image = self::upload( $file ); if ( is_wp_error( $image ) ) { $fail( $image ); } $new_images[] = $image;
+                $image = self::upload( $file, $role ); if ( is_wp_error( $image ) ) { $fail( $image ); } $new_images[] = $image;
                 $valid['images'] = array_values( array_filter( $valid['images'], function ( $i ) use ( $role ) { return $i['role'] !== $role; } ) ); $valid['images'][] = array( 'role' => $role, 'attachment_id' => $image );
             }
         }
@@ -47,13 +44,9 @@ class FTUY_Foodtruck_Admin {
             $image = FTUY_Instagram::import_logo( $input['instagram_token'], $valid['instagram'] ); if ( is_wp_error( $image ) ) { $fail( $image ); } $new_images[] = $image;
             $valid['images'] = array_values( array_filter( $valid['images'], function ( $i ) { return $i['role'] !== 'logo'; } ) ); $valid['images'][] = array( 'role' => 'logo', 'attachment_id' => $image );
         }
-        $files = $_FILES['truck_photos'] ?? array();
-        foreach ( (array) ( $files['name'] ?? array() ) as $index => $name ) {
-            if ( ! $name ) { continue; }
-            if ( count( $valid['images'] ) >= 10 ) { $fail( new WP_Error( 'images', 'Máximo diez imágenes incluyendo logo y portada.' ) ); }
-            $file = array(); foreach ( array( 'name', 'type', 'tmp_name', 'error', 'size' ) as $key ) { $file[$key] = $files[$key][$index] ?? ''; }
-            $image = self::upload( $file ); if ( is_wp_error( $image ) ) { $fail( $image ); } $new_images[] = $image; $valid['images'][] = array( 'role' => 'official', 'attachment_id' => $image );
-        }
+        $extra = $_FILES['truck_photos']['name'] ?? array();
+        if ( is_array( $extra ) ? (bool) array_filter( $extra ) : (bool) $extra ) { $fail( new WP_Error( 'image', 'Solo se admiten logo y foto del foodtruck.' ) ); }
+        foreach ( $valid['images'] as &$image ) { $optimized = FTUY_Foodtruck_Images::ensure( $image['attachment_id'], $image['role'] ); if ( is_wp_error( $optimized ) ) { $fail( $optimized ); } if ( $optimized !== $image['attachment_id'] ) { $new_images[] = $optimized; } $image['attachment_id'] = $optimized; } unset( $image );
         $responsible = $input['responsible_user_id'] ?? get_current_user_id(); if ( ! is_scalar( $responsible ) ) { $fail( new WP_Error( 'owner', 'Cuenta responsable inválida.' ) ); }
         $review = FTUY_Foodtrucks::propose( $valid, get_current_user_id(), $id, $responsible ); if ( is_wp_error( $review ) ) { $fail( $review ); }
         $decision = sanitize_key( $input['decision'] ?? 'pending' );

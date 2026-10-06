@@ -23,7 +23,8 @@ class FTUY_Foodtruck_Public {
     public static function proposed( $e ) {
         global $wpdb;
         $r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Foodtrucks::table( 'foodtruck_reviews' ) . ' WHERE foodtruck_id=%d ORDER BY id DESC LIMIT 1', $e['id'] ), ARRAY_A );
-        return $r && in_array( $r['status'], array( 'pending', 'corrections' ), true ) ? array_merge( $e, json_decode( $r['payload'], true ) ) : $e;
+        $e = $r && in_array( $r['status'], array( 'pending', 'corrections' ), true ) ? array_merge( $e, json_decode( $r['payload'], true ) ) : $e;
+        $e['images'] = FTUY_Foodtruck_Images::normalize( $e['images'] ); return $e;
     }
     public static function listing( $department = '', $cuisine = 0, $page = 1, $preview = false ) {
         global $wpdb; $table = FTUY_Foodtrucks::table(); $page = max( 1, (int) $page );

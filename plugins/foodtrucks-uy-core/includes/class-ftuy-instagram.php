@@ -60,11 +60,9 @@ class FTUY_Instagram {
         if ( is_wp_error( $r ) || wp_remote_retrieve_response_code( $r ) !== 200 ) { return new WP_Error( 'image', 'No pudimos descargar el logo. Podés cargarlo manualmente.' ); }
         $body = wp_remote_retrieve_body( $r ); if ( strlen( $body ) > 5 * MB_IN_BYTES ) { return new WP_Error( 'image', 'El logo supera 5 MB.' ); }
         $tmp = wp_tempnam( 'instagram-logo' ); if ( ! $tmp || file_put_contents( $tmp, $body ) === false ) { return new WP_Error( 'image', 'No se pudo preparar el logo.' ); }
-        $info = wp_getimagesize( $tmp ); $types = array( 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp' );
-        if ( ! $info || ! isset( $types[$info['mime']] ) || $info[0] * $info[1] > 40000000 ) { wp_delete_file( $tmp ); return new WP_Error( 'image', 'El archivo de Instagram no es una imagen válida.' ); }
-        require_once ABSPATH . 'wp-admin/includes/file.php'; require_once ABSPATH . 'wp-admin/includes/media.php'; require_once ABSPATH . 'wp-admin/includes/image.php';
-        $id = media_handle_sideload( array( 'name' => 'instagram-' . sanitize_title( $data['name'] ) . '.' . $types[$info['mime']], 'tmp_name' => $tmp ), 0, $data['name'] );
-        if ( is_wp_error( $id ) ) { wp_delete_file( $tmp ); } else { delete_transient( $key ); }
+        $id = FTUY_Foodtruck_Images::process( $tmp, 'logo', $data['name'] );
+        wp_delete_file( $tmp );
+        if ( ! is_wp_error( $id ) ) { delete_transient( $key ); }
         return $id;
     }
 }
