@@ -28,6 +28,16 @@ try {
     $admin = get_users( array( 'role' => 'administrator', 'number' => 1 ) )[0];
     $admin_cookie = $cookies( $admin->ID );
     $seed = FTUY_Events::listing( 'past' )['items'][0];
+    foreach ( array( '/eventos/', '/foodtrucks/', '/mis-eventos/', '/mis-foodtrucks/' ) as $path ) {
+        list( $code, $body ) = $call( $path, $cookie );
+        preg_match( '#<header class="ft-header">.*?</header>#s', $body, $header );
+        $assert( $code === 200 && strpos( $header[0] ?? '', '<summary>Mi cuenta</summary>' ) !== false && preg_match( '#<details[^>]*>.*?Mis eventos.*?Mis foodtrucks.*?Sugerir evento.*?Agregar mi foodtruck.*?Cerrar sesión.*?</details>#s', $header[0] ?? '' ), 'Menú de cuenta compartido: ' . $path );
+        $outside = preg_replace( '#<details.*?</details>#s', '', $header[0] ?? '' );
+        $assert( strpos( $outside, 'Mis eventos' ) === false && strpos( $outside, 'Mis foodtrucks' ) === false, 'Enlaces personales solo bajo Mi cuenta.' );
+    }
+    list( $code, $body ) = $call( '/foodtrucks/' );
+    preg_match( '#<header class="ft-header">.*?</header>#s', $body, $header );
+    $assert( strpos( $header[0], 'Iniciar sesión' ) !== false && strpos( $header[0], 'Cerrar sesión' ) === false, 'Menú anónimo sin acción de logout.' );
     list( $code, $body ) = $call( '/sugerir-evento/' );
     $assert( $code === 200 && strpos( $body, 'Iniciar sesión' ) !== false, 'Carga exige login.' );
     list( $code, $body ) = $call( '/sugerir-evento/', $cookie );

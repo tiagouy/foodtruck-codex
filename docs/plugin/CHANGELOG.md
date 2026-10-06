@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.2 — 2026-10-06
+
+- Cabecera única en páginas de eventos y foodtrucks: navegación pública estable, sin enlaces personales sueltos.
+- Desplegable Mi cuenta: Mis eventos, Mis foodtrucks, Sugerir evento y Agregar mi foodtruck; iniciar/cerrar sesión según estado. Registro solo si WordPress lo tiene habilitado.
+- Menú accesible mediante teclado y toque con `details`/`summary`, sin dependencia del tema ni JavaScript. No modifica cuentas ni permisos.
+- 74 comprobaciones HTTP, incluyendo navegación con/sin sesión. Verificado visualmente en escritorio y a 375 px, sin desbordamiento horizontal del desplegable.
+
 ## 0.7.1 — 2026-10-06
 
 - Formulario sin dimensiones, pesos finales ni explicación técnica: solo Logo y Foto del foodtruck. Redimensionado/compresión permanecen internos.
