@@ -60,9 +60,8 @@ class FTUY_Foodtruck_Submissions {
         wp_safe_redirect( add_query_arg( 'sent', 1, home_url( '/mis-foodtrucks/' ) ) ); exit;
     }
     public static function login( $target ) {
-        echo '<div class="ft-empty"><h2>Ingresá para gestionar tu foodtruck</h2><p>Podés explorar eventos y foodtrucks sin cuenta. Para enviar una ficha o editar las tuyas, necesitás iniciar sesión.</p><a class="ft-button" href="' . esc_url( wp_login_url( home_url( $target ) ) ) . '">Iniciar sesión</a>';
-        if ( get_option( 'users_can_register' ) ) { echo ' <a class="ft-button ft-outline" href="' . esc_url( add_query_arg( 'redirect_to', home_url( $target ), wp_registration_url() ) ) . '">Crear cuenta</a>'; }
-        else { echo '<p class="ft-truck-help">Por ahora el registro no está habilitado. Registro y reactivación se incorporarán en la etapa de usuarios; podés probar con una cuenta existente.</p>'; }
+        echo '<div class="ft-empty"><h2>Ingresá para gestionar tu foodtruck</h2><p>Podés explorar eventos y foodtrucks sin cuenta. Para enviar una ficha o editar las tuyas, necesitás iniciar sesión.</p><a class="ft-button" href="' . esc_url( FTUY_Accounts::login_url( home_url( $target ) ) ) . '">Iniciar sesión</a>';
+        if ( FTUY_Accounts::registration_enabled() ) { echo ' <a class="ft-button ft-outline" href="' . esc_url( home_url( '/registro/' ) ) . '">Crear cuenta</a>'; }
         echo '</div>';
     }
     public static function form() {

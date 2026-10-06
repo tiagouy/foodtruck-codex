@@ -154,8 +154,9 @@ class FTUY_Public {
         echo '<nav class="ft-pagination">' . paginate_links( array( 'base' => add_query_arg( 'ft_page', '%#%' ), 'current' => $page, 'total' => max( 1, (int) ceil( $total / 20 ) ) ) ) . '</nav>';
     }
     public static function login() {
-        echo '<div class="ft-empty"><h2>Ingresá para sugerir un evento</h2><p>Usaremos tu cuenta para avisarte del resultado y permitirte corregir la información.</p><a class="ft-button" href="' . esc_url( wp_login_url( home_url( '/sugerir-evento/' ) ) ) . '">Iniciar sesión</a>';
-        if ( get_option( 'users_can_register' ) ) { echo ' <a href="' . esc_url( wp_registration_url() ) . '">Crear cuenta</a>'; }
+        $target = self::$view === 'mine' ? '/mis-eventos/' : '/sugerir-evento/';
+        echo '<div class="ft-empty"><h2>Ingresá para gestionar tus eventos</h2><p>Usaremos tu cuenta para avisarte del resultado y permitirte corregir la información.</p><a class="ft-button" href="' . esc_url( FTUY_Accounts::login_url( home_url( $target ) ) ) . '">Iniciar sesión</a>';
+        if ( FTUY_Accounts::registration_enabled() ) { echo ' <a href="' . esc_url( home_url( '/registro/' ) ) . '">Crear cuenta</a>'; }
         echo '</div>';
     }
 }

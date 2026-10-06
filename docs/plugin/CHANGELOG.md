@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.0 — 2026-10-06
+
+- Pantallas propias de registro, login por email, perfil/nombre, recuperación, reactivación y elección de contraseña; mismas cuentas WordPress, siempre suscriptor en registro.
+- Confirmación de email por enlace nativo con vencimiento y un solo uso; cuentas pendientes sin login ni contraseñas de aplicación.
+- API inicial compartida para solicitudes de registro/recuperación/reactivación. Sesiones móviles pendientes.
+- Campo privado `ftuy_legacy_user_id` y servicio administrativo con control de duplicados; todavía sin migrar usuarios/fotos reales.
+- Suscriptores sin barra ni acceso a wp-admin; administración existente conservada.
+- Correos capturados localmente en Usuarios → Correos de cuentas, incluyendo notificaciones nativas; no se envían emails reales.
+- Nonces anónimos por navegador, límites de solicitudes, redirecciones seguras y páginas privadas no cacheables.
+- 22 comprobaciones de cuentas y 18 HTTP de registro/confirmación/login/perfil/logout; regresión de eventos/foodtrucks y revisión visual de login/registro en escritorio/móvil. Datos de prueba limpiados.
+
 ## 0.7.2 — 2026-10-06
 
 - Cabecera única en páginas de eventos y foodtrucks: navegación pública estable, sin enlaces personales sueltos.

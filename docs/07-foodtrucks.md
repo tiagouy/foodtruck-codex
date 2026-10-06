@@ -43,4 +43,5 @@ Para la prueba inicial son obligatorios nombre, descripción, qué sirven, depar
 - [ ] Revisar y confirmar datos/imágenes de las cuatro muestras; no están publicadas automáticamente.
 - [ ] Validar la ficha antes de continuar con catálogo completo y estética.
 - [x] Formulario web `/agregar-foodtruck/` y `/mis-foodtrucks/` para cuentas existentes, con edición propia y revisión (0.6.0).
-- [ ] Registro/verificación, reactivación y recuperación adaptados al sitio/app; migración de usuarios e IDs vinculados a fotos.
+- [x] Pantallas web de registro/confirmación, login, perfil/nombre, recuperación y reactivación; API compartida de solicitudes y campo interno para ID histórico (0.8.0). Solo cuentas de prueba/local.
+- [ ] Migración de usuarios e IDs vinculados a fotos y autenticación móvil. No se importaron usuarios reales todavía.

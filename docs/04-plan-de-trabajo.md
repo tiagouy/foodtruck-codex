@@ -2,6 +2,15 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-06
+
+- Implementados localmente eventos/foodtrucks, moderación, páginas, API de lectura e imágenes reducidas.
+- Implementadas pantallas de cuentas en 0.8.0: suscriptores WordPress, registro/confirmación por email, login, perfil/nombre, recuperación y reactivación. Correos locales capturados sin envío real.
+- Preparado ID histórico privado para conservar asociación con fotos, sin migrar usuarios reales todavía.
+- Próximo paso de cuentas: auditoría de emails/IDs antiguos y migración pequeña de ensayo, luego sesiones de app. Ver [cuentas](plugin/cuentas-0.8.0.md).
+- **Descartada la relación entre eventos y foodtrucks**; no implementar participantes ni asociaciones. Fotos de comunidad se suben solo desde la app, no desde el sitio.
+- La home/tema histórico sigue pendiente; la navegación propia ya es común a los módulos del plugin.
+
 ## 0. Base preparada
 
 - [x] Crear Git y conectar el repositorio de GitHub.
@@ -44,7 +53,7 @@ Resultado: alcance acordado y mapa de datos verificado.
 - [ ] Implementar instalación y migraciones idempotentes con `$wpdb->prefix`.
 - [ ] Implementar cuentas y permisos compartidos por web/app, sin acceso al panel para usuarios de comunidad.
 - [ ] Implementar registro, verificación, login, cierre de sesión, recuperación y reactivación; definir sesiones/tokens de app.
-- [ ] Crear menú Foodtrucks UY en WordPress y gestión de foodtrucks, rubros, eventos y participantes.
+- [ ] Crear menú Foodtrucks UY en WordPress y gestión de foodtrucks, rubros y eventos (sin participantes ni relación evento–foodtruck).
 - [ ] Crear gestión de publicaciones de fotos, categorías, denuncias y moderación.
 - [ ] Implementar propiedad de registros y revisión de altas/cambios enviados por usuarios.
 - [ ] Implementar subida de imágenes con validación, límites, miniaturas y eliminación coherente.
@@ -69,8 +78,8 @@ Resultado: API usable por sitio y app con un contrato compartido.
 
 - [ ] Elegir tema y ubicación del código visual propio; documentar y versionar las personalizaciones.
 - [ ] Construir inicio, directorio y detalle de foodtruck, agenda y detalle de evento.
-- [ ] Construir feed/detalle de fotos y mapas según el MVP.
-- [ ] Construir cuenta, perfil, alta/gestión de foodtruck, sugerencia de evento y publicación de fotos.
+- [ ] Conservar enlaces históricos `/fotousuarios/` y definir vista web de fotos/enlace profundo, sin subida de fotos de comunidad desde el sitio.
+- [ ] Construir cuenta, perfil, alta/gestión de foodtruck y sugerencia de evento. Las publicaciones de fotos se crean desde la app.
 - [ ] Mostrar estados de revisión y mensajes claros para formularios y errores.
 - [ ] Implementar búsqueda, filtros, diseño móvil, accesibilidad y SEO.
 - [ ] Probar un flujo completo: registro → publicación/sugerencia → revisión → aparición pública.
