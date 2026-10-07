@@ -21,6 +21,8 @@ La versión del esquema y la API (`v1`) son independientes de la versión del pl
 
 Primera base móvil `0.1.0`, independiente del plugin. Actualizar `apps/mobile/package.json`, versiones nativas Android/iOS y `docs/app/CHANGELOG.md`; incrementar números de build al distribuir. Tag anotado `foodtrucks-uy-app-vX.Y.Z`. Versionar lockfiles propios, no dependencias instaladas, Pods, cachés, credenciales ni keystores. El identificador provisional `com.foodtrucksuy.dev` y la configuración solo local no sirven para una actualización de tiendas; confirmar identidad/firma productiva antes de distribuir.
 
+Desde 0.1.1, objetivo explícito de actualizar las fichas existentes y versionado de código independiente de la numeración de tiendas. Android toma el ID del APK histórico y mantiene debug separado. iOS/firma/últimos números publicados pendientes de confirmación; ver [continuidad de tiendas](app/continuidad-tiendas.md).
+
 ## Git y despliegue
 
 Rama inicial `main`. Los snapshots, SQL y la app histórica están excluidos mediante `.gitignore`. El remoto es `https://github.com/tiagouy/foodtruck-codex.git`; no existe despliegue automático.

@@ -72,6 +72,18 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// Last local APK: 4.2.0 / 40200. These defaults are for development only.
+// Store values must be confirmed against Play Console before any release task.
+def storeCode = providers.gradleProperty("FTUY_ANDROID_VERSION_CODE").orNull
+def storeVersion = providers.gradleProperty("FTUY_STORE_VERSION").orNull
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it.project == project && it.name.toLowerCase().contains("release") }) {
+        if (!storeCode || !storeVersion || storeCode.toInteger() <= 40200) {
+            throw new GradleException("Confirmar la versión actual en Play Console y proporcionar -PFTUY_ANDROID_VERSION_CODE (mayor que la publicada) y -PFTUY_STORE_VERSION. No usar valores de desarrollo para distribuir.")
+        }
+    }
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -79,11 +91,12 @@ android {
 
     namespace "com.foodtrucksuy.dev"
     defaultConfig {
-        applicationId "com.foodtrucksuy.dev"
+        // Confirmed from the signed historical APK, not inferred from the display name.
+        applicationId "org.useful_media_app.foodtruck"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.1.0"
+        versionCode storeCode ? storeCode.toInteger() : 40201
+        versionName storeVersion ?: "4.2.1"
     }
     signingConfigs {
         debug {
@@ -95,6 +108,9 @@ android {
     }
     buildTypes {
         debug {
+            // Keep local tests separate: a debug certificate cannot update the store app.
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
             signingConfig signingConfigs.debug
         }
         release {

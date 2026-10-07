@@ -4,6 +4,8 @@ La nueva aplicación móvil está en `apps/mobile/`. Base `0.1.0` creada el 2026
 
 La aplicación consumirá exclusivamente la API versionada del plugin `Foodtrucks UY Core`; no accederá a MySQL ni a las APIs PHP históricas.
 
+Actualización 0.1.1: objetivo de tiendas confirmado como actualización de apps existentes. Android toma el applicationId del APK anterior, con debug separado; iOS presenta identificadores contradictorios y espera confirmación de App Store Connect. Ver [continuidad de tiendas y firma](continuidad-tiendas.md). No crear apps nuevas ni publicar la identidad de desarrollo.
+
 ## Inicio y navegación — propuesta 2026-10-07
 
 La preocupación de Santi es que un inicio basado exclusivamente en fotos dependa de que la comunidad publique con frecuencia. La lectura pública sin sesión se mantiene; no implica que las fotos deban ser la pantalla inicial.
