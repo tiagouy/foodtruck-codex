@@ -22,6 +22,10 @@ La cabecera y las invitaciones de eventos/foodtrucks enlazan a estas pantallas, 
 
 ## API inicial
 
+Desde 0.8.1 la reactivación tiene un bloque destacado antes del formulario de registro/ingreso y un enlace resaltado en Mi cuenta para visitantes.
+
+El registro busca el email únicamente en usuarios WordPress. Si ya existe, no crea otro usuario ni cambia nombre, contraseña, rol o ID histórico, aunque el remitente escriba otro nombre. Una cuenta nueva pendiente puede recibir otra confirmación dentro de los límites; una cuenta activa o histórica pendiente conserva el mensaje genérico y debe usar recuperación/reactivación según corresponda. Si el email existe **solo en el SQL de la app vieja**, todavía no se reconoce: podría crearse como nuevo en local. Importar/mapear las cuentas antiguas y resolver coincidencias antes de habilitar registro en producción. No se hace una asociación automática con fotos por nombre o email sin el proceso de migración validado.
+
 `POST /wp-json/foodtrucks-uy/v1/accounts/register`: `name`, `email`.
 
 `POST /wp-json/foodtrucks-uy/v1/accounts/forgot-password` y `/accounts/reactivate`: `email`.

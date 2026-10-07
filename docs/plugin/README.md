@@ -9,4 +9,4 @@ Plugin propio de WordPress que concentrará el dominio de la plataforma:
 - API REST versionada para web y app;
 - migración controlada desde las bases heredadas.
 
-El código está en `plugins/foodtrucks-uy-core/`. La versión `0.8.0` implementa eventos, administración/API de foodtrucks, directorio/detalle web, imágenes reducidas y [cuentas propias](cuentas-0.8.0.md): registro, confirmación, login, perfil y recuperación/reactivación. Todas las páginas del plugin comparten navegación pública y menú Mi cuenta. Ver [eventos](eventos-0.2.0.md) y [foodtrucks](foodtrucks-0.4.0.md).
+El código está en `plugins/foodtrucks-uy-core/`. La versión `0.8.1` implementa eventos, administración/API de foodtrucks, directorio/detalle web, imágenes reducidas y [cuentas propias](cuentas-0.8.0.md): registro, confirmación, login, perfil y recuperación/reactivación destacada. Todas las páginas del plugin comparten navegación pública y menú Mi cuenta. Ver [eventos](eventos-0.2.0.md) y [foodtrucks](foodtrucks-0.4.0.md).

@@ -22,7 +22,10 @@ try {
     $assert( is_wp_error( check_password_reset_key( $params['key'], $params['login'] ) ), 'Enlace consumido no reutilizable.' );
     $assert( ! is_wp_error( wp_authenticate( $email, 'Clave-de-prueba-larga-2026!' ) ), 'Login con email y contraseña nueva.' );
     $before = count( get_users( array( 'search' => $email, 'search_columns' => array( 'user_email' ) ) ) );
+    $original = get_user_by( 'id', $user->ID );
     $assert( FTUY_Accounts::request( 'register', $email, 'Duplicado' ) === true && count( get_users( array( 'search' => $email, 'search_columns' => array( 'user_email' ) ) ) ) === $before, 'No duplica email ni divulga existencia.' );
+    $after = get_user_by( 'email', $email );
+    $assert( $after->ID === $original->ID && $after->display_name === $original->display_name && $after->user_pass === $original->user_pass, 'Otro nombre con email existente no cambia identidad, nombre ni contraseña.' );
     $assert( is_wp_error( FTUY_Accounts::set_legacy_id( $user->ID, $legacy ) ), 'Anónimo no asigna IDs históricos.' );
     wp_set_current_user( get_users( array( 'role' => 'administrator', 'number' => 1 ) )[0]->ID );
     $assert( FTUY_Accounts::set_legacy_id( $user->ID, $legacy ) === true && (int) get_user_meta( $user->ID, FTUY_Accounts::LEGACY_META, true ) === $legacy, 'Administrador puede mapear ID.' );
@@ -32,6 +35,8 @@ try {
     FTUY_Accounts::request( 'register', $other_email, 'Otra cuenta' ); $other = get_user_by( 'email', $other_email ); $ids[] = $other->ID;
     $assert( is_wp_error( FTUY_Accounts::set_legacy_id( $other->ID, $legacy ) ), 'Un ID antiguo no corresponde a dos cuentas.' );
     update_user_meta( $user->ID, 'ftuy_account_status', 'legacy_pending' );
+    $assert( FTUY_Accounts::request( 'register', $email, 'Pepe' ) === true && get_user_by( 'email', $email )->display_name === $original->display_name && (int) get_user_meta( $user->ID, FTUY_Accounts::LEGACY_META, true ) === $legacy, 'Registro no reemplaza una cuenta histórica ni su ID.' );
+    delete_transient( 'ftuy_ac_' . hash_hmac( 'sha256', 'request-email-' . $email, wp_salt( 'auth' ) ) );
     $assert( FTUY_Accounts::request( 'reactivate', $email ) === true, 'Reactivación de cuenta con mapeo.' );
     $mails = get_option( 'ftuy_account_mail_local' ); $mail = end( $mails );
     $assert( $mail['subject'] === 'Reactivá tu cuenta de Foodtrucks Uruguay', 'Correo de reactivación separado.' );

@@ -19,6 +19,7 @@
 <a href="<?php echo esc_url( wp_nonce_url( home_url( '/salir/' ), 'ftuy_account_logout' ) ); ?>">Cerrar sesión</a>
 <?php else : ?>
 <a href="<?php echo esc_url( FTUY_Accounts::login_url() ); ?>">Iniciar sesión</a>
+<a class="ft-reactivate-link" href="<?php echo esc_url( home_url( '/reactivar-cuenta/' ) ); ?>">Reactivar cuenta</a>
 <?php if ( FTUY_Accounts::registration_enabled() ) : ?><a href="<?php echo esc_url( home_url( '/registro/' ) ); ?>">Crear cuenta</a><?php endif; ?>
 <?php endif; ?>
 </div></details>

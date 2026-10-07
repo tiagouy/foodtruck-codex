@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.1 — 2026-10-07
+
+- Reactivar cuenta destacado en un bloque antes de los formularios de ingreso/registro y en el menú Mi cuenta sin sesión.
+- Verificación explícita de que registrar otro nombre con un email existente no duplica cuentas ni cambia nombre, contraseña o ID histórico. Sin cambios al comportamiento del servicio.
+- Los emails de la app vieja todavía no se consultan: falta migrar sus cuentas antes de habilitar el registro público en producción.
+
 ## 0.8.0 — 2026-10-06
 
 - Pantallas propias de registro, login por email, perfil/nombre, recuperación, reactivación y elección de contraseña; mismas cuentas WordPress, siempre suscriptor en registro.

@@ -15,6 +15,7 @@ $nonce = function ( $body ) { preg_match( '/name="_wpnonce" value="([^"]+)"/', $
 try {
     list( $code, $body ) = $call( '/registro/' ); $registration_nonce = $nonce( $body );
     $assert( $code === 200 && $registration_nonce && strpos( $body, 'name="name"' ) !== false && strpos( $body, 'name="role"' ) === false, 'Registro propio sin selección de rol.' );
+    $assert( strpos( $body, 'ft-reactivate-callout' ) < strpos( $body, '<form method="post">' ) && strpos( $body, 'Reactivar mi cuenta' ) !== false, 'Reactivación destacada antes del formulario de registro.' );
     list( $code, $body ) = $call( '/registro/', null, $other_jar );
     $assert( $nonce( $body ) !== $registration_nonce, 'Nonce anónimo ligado al navegador.' );
     list( $code ) = $call( '/registro/', array( '_wpnonce' => $registration_nonce, 'name' => 'Prueba HTTP', 'email' => $email ), $other_jar ); $assert( $code === 403, 'CSRF entre navegadores rechazado.' );
@@ -29,6 +30,7 @@ try {
     list( $code, $body, $redirect ) = $call( $reset_url, array( '_wpnonce' => $reset_nonce, 'password' => $password, 'password_confirm' => $password ) ); $assert( $code === 302 && strpos( $redirect, '/ingresar/' ) !== false, 'Confirmación vuelve al login propio.' );
     list( $code, $body ) = $call( $reset_url ); $assert( strpos( $body, 'ya fue utilizado' ) !== false && strpos( $body, 'name="password_confirm"' ) === false, 'Enlace de un solo uso.' );
     list( $code, $body ) = $call( '/ingresar/' ); $login_nonce = $nonce( $body );
+    $assert( strpos( $body, 'Reactivar mi cuenta' ) !== false && strpos( $body, 'ft-reactivate-callout' ) < strpos( $body, '<form method="post">' ), 'Reactivación destacada también en ingreso.' );
     $assert( strpos( $body, 'Recordar contraseña' ) !== false && strpos( $body, 'Reactivar cuenta' ) !== false, 'Recuperación y reactivación visibles por separado.' );
     list( $code, $body, $redirect ) = $call( '/ingresar/', array( '_wpnonce' => $login_nonce, 'email' => $email, 'password' => $password, 'redirect_to' => 'https://evil.example/' ) ); $assert( $code === 302 && $redirect === home_url( '/mi-cuenta/' ), 'Login real con redirect seguro.' );
     list( $code, $body ) = $call( '/mi-cuenta/' ); $profile_nonce = $nonce( $body );

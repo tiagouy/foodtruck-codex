@@ -8,6 +8,9 @@ $title = $titles[$view];
 <?php include FTUY_PATH . 'templates/header.php'; ?>
 <section class="ft-titlebar"><div class="ft-container"><p class="ft-eyebrow">Foodtrucks Uruguay</p><h1><?php echo esc_html( $title ); ?></h1><p>Una misma cuenta para la web y la app.</p></div></section>
 <main class="ft-container ft-main"><div class="ft-account-page">
+<?php if ( in_array( $view, array( 'login', 'register' ), true ) ) : ?>
+<section class="ft-reactivate-callout" aria-labelledby="ft-reactivate-title"><h2 id="ft-reactivate-title">¿Ya usabas la app anterior?</h2><p>Usá el email de tu cuenta anterior para recuperar tu acceso.</p><a class="ft-button" href="<?php echo esc_url( home_url( '/reactivar-cuenta/' ) ); ?>">Reactivar mi cuenta</a></section>
+<?php endif; ?>
 <?php if ( FTUY_Accounts::$error ) : ?><p class="ft-error" role="alert"><?php echo esc_html( FTUY_Accounts::$error ); ?></p><?php endif; ?>
 <?php if ( FTUY_Accounts::$notice ) : ?><p class="ft-notice" role="status"><?php echo esc_html( FTUY_Accounts::$notice ); ?></p><?php endif; ?>
 <?php if ( $view === 'account' && ! is_user_logged_in() ) : ?><p>Ingresá para gestionar tu cuenta, tus eventos y tus foodtrucks.</p><a class="ft-button" href="<?php echo esc_url( FTUY_Accounts::login_url() ); ?>">Iniciar sesión</a>
