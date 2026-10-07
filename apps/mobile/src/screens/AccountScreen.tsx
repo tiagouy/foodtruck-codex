@@ -5,8 +5,12 @@ import AppHeader, { colors } from '../components/AppHeader';
 import { Button } from '../components/State';
 import { siteURL } from '../lib/config';
 import { openLink } from '../lib/links';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStack } from '../navigation';
 
 export default function AccountScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStack>>();
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
       <AppHeader title="Mi cuenta" />
@@ -17,25 +21,35 @@ export default function AccountScreen() {
           elegí una contraseña nueva.
         </Text>
         <Button
-          label="Reactivar cuenta en el sitio"
-          onPress={() => openLink(`${siteURL()}/reactivar-cuenta/`)}
+          label="Reactivar cuenta"
+          onPress={() =>
+            navigation.navigate('CuentaSolicitud', { action: 'reactivate' })
+          }
         />
         <Text style={styles.text}>
           En esta primera versión podés explorar sin ingresar. El ingreso y la
-          publicación de fotos dentro de la app están en preparación. Estos
-          botones abren la web; no inician una sesión en la app.
+          publicación de fotos dentro de la app están en preparación. Podés
+          registrarte o solicitar el correo desde acá. Elegir la contraseña se
+          completa con el enlace del correo; eso todavía no inicia una sesión en
+          la app.
         </Text>
         <Button
           label="Ingresar en el sitio"
           onPress={() => openLink(`${siteURL()}/ingresar/`)}
         />
         <Button
-          label="Registrarme en el sitio"
-          onPress={() => openLink(`${siteURL()}/registro/`)}
+          label="Registrarme"
+          onPress={() =>
+            navigation.navigate('CuentaSolicitud', { action: 'register' })
+          }
         />
         <Button
-          label="Recordar contraseña en el sitio"
-          onPress={() => openLink(`${siteURL()}/recordar-contrasena/`)}
+          label="Recordar contraseña"
+          onPress={() =>
+            navigation.navigate('CuentaSolicitud', {
+              action: 'forgot-password',
+            })
+          }
         />
       </ScrollView>
     </SafeAreaView>

@@ -4,9 +4,17 @@ import { Text } from 'react-native';
 import HomeScreen from '../src/screens/HomeScreen';
 import AccountScreen from '../src/screens/AccountScreen';
 import DetailScreen from '../src/screens/DetailScreen';
-import { list, detail } from '../src/lib/api';
+import AccountRequestScreen from '../src/screens/AccountRequestScreen';
+import { list, detail, accountRequest } from '../src/lib/api';
+import { TextInput } from 'react-native';
+import { Button } from '../src/components/State';
 
-jest.mock('../src/lib/api', () => ({ list: jest.fn(), detail: jest.fn() }));
+jest.mock('../src/lib/api', () => ({
+  ...jest.requireActual('../src/lib/api'),
+  list: jest.fn(),
+  detail: jest.fn(),
+  accountRequest: jest.fn(),
+}));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn() }),
   useFocusEffect: (callback: () => void) => {
@@ -29,6 +37,7 @@ function texts(tree: Renderer.ReactTestRenderer) {
 beforeEach(() => {
   mockList.mockReset();
   mockDetail.mockReset();
+  (accountRequest as jest.Mock).mockReset();
 });
 test('home works without community activity and distinguishes empty directory/history', async () => {
   mockList.mockResolvedValue({ items: [], total: 0, page: 1 });
@@ -60,8 +69,80 @@ test('account is explicit about web fallback rather than pretending native login
   await act(async () => {
     tree = Renderer.create(<AccountScreen />);
   });
-  expect(texts(tree)).toContain('Reactivar cuenta en el sitio');
-  expect(texts(tree)).toContain('no inician una sesión en la app');
+  expect(texts(tree)).toContain('Reactivar cuenta');
+  expect(texts(tree)).toContain('sesión en la app');
+  await act(async () => tree.unmount());
+});
+
+test('native reactivate sends email without password and shows a generic confirmation', async () => {
+  (accountRequest as jest.Mock).mockResolvedValue(
+    'Si corresponde, te enviamos un correo.',
+  );
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <AccountRequestScreen
+        route={{ params: { action: 'reactivate' } }}
+        navigation={{ goBack: jest.fn() }}
+        {...({} as any)}
+      />,
+    );
+  });
+  expect(tree.root.findAllByType(TextInput)).toHaveLength(1);
+  await act(async () =>
+    tree.root.findByType(TextInput).props.onChangeText('fixture@example.test'),
+  );
+  await act(async () => tree.root.findByType(Button).props.onPress());
+  expect(accountRequest).toHaveBeenCalledWith(
+    'reactivate',
+    'fixture@example.test',
+    '',
+    expect.any(AbortSignal),
+  );
+  expect(texts(tree)).toContain('Si corresponde');
+  expect(tree.root.findAllByType(TextInput)).toHaveLength(0);
+  await act(async () => tree.unmount());
+});
+test('native register validates name before contacting the server', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <AccountRequestScreen
+        route={{ params: { action: 'register' } }}
+        navigation={{ goBack: jest.fn() }}
+        {...({} as any)}
+      />,
+    );
+  });
+  const email = tree.root
+    .findAllByType(TextInput)
+    .find(input => input.props.accessibilityLabel === 'Email')!;
+  await act(async () => email.props.onChangeText('fixture@example.test'));
+  await act(async () => tree.root.findByType(Button).props.onPress());
+  expect(texts(tree)).toContain('Ingresá tu nombre');
+  expect(accountRequest).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+test('native password recovery keeps the form usable after an error', async () => {
+  (accountRequest as jest.Mock).mockRejectedValue(
+    new Error('Probá nuevamente más tarde.'),
+  );
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <AccountRequestScreen
+        route={{ params: { action: 'forgot-password' } }}
+        navigation={{ goBack: jest.fn() }}
+        {...({} as any)}
+      />,
+    );
+  });
+  await act(async () =>
+    tree.root.findByType(TextInput).props.onChangeText('fixture@example.test'),
+  );
+  await act(async () => tree.root.findByType(Button).props.onPress());
+  expect(texts(tree)).toContain('Probá nuevamente más tarde');
+  expect(tree.root.findByType(TextInput).props.editable).toBe(true);
   await act(async () => tree.unmount());
 });
 test('unpublished detail shows no stale photo or caption', async () => {

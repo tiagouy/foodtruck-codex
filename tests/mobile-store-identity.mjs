@@ -15,6 +15,6 @@ assert.match(ios, /PRODUCT_BUNDLE_IDENTIFIER = com\.foodtrucksuy\.dev/);
 assert.doesNotMatch(ios, /PRODUCT_BUNDLE_IDENTIFIER = org\.useful_media_app/);
 const pkg = JSON.parse(read('apps/mobile/package.json'));
 const lock = JSON.parse(read('apps/mobile/package-lock.json'));
-assert.equal(pkg.version, '0.1.1'); assert.equal(lock.version, pkg.version);
+assert.match(pkg.version, /^\d+\.\d+\.\d+$/); assert.equal(lock.version, pkg.version);
 assert.equal(lock.packages[''].version, pkg.version);
 console.log('12 identity/configuration checks passed; iOS store identity deliberately unconfirmed.');

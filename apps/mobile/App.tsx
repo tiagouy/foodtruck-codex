@@ -9,6 +9,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import CatalogScreen from './src/screens/CatalogScreen';
 import DetailScreen from './src/screens/DetailScreen';
 import AccountScreen from './src/screens/AccountScreen';
+import AccountRequestScreen from './src/screens/AccountRequestScreen';
 import { colors } from './src/components/AppHeader';
 import { RootStack, Tabs } from './src/navigation';
 
@@ -75,6 +76,11 @@ export default function App() {
             headerTintColor: '#FFFFFF',
           }}
         >
+          <Stack.Screen
+            name="CuentaSolicitud"
+            component={AccountRequestScreen}
+            options={{ title: 'Mi cuenta', headerBackTitle: 'Volver' }}
+          />
           <Stack.Screen
             name="Principal"
             component={MainTabs}

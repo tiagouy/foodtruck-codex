@@ -1,5 +1,5 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
-import { Kind } from './lib/api';
+import { AccountAction, Kind } from './lib/api';
 export type Tabs = {
   Inicio: undefined;
   Eventos: undefined;
@@ -10,4 +10,5 @@ export type Tabs = {
 export type RootStack = {
   Principal: NavigatorScreenParams<Tabs> | undefined;
   Detalle: { kind: Kind; contentKey: string };
+  CuentaSolicitud: { action: AccountAction };
 };

@@ -115,6 +115,7 @@ Resultado: migración repetible y revisada antes del corte de producción.
 - [x] Elegir React Native/TypeScript y crear base móvil separada, adaptando estructura/componentes de BuenCafé. Ver [base 0.1.0](app/base-0.1.0.md).
 - [ ] Confirmar identificadores de Android/iOS, firma y cuentas de tiendas existentes; la base usa identidad provisional de desarrollo.
 - [x] Crear proyecto móvil y configuración de entorno local iOS Simulator/Android Emulator.
+- [x] Conectar formularios nativos de registro, recuperación y reactivación a la API de cuentas; elección de contraseña por enlace del correo. Ver [cuentas 0.2.0](app/cuentas-0.2.0.md). No equivale a sesión móvil implementada.
 - [ ] Configurar y verificar entornos HTTPS de pruebas/producción antes de distribuir.
 - [ ] Implementar navegación, catálogo, eventos, publicaciones y mapas del MVP.
 - [ ] Implementar sesión, perfil y flujos de contribución acordados.

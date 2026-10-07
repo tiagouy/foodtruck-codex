@@ -1,5 +1,13 @@
 # Changelog de la app
 
+## 0.2.0 — 2026-10-07
+
+- Formularios nativos Reactivar cuenta, Registrarme y Recordar contraseña conectados a las APIs existentes del plugin; ya no abren la web para solicitar el correo.
+- Nombre/email sin contraseña ni IDs históricos enviados por el cliente; validaciones, estado de envío, protección de doble solicitud, cancelación al salir, errores y confirmación genérica.
+- Elección de contraseña continúa en el enlace del correo; ingreso/sesión móvil y perfil/subida siguen pendientes. Captura de correos local explícita en builds de desarrollo.
+- 23 pruebas de cliente y 24 de cuentas del backend con fixtures limpiados. Revisión inicial del formulario de reactivación en iPhone 17.
+- Verificación Android retomada: manifiesto Debug generado correctamente con `org.useful_media_app.foodtruck.dev`, 40201/4.2.1-dev y JDK 17. No equivale a APK compilado, firmado ni publicación; bundle productivo iOS sigue pendiente.
+
 ## 0.1.1 — 2026-10-07
 
 - Objetivo confirmado: actualizar las apps existentes, no crear fichas nuevas en tiendas.

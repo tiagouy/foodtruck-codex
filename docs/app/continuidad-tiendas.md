@@ -42,3 +42,7 @@ iOS permanece con identidad de desarrollo `com.foodtrucksuy.dev` hasta recibir e
 La comprobación nativa `:app:processDebugMainManifest` con JDK 17 quedó interrumpida al extraer `react-android-0.84.0-debug.aar`: `No space left on device`. No se afirma manifiesto ni APK final verificado. El entorno de shell también tenía Java 8 seleccionado; se usó JDK 17 explícito sin cambiar ajustes globales. Se retiró únicamente el DerivedData temporal iOS creado para la base (`/private/tmp/ftuy-native-0.1.0`, aproximadamente 1 GB, regenerable al compilar); fuentes, respaldos, keystore y la app instalada en el simulador siguen intactos. Liberar más espacio antes de retomar compilaciones nativas.
 
 Referencias oficiales: [condiciones de actualización Android](https://developer.android.com/google/play/app-updates), [firma y Play App Signing](https://developer.android.com/studio/publish/app-signing), [asociación de builds en Apple](https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds).
+
+### Verificación retomada — app 0.2.0
+
+Tras liberar espacio, `:app:processDebugMainManifest` terminó correctamente con JDK 17. Manifiesto generado: `org.useful_media_app.foodtruck.dev`, versionCode 40201, versionName 4.2.1-dev, minSdk 24 y targetSdk 36. Esto verifica configuración/mezcla de manifiestos, **no una compilación completa de APK ni pruebas en Android**. La numeración de publicación y el bundle iOS siguen pendientes de consola. No se reinstalaron runtimes ni se modificó la firma.

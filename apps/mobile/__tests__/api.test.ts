@@ -1,4 +1,10 @@
-import { APIError, detail, list, mergeItems } from '../src/lib/api';
+import {
+  APIError,
+  detail,
+  list,
+  mergeItems,
+  accountRequest,
+} from '../src/lib/api';
 import { dateLabel, plain } from '../src/lib/presentation';
 import { mediaURL, siteURL } from '../src/lib/config';
 
@@ -17,7 +23,7 @@ const photo = {
 beforeEach(() => mockFetch.mockReset());
 function response(body: unknown, status = 200) {
   mockFetch.mockResolvedValue({
-    ok: status === 200,
+    ok: status >= 200 && status < 300,
     status,
     json: async () => body,
   });
@@ -30,6 +36,52 @@ test('uses only the new plugin API and page/per_page, never legacy limit', async
     `${siteURL()}/wp-json/foodtrucks-uy/v1/publications?page=2&per_page=12`,
   );
   expect(mockFetch.mock.calls[0][1].headers['Cache-Control']).toBe('no-cache');
+});
+
+test('native registration posts only normalized name/email to the shared account API', async () => {
+  response({ message: 'Si corresponde, te enviamos un correo.' }, 202);
+  expect(
+    await accountRequest('register', ' Fixture@Example.test ', ' Persona '),
+  ).toContain('Si corresponde');
+  const [url, options] = mockFetch.mock.calls[0];
+  expect(url).toContain('/accounts/register');
+  expect(options.method).toBe('POST');
+  expect(JSON.parse(options.body)).toEqual({
+    email: 'fixture@example.test',
+    name: 'Persona',
+  });
+});
+test.each(['reactivate', 'forgot-password'] as const)(
+  'native %s never sends names, passwords or historical IDs',
+  async action => {
+    response({ message: 'Si corresponde.' }, 202);
+    await accountRequest(action, 'fixture@example.test', 'ignored');
+    expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual({
+      email: 'fixture@example.test',
+    });
+  },
+);
+test('bad account fields are rejected before network requests', async () => {
+  await expect(
+    accountRequest('register', 'fixture@example.test', ''),
+  ).rejects.toThrow('nombre');
+  await expect(accountRequest('reactivate', 'bad')).rejects.toThrow('email');
+  expect(mockFetch).not.toHaveBeenCalled();
+});
+test('account rate limits are shown as server errors, not success', async () => {
+  response(
+    { message: 'Hubo varios intentos. Probá nuevamente más tarde.' },
+    429,
+  );
+  await expect(
+    accountRequest('reactivate', 'fixture@example.test'),
+  ).rejects.toMatchObject({ status: 429 });
+});
+test('unexpected account response is not treated as a confirmation', async () => {
+  response({ id: 55 }, 202);
+  await expect(
+    accountRequest('reactivate', 'fixture@example.test'),
+  ).rejects.toThrow('inesperados');
 });
 test('event history is an explicit server filter', async () => {
   response({ items: [], total: 0, page: 1 });

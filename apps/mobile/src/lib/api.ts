@@ -146,7 +146,11 @@ export function validateContent(kind: Kind, item: unknown): item is Content {
   );
 }
 
-async function request(path: string, signal?: AbortSignal): Promise<unknown> {
+async function request(
+  path: string,
+  signal?: AbortSignal,
+  body?: Record<string, string>,
+): Promise<unknown> {
   const controller = new AbortController();
   const abort = () => controller.abort();
   signal?.addEventListener('abort', abort);
@@ -159,10 +163,31 @@ async function request(path: string, signal?: AbortSignal): Promise<unknown> {
       `${siteURL()}/wp-json/foodtrucks-uy/v1/${path}`,
       {
         signal: controller.signal,
-        headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
+        method: body ? 'POST' : 'GET',
+        body: body ? JSON.stringify(body) : undefined,
+        headers: {
+          Accept: 'application/json',
+          'Cache-Control': 'no-cache',
+          ...(body ? { 'Content-Type': 'application/json' } : {}),
+        },
       },
     );
     if (!response.ok) {
+      if (body) {
+        let message = 'No pudimos completar la solicitud. Probá nuevamente.';
+        try {
+          const error = await response.json();
+          if (
+            typeof error?.message === 'string' &&
+            [400, 429, 503].includes(response.status)
+          ) {
+            message = error.message.replace(/<[^>]*>/g, '').slice(0, 500);
+          }
+        } catch {
+          /* Keep the generic error if the server returned HTML. */
+        }
+        throw new APIError(message, response.status);
+      }
       throw new APIError(
         response.status === 404
           ? 'Este contenido ya no está disponible.'
@@ -185,6 +210,47 @@ async function request(path: string, signal?: AbortSignal): Promise<unknown> {
     clearTimeout(timeout);
     signal?.removeEventListener('abort', abort);
   }
+}
+
+export type AccountAction = 'register' | 'reactivate' | 'forgot-password';
+export function accountFieldsError(
+  action: AccountAction,
+  email: string,
+  name = '',
+): string {
+  if (
+    email.trim().length > 100 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+  ) {
+    return 'Ingresá un email válido.';
+  }
+  if (action === 'register' && (!name.trim() || name.trim().length > 200)) {
+    return 'Ingresá tu nombre.';
+  }
+  return '';
+}
+export async function accountRequest(
+  action: AccountAction,
+  email: string,
+  name = '',
+  signal?: AbortSignal,
+): Promise<string> {
+  const error = accountFieldsError(action, email, name);
+  if (error) {
+    throw new APIError(error, 400);
+  }
+  const body = {
+    email: email.trim().toLowerCase(),
+    ...(action === 'register' ? { name: name.trim() } : {}),
+  };
+  const response = (await request(`accounts/${action}`, signal, body)) as {
+    message?: unknown;
+  };
+  if (!response || typeof response.message !== 'string') {
+    throw new APIError('El servidor respondió con datos inesperados.');
+  }
+  // Do not expose or persist identities, credentials or links in the client response.
+  return response.message;
 }
 
 export async function list<T extends Content>(
