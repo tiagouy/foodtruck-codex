@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.0 — 2026-10-07
+
+- Importación completa local y reanudable: 3.659 suscriptores pendientes de reactivación y administrador existente vinculado sin cambiar credenciales ni permisos. Duplicado unificado con alias; 16 emails inválidos excluidos.
+- 1.311 avatares conservados en `/media/perfiles/`; dos archivos históricos HTML marcados para revisión, sin exponerlos como imágenes.
+- 51 publicaciones de 28 autores importadas con estado, fecha, slug y metadata histórica privada; fotos proporcionales optimizadas sin recortar originales.
+- Resolución pública por slug o ID histórico corto, enlaces canónicos y zona horaria histórica explícitamente desconocida. Repetir la importación no duplica ni sobrescribe moderación.
+- Respaldos privados previos, fuentes intactas y correos sin cambios. 260 comprobaciones sobre publicaciones reales, prueba reversible de despublicación y regresiones de migración/modelo/web.
+
 ## 0.12.0 — 2026-10-07
 
 - Listado/detalle web en las rutas históricas `/fotosusuarios/` y `/fotousuario/{slug}/`, listados por autor y compatibilidad con index.php/oferta.php.

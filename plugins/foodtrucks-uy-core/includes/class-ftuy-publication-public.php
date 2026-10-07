@@ -11,6 +11,10 @@ class FTUY_Publication_Public {
         return ! empty( $row['legacy_slug'] ) && preg_match( '/^[a-zA-Z0-9-]{1,200}$/D', $row['legacy_slug'] ) ? $row['legacy_slug'] : 'p-' . (int) $row['id'];
     }
     public static function url( $row ) { return home_url( '/fotousuario/' . self::slug( $row ) . '/' ); }
+    public static function datetime( $row ) {
+        // Legacy server timezone is unknown: retain its date without claiming UTC.
+        return ! empty( $row['legacy_id'] ) ? substr( $row['created_at'], 0, 10 ) : str_replace( ' ', 'T', $row['created_at'] ) . 'Z';
+    }
     /** Standalone templates do not load Eventchamp's placeholder/lazy-load scripts. */
     public static function image( $id, $size, $alt, $loading = 'lazy', $sizes = '(max-width:650px) 100vw, (max-width:950px) 50vw, 33vw' ) {
         $image = wp_get_attachment_image_src( $id, $size ); if ( ! $image ) { return ''; }
@@ -23,6 +27,9 @@ class FTUY_Publication_Public {
         $rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Publications::table() . " WHERE legacy_slug=%s AND status='published' LIMIT 2", $slug ), ARRAY_A );
         if ( count( $rows ) > 1 ) { return null; } // Ambiguous historical links must not select an arbitrary photo.
         if ( $rows ) { return $rows[0]; }
+        if ( ctype_digit( $slug ) ) {
+            return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Publications::table() . " WHERE legacy_id=%d AND status='published'", $slug ), ARRAY_A );
+        }
         if ( preg_match( '/^p-([1-9][0-9]*)$/D', $slug, $match ) ) {
             $row = FTUY_Publications::get( $match[1] ); return $row && $row['status'] === 'published' ? $row : null;
         }

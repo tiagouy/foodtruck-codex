@@ -8,7 +8,7 @@ class FTUY_Publications {
     public static function install() {
         global $wpdb; require_once ABSPATH . 'wp-admin/includes/upgrade.php'; $c = $wpdb->get_charset_collate();
         $definitions = array(
-            'publications' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n author_user_id bigint(20) unsigned NOT NULL,\n image_id bigint(20) unsigned NOT NULL,\n caption text NOT NULL,\n address varchar(255) NOT NULL DEFAULT '',\n latitude decimal(10,7) DEFAULT NULL,\n longitude decimal(10,7) DEFAULT NULL,\n status varchar(24) NOT NULL DEFAULT 'pending',\n version bigint(20) unsigned NOT NULL DEFAULT 1,\n legacy_id bigint(20) unsigned DEFAULT NULL,\n legacy_author_id bigint(20) unsigned DEFAULT NULL,\n legacy_slug varchar(200) NOT NULL DEFAULT '',\n legacy_status int DEFAULT NULL,\n created_at datetime NOT NULL,\n updated_at datetime NOT NULL,\n PRIMARY KEY  (id),\n UNIQUE KEY legacy_id (legacy_id),\n KEY feed (status,created_at,id),\n KEY author (author_user_id,status)",
+            'publications' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n author_user_id bigint(20) unsigned NOT NULL,\n image_id bigint(20) unsigned NOT NULL,\n caption text NOT NULL,\n address varchar(255) NOT NULL DEFAULT '',\n latitude decimal(10,7) DEFAULT NULL,\n longitude decimal(10,7) DEFAULT NULL,\n status varchar(24) NOT NULL DEFAULT 'pending',\n version bigint(20) unsigned NOT NULL DEFAULT 1,\n legacy_id bigint(20) unsigned DEFAULT NULL,\n legacy_author_id bigint(20) unsigned DEFAULT NULL,\n legacy_slug varchar(200) NOT NULL DEFAULT '',\n legacy_status int DEFAULT NULL,\n legacy_metadata longtext DEFAULT NULL,\n created_at datetime NOT NULL,\n updated_at datetime NOT NULL,\n PRIMARY KEY  (id),\n UNIQUE KEY legacy_id (legacy_id),\n KEY feed (status,created_at,id),\n KEY author (author_user_id,status)",
             'publication_reports' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n publication_id bigint(20) unsigned NOT NULL,\n reason text NOT NULL,\n status varchar(16) NOT NULL DEFAULT 'open',\n added_by bigint(20) unsigned NOT NULL,\n resolved_by bigint(20) unsigned NOT NULL DEFAULT 0,\n created_at datetime NOT NULL,\n resolved_at datetime DEFAULT NULL,\n PRIMARY KEY  (id),\n KEY queue (status,publication_id)",
             'publication_audit' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n publication_id bigint(20) unsigned NOT NULL,\n actor_user_id bigint(20) unsigned NOT NULL,\n action varchar(32) NOT NULL,\n before_json longtext NOT NULL,\n after_json longtext NOT NULL,\n note text NOT NULL,\n created_at datetime NOT NULL,\n PRIMARY KEY  (id),\n KEY history (publication_id,id)"
         );
@@ -18,7 +18,7 @@ class FTUY_Publications {
             if ( ! $table || $table['Engine'] !== 'InnoDB' ) { return; }
         }
         if ( $role = get_role( 'administrator' ) ) { $role->add_cap( 'manage_ft_publications' ); }
-        update_option( 'ftuy_publication_schema', '1', false );
+        update_option( 'ftuy_publication_schema', '2', false );
     }
     public static function get( $id ) { global $wpdb; return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id=%d', $id ), ARRAY_A ); }
     public static function validate( $input ) {
@@ -59,6 +59,22 @@ class FTUY_Publications {
         if ( $wpdb->insert( self::table(), $data ) === false ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'save', 'No se pudo guardar.' ); }
         $id = (int) $wpdb->insert_id;
         if ( ! self::audit( $id, 'create', array(), self::get( $id ), '' ) ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'save', 'No se pudo guardar el historial.' ); }
+        $wpdb->query( 'COMMIT' ); return $id;
+    }
+    public static function import_legacy( $source, $image, $author, $hash ) {
+        if ( ! FTUY_Accounts::local() || ! current_user_can( 'manage_ft_publications' ) ) { return new WP_Error( 'permission', 'Sin permiso para importar.' ); }
+        global $wpdb;
+        $legacy = (int) $source['idOffer'];
+        $existing = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE legacy_id=%d', $legacy ), ARRAY_A );
+        if ( $existing ) { return (int) $existing['author_user_id'] === (int) $author ? (int) $existing['id'] : new WP_Error( 'conflict', 'El autor histórico no coincide.' ); }
+        $data = self::validate( array( 'caption' => (string) $source['description'], 'address' => (string) $source['address'], 'latitude' => $source['lat'], 'longitude' => $source['lon'], 'status' => (int) $source['status'] === 1 ? 'published' : 'unpublished' ) );
+        if ( is_wp_error( $data ) ) { return $data; }
+        $data = array_merge( $data, array( 'image_id' => $image, 'author_user_id' => $author, 'legacy_id' => $legacy, 'legacy_author_id' => (int) $source['idUser'], 'legacy_slug' => $source['slug'], 'legacy_status' => $source['status'], 'created_at' => $source['creationDate'], 'updated_at' => current_time( 'mysql', true ), 'legacy_metadata' => wp_json_encode( array( 'source_sha256' => $hash, 'original' => $source, 'date_timezone' => 'unknown' ) ) ) );
+        if ( ! self::usable( $data ) ) { return new WP_Error( 'image', 'Foto o autor inválidos.' ); }
+        $wpdb->query( 'START TRANSACTION' );
+        if ( $wpdb->insert( self::table(), $data ) === false ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'save', 'No se pudo importar la publicación.' ); }
+        $id = (int) $wpdb->insert_id;
+        if ( ! self::audit( $id, 'import_legacy', array(), self::get( $id ), 'Importación histórica; fecha original conservada sin asumir zona horaria.' ) ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'save', 'No se pudo registrar la importación.' ); }
         $wpdb->query( 'COMMIT' ); return $id;
     }
     public static function edit( $id, $input, $version, $note = '' ) {
@@ -102,9 +118,23 @@ class FTUY_Publications {
     }
     public static function public_data( $row ) {
         $user = get_user_by( 'id', $row['author_user_id'] );
-        return array( 'id' => (int) $row['id'], 'share_url' => FTUY_Publication_Public::url( $row ), 'caption' => $row['caption'], 'address' => $row['address'], 'latitude' => $row['latitude'] === null ? null : (float) $row['latitude'], 'longitude' => $row['longitude'] === null ? null : (float) $row['longitude'], 'created_at' => $row['created_at'], 'updated_at' => $row['updated_at'], 'image' => array( 'full' => wp_get_attachment_image_url( $row['image_id'], 'full' ), 'thumbnail' => wp_get_attachment_image_url( $row['image_id'], 'medium_large' ) ), 'author' => array( 'id' => (int) $row['author_user_id'], 'name' => $user ? $user->display_name : 'Usuario', 'avatar' => $user && FTUY_Profile_Images::attachment( $user->ID ) ? get_avatar_url( $user->ID ) : null ) );
+        return array(
+            'id' => (int) $row['id'], 'share_url' => FTUY_Publication_Public::url( $row ),
+            'caption' => $row['caption'], 'address' => $row['address'],
+            'latitude' => $row['latitude'] === null ? null : (float) $row['latitude'],
+            'longitude' => $row['longitude'] === null ? null : (float) $row['longitude'],
+            'created_at' => $row['created_at'], 'created_timezone' => empty( $row['legacy_id'] ) ? 'UTC' : null,
+            'updated_at' => $row['updated_at'],
+            'image' => array( 'full' => wp_get_attachment_image_url( $row['image_id'], 'full' ), 'thumbnail' => wp_get_attachment_image_url( $row['image_id'], 'medium_large' ) ),
+            'author' => array( 'id' => (int) $row['author_user_id'], 'name' => $user ? $user->display_name : 'Usuario', 'avatar' => $user && FTUY_Profile_Images::attachment( $user->ID ) ? get_avatar_url( $user->ID ) : null )
+        );
     }
     public static function api() {
+        register_rest_route( 'foodtrucks-uy/v1', '/publications/by-slug/(?P<slug>[a-zA-Z0-9-]+)', array( 'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => function ( $request ) {
+            $row = FTUY_Publication_Public::by_slug( $request['slug'] );
+            if ( ! $row ) { return new WP_Error( 'not_found', 'Publicación no encontrada.', array( 'status' => 404 ) ); }
+            $response = new WP_REST_Response( self::public_data( $row ) ); $response->header( 'Cache-Control', 'no-store' ); return $response;
+        } ) );
         register_rest_route( 'foodtrucks-uy/v1', '/publications', array( 'methods' => 'GET', 'permission_callback' => '__return_true', 'args' => array( 'page' => array( 'type' => 'integer', 'minimum' => 1, 'default' => 1 ), 'per_page' => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'default' => 20 ), 'author' => array( 'type' => 'integer', 'minimum' => 0, 'default' => 0 ) ), 'callback' => function ( $request ) {
             $data = self::listing( 'published', $request['page'], $request['per_page'], $request['author'] ); $data['items'] = array_map( array( __CLASS__, 'public_data' ), $data['items'] );
             $response = new WP_REST_Response( $data ); $response->header( 'Cache-Control', 'no-store' ); return $response;

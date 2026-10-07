@@ -33,8 +33,8 @@ class FTUY_Foodtruck_Images {
     }
     public static function process( $path, $role, $name = 'foodtruck', $category = 'foodtrucks' ) {
         require_once ABSPATH . 'wp-admin/includes/file.php';
-        if ( ! in_array( $category, array( 'foodtrucks', 'perfiles' ), true ) || ( $category === 'perfiles' && $role !== 'logo' ) ) { return new WP_Error( 'category', 'Tipo de imagen inválido.' ); }
-        if ( ! in_array( $role, array( 'logo', 'truck_photo' ), true ) ) { return new WP_Error( 'role', 'Tipo de imagen inválido.' ); }
+        if ( ! in_array( $category, array( 'foodtrucks', 'perfiles', 'publicaciones' ), true ) || ( $category === 'perfiles' && $role !== 'logo' ) || ( ( $category === 'publicaciones' ) !== ( $role === 'community_photo' ) ) ) { return new WP_Error( 'category', 'Tipo de imagen inválido.' ); }
+        if ( ! in_array( $role, array( 'logo', 'truck_photo', 'community_photo' ), true ) ) { return new WP_Error( 'role', 'Tipo de imagen inválido.' ); }
         if ( filesize( $path ) > 5 * MB_IN_BYTES ) { return new WP_Error( 'weight', 'La imagen pesa demasiado. Elegí un archivo de hasta 5 MB.' ); }
         $info = wp_getimagesize( $path );
         if ( ! $info || ! in_array( $info['mime'], array( 'image/jpeg', 'image/png', 'image/webp' ), true ) ) { return new WP_Error( 'image', 'No pudimos leer esa imagen. Probá con un archivo JPG, PNG o WebP.' ); }
@@ -45,7 +45,9 @@ class FTUY_Foodtruck_Images {
         if ( is_wp_error( $editor ) ) { return new WP_Error( 'editor', 'El servidor no pudo procesar la imagen. No se guardó el archivo grande.' ); }
         $rotated = $editor->maybe_exif_rotate(); if ( is_wp_error( $rotated ) ) { return $rotated; }
         list( $edge, $limit ) = self::settings( $role ); $size = $editor->get_size(); $side = min( $size['width'], $size['height'] );
-        $crop = $editor->crop( (int) floor( ( $size['width'] - $side ) / 2 ), (int) floor( ( $size['height'] - $side ) / 2 ), $side, $side, $edge, $edge ); if ( is_wp_error( $crop ) ) { return $crop; }
+        if ( $role === 'community_photo' ) { $crop = max( $size['width'], $size['height'] ) > $edge ? $editor->resize( $edge, $edge, false ) : true; }
+        else { $crop = $editor->crop( (int) floor( ( $size['width'] - $side ) / 2 ), (int) floor( ( $size['height'] - $side ) / 2 ), $side, $side, $edge, $edge ); }
+        if ( is_wp_error( $crop ) ) { return $crop; }
         $editor->prepare_jpeg(); $tmp = wp_tempnam( 'ftuy-optimized.jpg' ); if ( ! $tmp ) { return new WP_Error( 'temp', 'No se pudo preparar la imagen.' ); }
         $saved = null;
         foreach ( array( 82, 75, 68, 60, 52, 45, 35 ) as $quality ) {
@@ -55,7 +57,7 @@ class FTUY_Foodtruck_Images {
         }
         $file = $saved['path'];
         $dimensions = wp_getimagesize( $file );
-        if ( ! $dimensions || $dimensions[0] !== $edge || $dimensions[1] !== $edge ) { wp_delete_file( $file ); wp_delete_file( $tmp ); return new WP_Error( 'size', 'No se pudo generar el tamaño requerido. Probá otra imagen.' ); }
+        if ( ! $dimensions || ( $role === 'community_photo' ? max( $dimensions[0], $dimensions[1] ) > $edge : ( $dimensions[0] !== $edge || $dimensions[1] !== $edge ) ) ) { wp_delete_file( $file ); wp_delete_file( $tmp ); return new WP_Error( 'size', 'No se pudo generar el tamaño requerido. Probá otra imagen.' ); }
         if ( substr( file_get_contents( $file, false, null, 0, 2 ), 0, 2 ) !== "\xFF\xD8" ) { wp_delete_file( $file ); wp_delete_file( $tmp ); return new WP_Error( 'format', 'No se pudo generar el JPEG optimizado.' ); }
         // JFIF density is metadata, not the mechanism that reduces file size.
         $bytes = file_get_contents( $file );

@@ -45,6 +45,7 @@ class FTUY_Accounts {
             echo '<h2>Foodtrucks Uruguay</h2><p>ID histórico de la app: <strong>' . esc_html( get_user_meta( $user->ID, self::LEGACY_META, true ) ?: 'Sin asignar' ) . '</strong></p><p>Campo interno asignado por la migración. No se modifica desde el perfil ni desde la API pública.</p>';
             $aliases = array_filter( array_map( 'intval', (array) get_user_meta( $user->ID, 'ftuy_legacy_alias_ids', true ) ) );
             if ( $aliases ) { echo '<p>Otros IDs antiguos de esta misma cuenta: ' . esc_html( implode( ', ', $aliases ) ) . '</p>'; }
+            if ( get_user_meta( $user->ID, 'ftuy_legacy_avatar_needs_review', true ) ) { echo '<p>Foto de perfil: requiere revisión; el archivo antiguo no era una imagen válida. El original sigue en el respaldo.</p>'; }
             echo '<p>Estado de cuenta: ' . esc_html( get_user_meta( $user->ID, 'ftuy_account_status', true ) === 'legacy_pending' ? 'Pendiente de reactivación' : ( get_user_meta( $user->ID, 'ftuy_account_status', true ) === 'email_pending' ? 'Pendiente de confirmación' : 'Activa' ) ) . '</p>';
         };
         add_action( 'show_user_profile', $show_legacy ); add_action( 'edit_user_profile', $show_legacy );
@@ -107,7 +108,7 @@ class FTUY_Accounts {
     public static function set_legacy_id( $user_id, $legacy_id ) {
         if ( ! current_user_can( 'manage_options' ) || ! get_user_by( 'id', $user_id ) || ! is_scalar( $legacy_id ) || ! ctype_digit( (string) $legacy_id ) || (int) $legacy_id < 1 ) { return new WP_Error( 'legacy', 'Asignación histórica inválida o sin permiso.' ); }
         $legacy_id = (int) $legacy_id; $current = get_user_meta( $user_id, self::LEGACY_META, true );
-        foreach ( get_users( array( 'meta_key' => 'ftuy_legacy_alias_ids', 'fields' => 'ID' ) ) as $owner ) {
+        foreach ( self::alias_owners() as $owner ) {
             if ( (int) $owner !== (int) $user_id && in_array( $legacy_id, array_map( 'intval', (array) get_user_meta( $owner, 'ftuy_legacy_alias_ids', true ) ), true ) ) { return new WP_Error( 'legacy', 'Ese ID histórico ya está asignado como alias.' ); }
         }
         if ( $current && (int) $current !== $legacy_id ) { return new WP_Error( 'legacy', 'La cuenta ya tiene otro ID histórico.' ); }
@@ -127,7 +128,8 @@ class FTUY_Accounts {
         if ( count( $ids ) !== count( array_unique( $ids ) ) ) { return new WP_Error( 'legacy', 'IDs históricos repetidos.' ); }
         $old = (int) get_user_meta( $user_id, self::LEGACY_META, true );
         if ( $old && $old !== $ids[0] ) { return new WP_Error( 'legacy', 'La cuenta ya tiene otro ID histórico.' ); }
-        foreach ( get_users( array( 'fields' => 'ID' ) ) as $owner ) {
+        $owners = get_users( array( 'fields' => 'ID', 'meta_query' => array( array( 'key' => self::LEGACY_META, 'value' => $ids, 'compare' => 'IN' ) ) ) );
+        foreach ( array_unique( array_merge( $owners, self::alias_owners() ) ) as $owner ) {
             if ( (int) $owner === (int) $user_id ) { continue; }
             $claimed = array_merge( array( (int) get_user_meta( $owner, self::LEGACY_META, true ) ), array_map( 'intval', (array) get_user_meta( $owner, 'ftuy_legacy_alias_ids', true ) ) );
             if ( array_intersect( $ids, $claimed ) ) { return new WP_Error( 'legacy', 'Un ID histórico pertenece a otra cuenta.' ); }
@@ -145,6 +147,10 @@ class FTUY_Accounts {
         $aliases = array_values( array_filter( $aliases, function ( $id ) use ( $ids ) { return $id > 0 && $id !== $ids[0]; } ) ); sort( $aliases );
         update_user_meta( $user_id, 'ftuy_legacy_alias_ids', $aliases );
         return get_user_meta( $user_id, 'ftuy_legacy_alias_ids', true ) === $aliases ? true : new WP_Error( 'legacy', 'No se pudieron guardar los alias. Reintentar sin borrar cuentas.' );
+    }
+    private static function alias_owners() {
+        global $wpdb;
+        return $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT user_id FROM {$wpdb->usermeta} WHERE meta_key=%s AND meta_value<>%s AND meta_value<>''", 'ftuy_legacy_alias_ids', serialize( array() ) ) );
     }
     public static function legacy_owner( $legacy_id ) {
         if ( ! is_scalar( $legacy_id ) || ! ctype_digit( (string) $legacy_id ) || (int) $legacy_id < 1 ) { return 0; }

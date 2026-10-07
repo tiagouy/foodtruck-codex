@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-/** Planner and bounded, resumable local sample importer. Never executes source SQL. */
+/** Planner and resumable local sample/full importer. Never executes source SQL. */
 class FTUY_User_Migration {
     public static function current_users() {
         $result = array();
@@ -84,6 +84,30 @@ class FTUY_User_Migration {
     }
     public static function apply_sample( $plan, $hash ) {
         if ( ! FTUY_Accounts::local() || ! current_user_can( 'manage_options' ) || empty( $plan['sample'] ) || count( $plan['sample'] ) > 5 || ! preg_match( '/^[a-f0-9]{64}$/D', $hash ) ) { throw new RuntimeException( 'Solo muestra local de hasta cinco cuentas, con permiso administrativo.' ); }
+        return self::apply_rows( $plan['sample'], $hash );
+    }
+    public static function apply_all( $plan, $hash, $progress = null ) {
+        if ( ! FTUY_Accounts::local() || ! current_user_can( 'manage_options' ) || empty( $plan['accounts'] ) || count( $plan['accounts'] ) > 10000 || ! preg_match( '/^[a-f0-9]{64}$/D', $hash ) || ! empty( $plan['summary']['blocked_conflicts'] ) ) { throw new RuntimeException( 'Importación completa inválida o sin permiso.' ); }
+        $totals = array( 'mode' => 'apply-all', 'processed' => 0, 'created_subscribers' => 0, 'linked_existing' => 0, 'already_mapped' => 0, 'avatars_imported' => 0, 'avatars_already_present' => 0, 'accounts_without_avatar' => 0, 'invalid_avatar_sources' => 0 );
+        foreach ( array_chunk( $plan['accounts'], 50 ) as $batch ) {
+            foreach ( $batch as &$row ) {
+                if ( $row['avatar_source'] ) {
+                    $info = wp_getimagesize( $row['avatar_source'] );
+                    if ( ! $info || ! in_array( $info['mime'], array( 'image/jpeg', 'image/png', 'image/webp' ), true ) ) { $row['avatar_source'] = null; $row['avatar_invalid'] = true; $totals['invalid_avatar_sources']++; }
+                }
+            } unset( $row );
+            $result = self::apply_rows( $batch, $hash );
+            foreach ( $batch as $row ) { if ( ! empty( $row['avatar_invalid'] ) ) { update_user_meta( FTUY_Accounts::legacy_owner( $row['legacy_primary_id'] ), 'ftuy_legacy_avatar_needs_review', 1 ); } }
+            foreach ( $totals as $key => $value ) { if ( isset( $result[$key] ) && is_int( $value ) ) { $totals[$key] += $result[$key]; } }
+            $totals['processed'] += count( $batch );
+            if ( is_callable( $progress ) ) { call_user_func( $progress, $totals, count( $plan['accounts'] ) ); }
+            // CLI-only import can rebuild runtime caches between bounded batches.
+            if ( function_exists( 'wp_cache_flush_runtime' ) ) { wp_cache_flush_runtime(); }
+        }
+        return $totals;
+    }
+    private static function apply_rows( $rows, $hash ) {
+        $plan = array( 'sample' => $rows );
         if ( ! add_option( 'ftuy_user_migration_lock', time(), '', false ) ) { throw new RuntimeException( 'Hay otra importación en curso. Revisar el bloqueo antes de reintentar.' ); }
         $result = array( 'mode' => 'apply-sample', 'created_subscribers' => 0, 'linked_existing' => 0, 'already_mapped' => 0, 'avatars_imported' => 0, 'avatars_already_present' => 0, 'accounts_without_avatar' => 0, 'publications_imported' => 0 );
         // Even third-party hooks may not send real mail during this bounded local operation.
@@ -130,8 +154,8 @@ class FTUY_User_Migration {
         } finally { remove_filter( 'pre_wp_mail', $no_mail, PHP_INT_MAX ); delete_option( 'ftuy_user_migration_lock' ); }
     }
     public static function command( $args, $assoc ) {
-        $apply = isset( $assoc['apply-sample'] );
-        if ( ! FTUY_Accounts::local() || ! isset( $assoc['source'], $assoc['media-root'] ) || ( isset( $assoc['dry-run'] ) === $apply ) ) { WP_CLI::error( 'Solo local: indicar --dry-run o --apply-sample, --source y --media-root. Importación masiva no habilitada.' ); }
+        $all = isset( $assoc['apply-all'] ); $apply = isset( $assoc['apply-sample'] ) || $all;
+        if ( ! FTUY_Accounts::local() || ! isset( $assoc['source'], $assoc['media-root'] ) || ( (int) isset( $assoc['dry-run'] ) + (int) isset( $assoc['apply-sample'] ) + (int) $all !== 1 ) ) { WP_CLI::error( 'Solo local: elegir --dry-run, --apply-sample o --apply-all; indicar --source y --media-root.' ); }
         try {
             $data = FTUY_Legacy_SQL::read( $assoc['source'], array( 'users' => array( 'idUser', 'firstname', 'lastname', 'email', 'creationDate', 'status', 'photo' ), 'offers' => array( 'idOffer', 'idUser', 'photo', 'status' ) ) );
             if ( ! is_dir( $assoc['media-root'] ) ) { throw new RuntimeException( 'Carpeta de medios no disponible.' ); }
@@ -142,9 +166,10 @@ class FTUY_User_Migration {
             if ( $apply ) {
                 $backup = $assoc['backup'] ?? ''; global $wpdb;
                 if ( ! current_user_can( 'manage_options' ) || ! is_file( $backup ) || ! is_readable( $backup ) || realpath( $backup ) === realpath( $assoc['source'] ) || filesize( $backup ) < 1024 || strpos( file_get_contents( $backup, false, null, 0, 1048576 ), 'CREATE TABLE `' . $wpdb->options . '`' ) === false ) { throw new RuntimeException( 'Aplicar requiere --user administrador y --backup de la base WordPress local.' ); }
-                if ( count( $result['sample'] ) > 5 ) { throw new RuntimeException( 'Solo se permite importar una muestra de hasta cinco cuentas.' ); }
-                WP_CLI::log( wp_json_encode( self::apply_sample( $result, $summary['source_sha256'] ), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) );
-                WP_CLI::success( 'Muestra importada. Sin envío real de correos ni importación de publicaciones; progreso reanudable.' );
+                if ( ! $all && count( $result['sample'] ) > 5 ) { throw new RuntimeException( 'Solo se permite importar una muestra de hasta cinco cuentas.' ); }
+                $applied = $all ? self::apply_all( $result, $summary['source_sha256'], function ( $totals, $total ) { WP_CLI::log( 'Cuentas procesadas: ' . $totals['processed'] . '/' . $total . '; nuevas: ' . $totals['created_subscribers'] . '; avatares nuevos: ' . $totals['avatars_imported'] ); } ) : self::apply_sample( $result, $summary['source_sha256'] );
+                WP_CLI::log( wp_json_encode( $applied, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) );
+                WP_CLI::success( 'Usuarios importados. Sin envío real de correos ni importación de publicaciones; progreso reanudable.' );
             } else { WP_CLI::success( 'Simulación terminada. No se crearon usuarios, medios ni publicaciones; no se enviaron correos.' ); }
         } catch ( Throwable $e ) { WP_CLI::error( $e->getMessage() ); }
     }

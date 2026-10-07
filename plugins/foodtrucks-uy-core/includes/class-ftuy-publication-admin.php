@@ -44,12 +44,13 @@ class FTUY_Publication_Admin {
         echo '</p>';
         $page = isset( $_GET['paged'] ) && is_scalar( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
         $list = FTUY_Publications::listing( $status, $page );
-        echo '<p>' . (int) $list['total'] . ' publicaciones.</p><table class="widefat striped"><thead><tr><th>Foto</th><th>Texto / ubicación</th><th>Autor</th><th>Estado</th><th>Fecha (UTC)</th><th>Acciones</th></tr></thead><tbody>';
+        echo '<p>' . (int) $list['total'] . ' publicaciones.</p><table class="widefat striped"><thead><tr><th>Foto</th><th>Texto / ubicación</th><th>Autor</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
         foreach ( $list['items'] as $row ) {
             $user = get_user_by( 'id', $row['author_user_id'] );
-            echo '<tr><td>' . wp_get_attachment_image( $row['image_id'], array( 80, 80 ) ) . '</td><td>' . esc_html( wp_trim_words( $row['caption'], 20 ) ) . '<br><small>' . esc_html( $row['address'] ) . '</small></td><td>' . esc_html( $user ? $user->display_name : 'Usuario no disponible' ) . '</td><td>' . esc_html( FTUY_Publications::labels()[$row['status']] ?? $row['status'] ) . '</td><td>' . esc_html( $row['created_at'] ) . '</td><td><a class="button" href="' . esc_url( admin_url( 'admin.php?page=ftuy-publications&edit=' . $row['id'] ) ) . '">Ver / moderar</a></td></tr>';
+            $legacy_label = $row['legacy_id'] ? ' · ID anterior: ' . (int) $row['legacy_id'] : '';
+            echo '<tr><td>' . wp_get_attachment_image( $row['image_id'], array( 80, 80 ) ) . '</td><td>' . esc_html( wp_trim_words( $row['caption'], 20 ) ) . '<br><small>' . esc_html( $row['address'] . $legacy_label ) . '</small></td><td>' . esc_html( $user ? $user->display_name : 'Usuario no disponible' ) . '</td><td>' . esc_html( FTUY_Publications::labels()[$row['status']] ?? $row['status'] ) . '</td><td>' . esc_html( $row['created_at'] ) . '</td><td><a class="button" href="' . esc_url( admin_url( 'admin.php?page=ftuy-publications&edit=' . $row['id'] ) ) . '">Ver / moderar</a></td></tr>';
         }
-        if ( ! $list['items'] ) { echo '<tr><td colspan="6">Todavía no hay publicaciones en este filtro. Las 51 publicaciones antiguas aún no están importadas.</td></tr>'; }
+        if ( ! $list['items'] ) { echo '<tr><td colspan="6">No hay publicaciones en este filtro.</td></tr>'; }
         echo '</tbody></table><p>';
         if ( $page > 1 ) { echo '<a class="button" href="' . esc_url( add_query_arg( array( 'page' => 'ftuy-publications', 'status' => $status, 'paged' => $page - 1 ), admin_url( 'admin.php' ) ) ) . '">Anterior</a> '; }
         if ( $page * 20 < $list['total'] ) { echo '<a class="button" href="' . esc_url( add_query_arg( array( 'page' => 'ftuy-publications', 'status' => $status, 'paged' => $page + 1 ), admin_url( 'admin.php' ) ) ) . '">Siguiente</a>'; }
@@ -58,7 +59,9 @@ class FTUY_Publication_Admin {
     private static function detail( $id ) {
         $row = FTUY_Publications::get( $id ); if ( ! $row ) { echo '<p>Publicación inexistente.</p>'; return; }
         $user = get_user_by( 'id', $row['author_user_id'] );
-        echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=ftuy-publications' ) ) . '">← Todas las publicaciones</a></p><h2>Publicación #' . (int) $id . ' · ' . esc_html( FTUY_Publications::labels()[$row['status']] ) . '</h2><p>Autor: ' . esc_html( $user ? $user->display_name : 'Usuario no disponible' ) . ' · Fecha: ' . esc_html( $row['created_at'] ) . ' UTC</p>';
+        echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=ftuy-publications' ) ) . '">← Todas las publicaciones</a></p><h2>Publicación #' . (int) $id . ' · ' . esc_html( FTUY_Publications::labels()[$row['status']] ) . '</h2><p>Autor: ' . esc_html( $user ? $user->display_name : 'Usuario no disponible' ) . ' · Fecha: ' . esc_html( $row['created_at'] ) . ( $row['legacy_id'] ? ' (original; zona horaria no comprobada)' : ' UTC' ) . '</p>';
+        if ( $row['legacy_id'] ) { echo '<p>ID de publicación anterior: ' . (int) $row['legacy_id'] . '</p>'; }
+        if ( $row['status'] === 'published' ) { echo '<p><a class="button" href="' . esc_url( FTUY_Publication_Public::url( $row ) ) . '">Ver enlace público</a></p>'; }
         echo '<div style="max-width:480px">' . wp_get_attachment_image( $row['image_id'], 'medium_large', false, array( 'style' => 'max-width:100%;height:auto' ) ) . '</div>';
         self::form_start( $id );
         echo '<input type="hidden" name="version" value="' . (int) $row['version'] . '"><p><label>Texto<br><textarea class="large-text" rows="5" name="caption" maxlength="10000">' . esc_textarea( $row['caption'] ) . '</textarea></label></p><p><label>Ubicación / dirección<br><input class="large-text" name="address" maxlength="255" value="' . esc_attr( $row['address'] ) . '"></label></p>';
@@ -76,7 +79,7 @@ class FTUY_Publication_Admin {
         }
         echo '<h2>Historial de moderación</h2><table class="widefat striped"><thead><tr><th>Fecha (UTC)</th><th>Administrador</th><th>Acción</th><th>Nota</th></tr></thead><tbody>';
         $audit = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Publications::table( 'publication_audit' ) . ' WHERE publication_id=%d ORDER BY id DESC LIMIT 50', $id ), ARRAY_A );
-        $labels = array( 'create' => 'Registro inicial', 'edit' => 'Edición / cambio de estado', 'report' => 'Denuncia registrada', 'resolve_report' => 'Denuncia revisada' );
+        $labels = array( 'create' => 'Registro inicial', 'edit' => 'Edición / cambio de estado', 'report' => 'Denuncia registrada', 'resolve_report' => 'Denuncia revisada', 'import_legacy' => 'Importación histórica' );
         foreach ( $audit as $entry ) { $actor = get_user_by( 'id', $entry['actor_user_id'] ); echo '<tr><td>' . esc_html( $entry['created_at'] ) . '</td><td>' . esc_html( $actor ? $actor->display_name : 'Usuario no disponible' ) . '</td><td>' . esc_html( $labels[$entry['action']] ?? $entry['action'] ) . '</td><td>' . esc_html( $entry['note'] ) . '</td></tr>'; }
         echo '</tbody></table>';
     }

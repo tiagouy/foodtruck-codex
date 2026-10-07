@@ -2,6 +2,12 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-07 · 0.13.0
+
+Migración completa aplicada **solo en local**: 3.659 suscriptores pendientes de reactivación, administrador conservado, 1.311 avatares y 51 publicaciones de 28 autores. IDs/alias históricos preservados; 16 emails inválidos excluidos y un duplicado unificado. Dos falsos avatares HTML quedan marcados para revisión. Respaldos privados y fuentes intactas, sin correos reales. Ver [resultado y procedimiento](plugin/migracion-completa-0.13.0.md).
+
+Las fotos ya se pueden ver en la web y administrar dentro del plugin: editar/despublicar, historial y denuncias manuales. Pendientes principales: nueva app y sus sesiones/subidas/denuncias, asociaciones Android/iOS, retirada física de imágenes cuando corresponda, diseño/home y despliegue productivo. Despublicar oculta listado, detalle y API; no bloquea la URL física del archivo.
+
 ## Actualización · 2026-10-06
 
 - Implementados localmente eventos/foodtrucks, moderación, páginas, API de lectura e imágenes reducidas.
@@ -30,7 +36,7 @@ Responsable inicial: Santi prepara WordPress local; luego conectamos el plugin a
 
 - [ ] Crear una instalación limpia de WordPress local, con base independiente y cuenta administrativa de desarrollo.
 - [ ] Informar la URL local, ruta de instalación y versiones PHP/MySQL o MariaDB del hosting compartido para mantener compatibilidad.
-- [ ] Instalar el plugin desde `plugins/foodtrucks-uy-core/`, definiendo cómo sincronizar el código del repositorio con `wp-content/plugins/`.
+- [x] Instalar el plugin desde `plugins/foodtrucks-uy-core/`, definiendo cómo sincronizar el código del repositorio con `wp-content/plugins/`.
 - [ ] Configurar correo de pruebas capturado localmente y desactivar envíos reales, push, pagos y tareas externas en cualquier copia histórica.
 - [ ] Activar logs de desarrollo y comprobar REST API, enlaces permanentes y carga de imágenes.
 - [ ] Decidir si hace falta una segunda instalación local del sitio viejo para comparar tema, contenidos y comportamiento; mantenerla separada de la nueva.
@@ -45,10 +51,10 @@ Resultado: WordPress local funcional con el plugin base activado.
 - [ ] Definir roles: comunidad, propietario, moderador y administrador; permisos y proceso para reclamar un foodtruck.
 - [ ] Definir estados y reglas de publicación, sugerencias, revisión y denuncias.
 - [ ] Revisar navegación e identidad visual nueva.
-- [ ] Inventariar tablas, cantidades, relaciones, imágenes, duplicados y calidad de los datos históricos.
-- [ ] Separar usuarios de la app de cuentas administrativas del sitio; identificar el uso real de `usuarios` frente a `users`.
+- [x] Inventariar tablas, cantidades, relaciones, imágenes, duplicados y calidad de los datos históricos.
+- [x] Separar usuarios de la app de cuentas administrativas del sitio; identificar el uso real de `usuarios` frente a `users`.
 - [ ] Mapear cada operación del panel `admin/` a la nueva administración.
-- [ ] Definir qué datos y fotos migrar, conservar como archivo o descartar del sistema nuevo.
+- [x] Definir qué datos y fotos migrar, conservar como archivo o descartar del sistema nuevo.
 
 Resultado: alcance acordado y mapa de datos verificado.
 
@@ -71,7 +77,7 @@ Resultado: los datos se administran desde WordPress con permisos verificables.
 Se implementa junto con los módulos del plugin, antes de construir todos los clientes.
 
 - [ ] Documentar recursos, campos, errores, paginación, filtros y autenticación bajo `foodtrucks-uy/v1`.
-- [ ] Implementar lectura pública de catálogo, eventos y publicaciones según sus estados.
+- [x] Implementar lectura pública de catálogo, eventos y publicaciones según sus estados.
 - [ ] Implementar cuenta, altas, cambios, sugerencias, fotos y denuncias autenticadas según permisos.
 - [ ] Validar que cada usuario solo pueda modificar los registros autorizados.
 - [ ] Implementar límites de solicitudes, caché de lecturas públicas e invalidación tras cambios.
@@ -85,7 +91,7 @@ Resultado: API usable por sitio y app con un contrato compartido.
 - [ ] Construir inicio, directorio y detalle de foodtruck, agenda y detalle de evento.
 - [x] Implementar listado/detalle web en rutas históricas verificadas: `/fotosusuarios/` y `/fotousuario/{slug}/`. Sin subida web; pendientes/despublicadas ocultas en listado/autor/detalle y con 404 sin foto ni metadata de preview.
 - [ ] Migrar slugs/datos antiguos y configurar/probar enlaces asociados Android/iOS de la nueva app, con fallback a la web; la app debe revalidar estado al abrir enlaces compartidos.
-- [ ] Construir cuenta, perfil, alta/gestión de foodtruck y sugerencia de evento. Las publicaciones de fotos se crean desde la app.
+- [x] Construir cuenta, perfil, alta/gestión de foodtruck y sugerencia de evento. Las publicaciones de fotos se crean desde la app.
 - [ ] Mostrar estados de revisión y mensajes claros para formularios y errores.
 - [ ] Implementar búsqueda, filtros, diseño móvil, accesibilidad y SEO.
 - [ ] Probar un flujo completo: registro → publicación/sugerencia → revisión → aparición pública.
@@ -94,13 +100,13 @@ Resultado: primera experiencia completa que valida el plugin y los datos. La web
 
 ## 6. Migración de ensayo
 
-- [ ] Construir importador idempotente con modo de simulación e informe de errores.
+- [x] Construir importador idempotente con modo de simulación e informe de errores.
 - [ ] Importar muestra de usuarios de la app, foodtrucks, eventos y publicaciones conservando las relaciones de autoría.
 - [ ] Migrar medios y verificar archivos/referencias, fechas, coordenadas y codificación.
-- [ ] Resolver duplicados y datos inválidos; conservar equivalencias de IDs históricos.
+- [x] Resolver duplicados y datos inválidos; conservar equivalencias de IDs históricos.
 - [ ] Probar reactivación con correo local y contraseñas nuevas.
-- [ ] Comparar cantidades y revisar muestras manualmente.
-- [ ] Definir redirecciones de enlaces públicos históricos.
+- [x] Comparar cantidades y revisar muestras manualmente.
+- [x] Definir redirecciones de enlaces públicos históricos.
 
 Resultado: migración repetible y revisada antes del corte de producción.
 
