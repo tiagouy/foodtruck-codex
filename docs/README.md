@@ -5,7 +5,7 @@ Este repositorio separa la reconstrucción del producto de los materiales histó
 | Área | Ubicación | Propósito |
 | --- | --- | --- |
 | Documentación del proyecto | `docs/` | Decisiones, modelo de datos, migración y evolución. |
-| Aplicación móvil nueva | `apps/mobile/` | Cliente móvil nuevo; todavía sin tecnología decidida. |
+| Aplicación móvil nueva | `apps/mobile/` | Base React Native/TypeScript, adaptada de BuenCafé y conectada a la API pública del plugin. |
 | Plugin WordPress | `plugins/foodtrucks-uy-core/` | Dominio, panel administrativo, cuentas, API y migración. |
 | Material histórico | `Cosas viejas/`, `foodtruckuruguay.com/`, `Bds/` | Solo consulta: no continuar desarrollo allí. |
 | Guía de referencia BuenCafé | `docs/referencias/BUENCAFE_APP_NUEVA.md` | Patrón técnico para una reconstrucción moderna. |

@@ -1,0 +1,13 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
+import { Kind } from './lib/api';
+export type Tabs = {
+  Inicio: undefined;
+  Eventos: undefined;
+  Foodtrucks: undefined;
+  Fotos: undefined;
+  Cuenta: undefined;
+};
+export type RootStack = {
+  Principal: NavigatorScreenParams<Tabs> | undefined;
+  Detalle: { kind: Kind; contentKey: string };
+};

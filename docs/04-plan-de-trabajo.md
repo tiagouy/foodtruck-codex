@@ -112,8 +112,10 @@ Resultado: migración repetible y revisada antes del corte de producción.
 
 ## 7. App nueva
 
-- [ ] Elegir tecnología y revisar identificadores de Android/iOS, firma y cuentas de las tiendas existentes.
-- [ ] Crear proyecto móvil y configuración de entornos local/pruebas/producción.
+- [x] Elegir React Native/TypeScript y crear base móvil separada, adaptando estructura/componentes de BuenCafé. Ver [base 0.1.0](app/base-0.1.0.md).
+- [ ] Confirmar identificadores de Android/iOS, firma y cuentas de tiendas existentes; la base usa identidad provisional de desarrollo.
+- [x] Crear proyecto móvil y configuración de entorno local iOS Simulator/Android Emulator.
+- [ ] Configurar y verificar entornos HTTPS de pruebas/producción antes de distribuir.
 - [ ] Implementar navegación, catálogo, eventos, publicaciones y mapas del MVP.
 - [ ] Implementar sesión, perfil y flujos de contribución acordados.
 - [ ] Integrar cámara/galería, permisos, subida de fotos y tratamiento de errores de conexión.

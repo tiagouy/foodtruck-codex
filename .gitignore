@@ -20,3 +20,7 @@ vendor/
 dist/
 build/
 /media/
+!/apps/mobile/package.json
+!/apps/mobile/package-lock.json
+!/apps/mobile/README.md
+!/apps/mobile/.gitignore

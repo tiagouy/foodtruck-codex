@@ -17,6 +17,10 @@ Actualizar juntos la cabecera PHP, `FOODTRUCKS_UY_CORE_VERSION` y `docs/plugin/C
 
 La versión del esquema y la API (`v1`) son independientes de la versión del plugin. Los cambios de tablas requieren migraciones incrementales e idempotentes que conserven datos. Desactivar el plugin conserva sus tablas.
 
+## Releases de la app
+
+Primera base móvil `0.1.0`, independiente del plugin. Actualizar `apps/mobile/package.json`, versiones nativas Android/iOS y `docs/app/CHANGELOG.md`; incrementar números de build al distribuir. Tag anotado `foodtrucks-uy-app-vX.Y.Z`. Versionar lockfiles propios, no dependencias instaladas, Pods, cachés, credenciales ni keystores. El identificador provisional `com.foodtrucksuy.dev` y la configuración solo local no sirven para una actualización de tiendas; confirmar identidad/firma productiva antes de distribuir.
+
 ## Git y despliegue
 
 Rama inicial `main`. Los snapshots, SQL y la app histórica están excluidos mediante `.gitignore`. El remoto es `https://github.com/tiagouy/foodtruck-codex.git`; no existe despliegue automático.
