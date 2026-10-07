@@ -38,6 +38,16 @@ Solo devuelve `published`, incluso al consultar por autor. Pendientes/despublica
 
 No existen endpoints públicos POST para subir publicaciones o denuncias en esta versión. La futura app tendrá subida autenticada y recepción de denuncias con controles de abuso y aviso por email; el flujo antiguo de denuncia por email no se altera ahora.
 
+## Enlaces compartidos históricos — requisito confirmado
+
+Las rutas reales encontradas son `/fotosusuarios/` para el listado web y `/fotousuario/{slug}` para una publicación. No `/fotousuarios/`, que era una aproximación del nombre. El backup conserva el listado/detalle en `fotosusuarios/index.php` y `oferta.php`, la regla de detalle en `.htaccess`, asociaciones iOS en `apple-app-site-association`, enlaces `android-app://` en el HTML y configuración de ambas rutas en `Cosas viejas/foodtruckuruguay-v2/config.xml`. Esto prueba la intención/configuración histórica, no que los sistemas operativos actuales abran correctamente esa app antigua.
+
+Mantener los enlaces al migrar: si la app instalada y sus asociaciones verificadas lo permiten, abrir la pantalla correspondiente; en caso contrario, mostrar la web. La configuración Android/iOS de la nueva app deberá actualizarse con sus identificadores/certificados reales; no reutilizar ciegamente los antiguos.
+
+Despublicar significa que no se ve en app, listado web, listado por autor ni al abrir la URL compartida. El detalle compartido debe consultar el estado en el backend, responder no disponible/404 para una despublicada y no incluir foto, URL de imagen ni Open Graph/Twitter de esa publicación. La nueva app también debe revalidar el estado al recibir el enlace. La URL compartida de publicación no es el enlace físico a `/media/`; retirar el archivo directo sigue siendo otra acción pendiente. Cachés/copias ya descargadas o vistas previas anteriores pueden conservar contenido hasta su invalidación.
+
+Estas rutas web, su compatibilidad y asociaciones móviles siguen pendientes de implementación. La API de la versión 0.11.0 ya aplica el filtro de publicadas al feed/detalle/autor.
+
 ## Datos reales y verificaciones
 
 La sección inicialmente está vacía: las 51 publicaciones históricas **todavía no se importaron**. Fotos/SQL antiguos intactos. Tampoco se importaron los 3.655 usuarios que faltaban tras la muestra.

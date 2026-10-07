@@ -82,7 +82,7 @@ Resultado: API usable por sitio y app con un contrato compartido.
 
 - [ ] Elegir tema y ubicación del código visual propio; documentar y versionar las personalizaciones.
 - [ ] Construir inicio, directorio y detalle de foodtruck, agenda y detalle de evento.
-- [ ] Conservar enlaces históricos `/fotousuarios/` y definir vista web de fotos/enlace profundo, sin subida de fotos de comunidad desde el sitio.
+- [ ] Conservar rutas históricas verificadas: `/fotosusuarios/` (listado) y `/fotousuario/{slug}` (detalle compartido), con apertura de web/app mediante enlaces asociados de Android/iOS. Sin subida de fotos de comunidad desde el sitio. Despublicar debe ocultar de app, listado web, perfil público y detalle compartido; el enlace de una despublicada debe responder no disponible/404, sin foto ni metadata de vista previa.
 - [ ] Construir cuenta, perfil, alta/gestión de foodtruck y sugerencia de evento. Las publicaciones de fotos se crean desde la app.
 - [ ] Mostrar estados de revisión y mensajes claros para formularios y errores.
 - [ ] Implementar búsqueda, filtros, diseño móvil, accesibilidad y SEO.
