@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.0 — 2026-10-07
+
+- Sección Publicaciones dentro de Foodtrucks UY: listado/filtros, edición de texto/ubicación, publicar/despublicar y notas/historial de moderación.
+- Denuncias recibidas por email registrables manualmente, con filtro de abiertas y control de revisión, sin republicación automática.
+- Tablas propias InnoDB, capacidad administrativa, nonces y versiones contra sobrescritura; historial y cambios guardados en transacción.
+- API GET de publicaciones, detalle y listado por autor exclusivamente publicados; sin emails, notas o IDs históricos. Pendientes/despublicadas devuelven 404.
+- 31 comprobaciones de modelo/API y 12 HTTP, incluyendo CSRF, permisos, ocultamiento y rollback. Fotos y publicaciones históricas sin importar ni modificar.
+
 ## 0.10.0 — 2026-10-07
 
 - Importación local limitada y reanudable de hasta cinco usuarios con respaldo previo, permiso administrativo, bloqueo y registro por identidad. Sin importación masiva ni correos reales.
