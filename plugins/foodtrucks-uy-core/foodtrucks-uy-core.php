@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Foodtrucks UY Core
  * Description: Plataforma compartida de Foodtrucks Uruguay para el sitio y la aplicación.
- * Version: 0.9.1
+ * Version: 0.10.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: foodtrucks-uy-core
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FOODTRUCKS_UY_CORE_VERSION', '0.9.1' );
+define( 'FOODTRUCKS_UY_CORE_VERSION', '0.10.0' );
 define( 'FTUY_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FTUY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -28,6 +28,8 @@ require_once FTUY_PATH . 'includes/class-ftuy-foodtruck-form.php';
 require_once FTUY_PATH . 'includes/class-ftuy-foodtruck-submissions.php';
 require_once FTUY_PATH . 'includes/class-ftuy-instagram.php';
 require_once FTUY_PATH . 'includes/class-ftuy-accounts.php';
+require_once FTUY_PATH . 'includes/class-ftuy-profile-images.php';
+FTUY_Profile_Images::init();
 
 register_activation_hook( __FILE__, array( 'FTUY_Events', 'install' ) );
 add_action( 'plugins_loaded', function () {

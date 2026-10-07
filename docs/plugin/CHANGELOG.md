@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.0 — 2026-10-07
+
+- Importación local limitada y reanudable de hasta cinco usuarios con respaldo previo, permiso administrativo, bloqueo y registro por identidad. Sin importación masiva ni correos reales.
+- Principal/alias históricos con reservas privadas, controles de duplicidad y resolución a un mismo usuario, preservando permisos/contraseña de cuentas existentes.
+- Fotos propias de perfil optimizadas en `/media/perfiles/`, asociadas al usuario e integradas con avatar de WordPress; API de carga desde app pendiente.
+- Aplicada muestra real: cuatro suscriptores pendientes, administrador vinculado y tres avatares. Repetición sin duplicados; fuentes y 51 publicaciones intactas, aún sin importar publicaciones.
+- 18 pruebas sintéticas, 22 verificaciones de muestra real, 20 del plan y 24 de regresión de cuentas.
+
 ## 0.9.1 — 2026-10-07
 
 - Nuevas subidas de eventos y foodtrucks a `/media/`, separadas de `wp-content`, con categorías y UUID por adjunto; perfiles/publicaciones preparados para futuras APIs e importación.

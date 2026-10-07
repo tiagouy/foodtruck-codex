@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-/** Read-only planner. Applying this plan is deliberately not implemented in this release. */
+/** Planner and bounded, resumable local sample importer. Never executes source SQL. */
 class FTUY_User_Migration {
     public static function current_users() {
         $result = array();
@@ -82,8 +82,56 @@ class FTUY_User_Migration {
         // Private rows remain in memory. CLI output uses only the summary, never emails/names/files.
         return array( 'summary' => $summary, 'accounts' => $rows, 'excluded_ids' => $excluded, 'publications' => $publications, 'sample' => array_values( $sample ) );
     }
+    public static function apply_sample( $plan, $hash ) {
+        if ( ! FTUY_Accounts::local() || ! current_user_can( 'manage_options' ) || empty( $plan['sample'] ) || count( $plan['sample'] ) > 5 || ! preg_match( '/^[a-f0-9]{64}$/D', $hash ) ) { throw new RuntimeException( 'Solo muestra local de hasta cinco cuentas, con permiso administrativo.' ); }
+        if ( ! add_option( 'ftuy_user_migration_lock', time(), '', false ) ) { throw new RuntimeException( 'Hay otra importación en curso. Revisar el bloqueo antes de reintentar.' ); }
+        $result = array( 'mode' => 'apply-sample', 'created_subscribers' => 0, 'linked_existing' => 0, 'already_mapped' => 0, 'avatars_imported' => 0, 'avatars_already_present' => 0, 'accounts_without_avatar' => 0, 'publications_imported' => 0 );
+        // Even third-party hooks may not send real mail during this bounded local operation.
+        $no_mail = function () { return true; }; add_filter( 'pre_wp_mail', $no_mail, PHP_INT_MAX );
+        try {
+            // Preflight all five before starting. Reservations are checked as well as usermeta.
+            foreach ( $plan['sample'] as $row ) {
+                if ( $row['action'] === 'blocked' ) { throw new RuntimeException( 'La muestra contiene conflictos.' ); }
+                $user = get_user_by( 'email', $row['email'] );
+                foreach ( array_merge( array( $row['legacy_primary_id'] ), $row['legacy_alias_ids'] ) as $legacy_id ) {
+                    $owner = (int) get_option( 'ftuy_legacy_owner_' . $legacy_id );
+                    if ( $owner && ( ! $user || $owner !== (int) $user->ID ) ) { throw new RuntimeException( 'ID histórico reservado por otra cuenta. No continuar.' ); }
+                }
+                if ( $row['target_wp_user_id'] && ( ! $user || (int) $user->ID !== $row['target_wp_user_id'] ) ) { throw new RuntimeException( 'La cuenta de destino cambió. Repetir la simulación.' ); }
+                if ( ! $row['target_wp_user_id'] && $user && get_user_meta( $user->ID, 'ftuy_migration_source_sha256', true ) !== $hash ) { throw new RuntimeException( 'Apareció una cuenta nueva con ese email. Repetir la simulación.' ); }
+            }
+            foreach ( $plan['sample'] as $row ) {
+                $journal_key = 'ftuy_user_migration_' . $row['legacy_primary_id'];
+                $user = get_user_by( 'email', $row['email'] ); $created = false;
+                if ( $row['target_wp_user_id'] && ( ! $user || (int) $user->ID !== $row['target_wp_user_id'] ) ) { throw new RuntimeException( 'La cuenta cambió durante la importación. Repetir la simulación.' ); }
+                if ( ! $row['target_wp_user_id'] && $user && get_user_meta( $user->ID, 'ftuy_migration_source_sha256', true ) !== $hash ) { throw new RuntimeException( 'Apareció otra cuenta durante la importación. Repetir la simulación.' ); }
+                if ( ! $user ) {
+                    $id = wp_insert_user( array( 'user_login' => 'ft_' . str_replace( '-', '', wp_generate_uuid4() ), 'user_email' => $row['email'], 'display_name' => $row['display_name'], 'user_pass' => wp_generate_password( 64 ), 'role' => 'subscriber', 'meta_input' => array( 'ftuy_account_status' => 'legacy_pending', 'ftuy_migration_source_sha256' => $hash ) ) );
+                    if ( is_wp_error( $id ) ) { throw new RuntimeException( 'No se pudo crear una cuenta de la muestra. Revisar y retomar.' ); }
+                    $user = get_user_by( 'id', $id ); $created = true;
+                }
+                $was_mapped = (int) get_user_meta( $user->ID, FTUY_Accounts::LEGACY_META, true ) === $row['legacy_primary_id'] && ! array_diff( $row['legacy_alias_ids'], (array) get_user_meta( $user->ID, 'ftuy_legacy_alias_ids', true ) );
+                update_option( $journal_key, array( 'source_sha256' => $hash, 'wp_user_id' => $user->ID, 'state' => 'running' ), false );
+                $linked = FTUY_Accounts::set_legacy_ids( $user->ID, $row['legacy_primary_id'], $row['legacy_alias_ids'] );
+                if ( is_wp_error( $linked ) ) { throw new RuntimeException( 'No se pudo vincular una identidad histórica. Avance conservado para reintentar.' ); }
+                // Never alter existing account roles, name, password, registration date or status.
+                update_user_meta( $user->ID, 'ftuy_legacy_created_at', $row['legacy_created_at'] ?: '' );
+                update_user_meta( $user->ID, 'ftuy_legacy_date_unknown', $row['legacy_created_at'] === null ? 1 : 0 );
+                if ( $row['avatar_source'] ) {
+                    $present = FTUY_Profile_Images::attachment( $user->ID );
+                    $avatar = FTUY_Profile_Images::import( $user->ID, $row['avatar_source'] );
+                    if ( is_wp_error( $avatar ) ) { throw new RuntimeException( 'Una foto de perfil no pudo procesarse. Cuenta conservada; reintentar tras revisar.' ); }
+                    $result[$present ? 'avatars_already_present' : 'avatars_imported']++;
+                } else { $result['accounts_without_avatar']++; }
+                update_option( $journal_key, array( 'source_sha256' => $hash, 'wp_user_id' => $user->ID, 'state' => 'complete' ), false );
+                $result[$created ? 'created_subscribers' : ( $was_mapped ? 'already_mapped' : 'linked_existing' )]++;
+            }
+            return $result;
+        } finally { remove_filter( 'pre_wp_mail', $no_mail, PHP_INT_MAX ); delete_option( 'ftuy_user_migration_lock' ); }
+    }
     public static function command( $args, $assoc ) {
-        if ( ! FTUY_Accounts::local() || ! isset( $assoc['dry-run'], $assoc['source'], $assoc['media-root'] ) ) { WP_CLI::error( 'Solo local: indicar --dry-run, --source y --media-root. Aplicar la migración todavía no está implementado.' ); }
+        $apply = isset( $assoc['apply-sample'] );
+        if ( ! FTUY_Accounts::local() || ! isset( $assoc['source'], $assoc['media-root'] ) || ( isset( $assoc['dry-run'] ) === $apply ) ) { WP_CLI::error( 'Solo local: indicar --dry-run o --apply-sample, --source y --media-root. Importación masiva no habilitada.' ); }
         try {
             $data = FTUY_Legacy_SQL::read( $assoc['source'], array( 'users' => array( 'idUser', 'firstname', 'lastname', 'email', 'creationDate', 'status', 'photo' ), 'offers' => array( 'idOffer', 'idUser', 'photo', 'status' ) ) );
             if ( ! is_dir( $assoc['media-root'] ) ) { throw new RuntimeException( 'Carpeta de medios no disponible.' ); }
@@ -91,7 +139,13 @@ class FTUY_User_Migration {
             $summary = array_merge( array( 'source_sha256' => hash_file( 'sha256', $assoc['source'] ) ), $result['summary'] );
             WP_CLI::log( wp_json_encode( $summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) );
             if ( $summary['blocked_conflicts'] || $summary['publications']['blocked_or_unmapped'] ) { WP_CLI::error( 'Hay conflictos para revisar. No se modificó ningún dato.' ); }
-            WP_CLI::success( 'Simulación terminada. No se crearon usuarios, medios ni publicaciones; no se enviaron correos.' );
+            if ( $apply ) {
+                $backup = $assoc['backup'] ?? ''; global $wpdb;
+                if ( ! current_user_can( 'manage_options' ) || ! is_file( $backup ) || ! is_readable( $backup ) || realpath( $backup ) === realpath( $assoc['source'] ) || filesize( $backup ) < 1024 || strpos( file_get_contents( $backup, false, null, 0, 1048576 ), 'CREATE TABLE `' . $wpdb->options . '`' ) === false ) { throw new RuntimeException( 'Aplicar requiere --user administrador y --backup de la base WordPress local.' ); }
+                if ( count( $result['sample'] ) > 5 ) { throw new RuntimeException( 'Solo se permite importar una muestra de hasta cinco cuentas.' ); }
+                WP_CLI::log( wp_json_encode( self::apply_sample( $result, $summary['source_sha256'] ), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) );
+                WP_CLI::success( 'Muestra importada. Sin envío real de correos ni importación de publicaciones; progreso reanudable.' );
+            } else { WP_CLI::success( 'Simulación terminada. No se crearon usuarios, medios ni publicaciones; no se enviaron correos.' ); }
         } catch ( Throwable $e ) { WP_CLI::error( $e->getMessage() ); }
     }
 }

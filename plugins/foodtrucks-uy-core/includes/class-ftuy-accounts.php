@@ -20,6 +20,7 @@ class FTUY_Accounts {
             update_option( 'ftuy_account_mail_local', array_slice( $mail, -100 ), false ); return true;
         }, 999, 2 ); }
         register_meta( 'user', self::LEGACY_META, array( 'type' => 'integer', 'single' => true, 'show_in_rest' => false, 'auth_callback' => function () { return current_user_can( 'manage_options' ); } ) );
+        register_meta( 'user', 'ftuy_legacy_alias_ids', array( 'type' => 'array', 'single' => true, 'show_in_rest' => false, 'auth_callback' => function () { return current_user_can( 'manage_options' ); } ) );
         add_action( 'template_redirect', array( __CLASS__, 'route' ), -1 );
         add_filter( 'nonce_user_logged_out', function ( $id, $action ) {
             return strpos( $action, 'ftuy_account_' ) === 0 && self::$guest ? hexdec( substr( hash_hmac( 'sha256', self::$guest, wp_salt( 'nonce' ) ), 0, 7 ) ) : $id;
@@ -42,6 +43,9 @@ class FTUY_Accounts {
         $show_legacy = function ( $user ) {
             if ( ! current_user_can( 'manage_options' ) ) { return; }
             echo '<h2>Foodtrucks Uruguay</h2><p>ID histórico de la app: <strong>' . esc_html( get_user_meta( $user->ID, self::LEGACY_META, true ) ?: 'Sin asignar' ) . '</strong></p><p>Campo interno asignado por la migración. No se modifica desde el perfil ni desde la API pública.</p>';
+            $aliases = array_filter( array_map( 'intval', (array) get_user_meta( $user->ID, 'ftuy_legacy_alias_ids', true ) ) );
+            if ( $aliases ) { echo '<p>Otros IDs antiguos de esta misma cuenta: ' . esc_html( implode( ', ', $aliases ) ) . '</p>'; }
+            echo '<p>Estado de cuenta: ' . esc_html( get_user_meta( $user->ID, 'ftuy_account_status', true ) === 'legacy_pending' ? 'Pendiente de reactivación' : ( get_user_meta( $user->ID, 'ftuy_account_status', true ) === 'email_pending' ? 'Pendiente de confirmación' : 'Activa' ) ) . '</p>';
         };
         add_action( 'show_user_profile', $show_legacy ); add_action( 'edit_user_profile', $show_legacy );
         add_action( 'rest_api_init', function () {
@@ -103,6 +107,9 @@ class FTUY_Accounts {
     public static function set_legacy_id( $user_id, $legacy_id ) {
         if ( ! current_user_can( 'manage_options' ) || ! get_user_by( 'id', $user_id ) || ! is_scalar( $legacy_id ) || ! ctype_digit( (string) $legacy_id ) || (int) $legacy_id < 1 ) { return new WP_Error( 'legacy', 'Asignación histórica inválida o sin permiso.' ); }
         $legacy_id = (int) $legacy_id; $current = get_user_meta( $user_id, self::LEGACY_META, true );
+        foreach ( get_users( array( 'meta_key' => 'ftuy_legacy_alias_ids', 'fields' => 'ID' ) ) as $owner ) {
+            if ( (int) $owner !== (int) $user_id && in_array( $legacy_id, array_map( 'intval', (array) get_user_meta( $owner, 'ftuy_legacy_alias_ids', true ) ), true ) ) { return new WP_Error( 'legacy', 'Ese ID histórico ya está asignado como alias.' ); }
+        }
         if ( $current && (int) $current !== $legacy_id ) { return new WP_Error( 'legacy', 'La cuenta ya tiene otro ID histórico.' ); }
         $owners = get_users( array( 'meta_key' => self::LEGACY_META, 'meta_value' => $legacy_id, 'fields' => 'ID' ) );
         foreach ( $owners as $owner ) { if ( (int) $owner !== (int) $user_id ) { return new WP_Error( 'legacy', 'Ese ID histórico ya está asignado.' ); } }
@@ -111,6 +118,40 @@ class FTUY_Accounts {
         update_user_meta( $user_id, self::LEGACY_META, $legacy_id );
         if ( (int) get_user_meta( $user_id, self::LEGACY_META, true ) !== $legacy_id ) { if ( ! $current ) { delete_option( $claim ); } return new WP_Error( 'legacy', 'No se pudo guardar el vínculo histórico.' ); }
         return true;
+    }
+    public static function set_legacy_ids( $user_id, $primary, $aliases = array() ) {
+        if ( ! current_user_can( 'manage_options' ) || ! get_user_by( 'id', $user_id ) || ! is_array( $aliases ) ) { return new WP_Error( 'legacy', 'Asignación histórica sin permiso.' ); }
+        $ids = array_merge( array( $primary ), $aliases );
+        foreach ( $ids as $id ) { if ( ! is_scalar( $id ) || ! ctype_digit( (string) $id ) || (int) $id < 1 ) { return new WP_Error( 'legacy', 'ID histórico inválido.' ); } }
+        $ids = array_map( 'intval', $ids );
+        if ( count( $ids ) !== count( array_unique( $ids ) ) ) { return new WP_Error( 'legacy', 'IDs históricos repetidos.' ); }
+        $old = (int) get_user_meta( $user_id, self::LEGACY_META, true );
+        if ( $old && $old !== $ids[0] ) { return new WP_Error( 'legacy', 'La cuenta ya tiene otro ID histórico.' ); }
+        foreach ( get_users( array( 'fields' => 'ID' ) ) as $owner ) {
+            if ( (int) $owner === (int) $user_id ) { continue; }
+            $claimed = array_merge( array( (int) get_user_meta( $owner, self::LEGACY_META, true ) ), array_map( 'intval', (array) get_user_meta( $owner, 'ftuy_legacy_alias_ids', true ) ) );
+            if ( array_intersect( $ids, $claimed ) ) { return new WP_Error( 'legacy', 'Un ID histórico pertenece a otra cuenta.' ); }
+        }
+        foreach ( $ids as $id ) { $owner = (int) get_option( 'ftuy_legacy_owner_' . $id ); if ( $owner && $owner !== (int) $user_id ) { return new WP_Error( 'legacy', 'Un ID histórico está reservado por otra cuenta.' ); } }
+        $acquired = array();
+        foreach ( $ids as $id ) {
+            $key = 'ftuy_legacy_owner_' . $id;
+            if ( add_option( $key, (int) $user_id, '', false ) ) { $acquired[] = $key; }
+            elseif ( (int) get_option( $key ) !== (int) $user_id ) { foreach ( $acquired as $new ) { delete_option( $new ); } return new WP_Error( 'legacy', 'No se pudo reservar el ID histórico.' ); }
+        }
+        $result = self::set_legacy_id( $user_id, $ids[0] );
+        if ( is_wp_error( $result ) ) { foreach ( $acquired as $new ) { delete_option( $new ); } return $result; }
+        $aliases = array_values( array_unique( array_merge( array_map( 'intval', (array) get_user_meta( $user_id, 'ftuy_legacy_alias_ids', true ) ), array_slice( $ids, 1 ) ) ) );
+        $aliases = array_values( array_filter( $aliases, function ( $id ) use ( $ids ) { return $id > 0 && $id !== $ids[0]; } ) ); sort( $aliases );
+        update_user_meta( $user_id, 'ftuy_legacy_alias_ids', $aliases );
+        return get_user_meta( $user_id, 'ftuy_legacy_alias_ids', true ) === $aliases ? true : new WP_Error( 'legacy', 'No se pudieron guardar los alias. Reintentar sin borrar cuentas.' );
+    }
+    public static function legacy_owner( $legacy_id ) {
+        if ( ! is_scalar( $legacy_id ) || ! ctype_digit( (string) $legacy_id ) || (int) $legacy_id < 1 ) { return 0; }
+        $owner = (int) get_option( 'ftuy_legacy_owner_' . (int) $legacy_id );
+        if ( ! $owner || ! get_user_by( 'id', $owner ) ) { return 0; }
+        $ids = array_merge( array( (int) get_user_meta( $owner, self::LEGACY_META, true ) ), array_map( 'intval', (array) get_user_meta( $owner, 'ftuy_legacy_alias_ids', true ) ) );
+        return in_array( (int) $legacy_id, $ids, true ) ? $owner : 0;
     }
     private static function guest_cookie() {
         if ( is_user_logged_in() ) { return; }
