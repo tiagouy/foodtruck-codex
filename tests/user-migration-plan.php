@@ -11,6 +11,7 @@ try {
     $assert( $summary['source_accounts'] === 5 && $summary['excluded_unusable_email'] === 2 && $summary['destination_accounts'] === 2, 'Excluye emails inválidos y unifica duplicados.' );
     $assert( $summary['would_create_subscribers'] === 1 && $summary['would_link_existing'] === 1, 'Cuenta nueva y vínculo existente diferenciados.' );
     $assert( $plan['accounts'][0]['legacy_primary_id'] === 10 && $plan['accounts'][0]['legacy_alias_ids'] === array( 20 ) && $plan['accounts'][0]['display_name'] === 'Primero Apellido', 'El menor ID es principal y conserva alias.' );
+    $assert( $plan['accounts'][0]['first_name'] === 'Primero' && $plan['accounts'][0]['last_name'] === 'Apellido', 'Campos de nombre y apellido separados desde origen.' );
     $assert( $plan['accounts'][1]['preserve_admin'] && $plan['accounts'][1]['target_wp_user_id'] === 77, 'No duplica ni degrada al administrador.' );
     $assert( $summary['publications']['with_account_mapping'] === 3 && $plan['publications'][1]['canonical_author_id'] === 10, 'Fotos de ambos IDs conservan autor canónico.' );
     $assert( $plan === FTUY_User_Migration::plan( $data, '', 5, $existing ), 'Simulación repetible.' );

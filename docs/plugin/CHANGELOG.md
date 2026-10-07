@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.1 — 2026-10-07
+
+- Nombre y apellido originales en los campos nativos WordPress, también en importaciones nuevas.
+- Comando local reanudable para completar únicamente campos vacíos de cuentas migradas, verificando fuente e identidad principal y preservando administradores y datos editados.
+- Aplicado: 3.659 nombres y 3.649 apellidos; identidades, claves y 51 publicaciones sin cambios. Respaldo privado y pruebas de repetición/preservación.
+
 ## 0.13.0 — 2026-10-07
 
 - Importación completa local y reanudable: 3.659 suscriptores pendientes de reactivación y administrador existente vinculado sin cambiar credenciales ni permisos. Duplicado unificado con alias; 16 emails inválidos excluidos.

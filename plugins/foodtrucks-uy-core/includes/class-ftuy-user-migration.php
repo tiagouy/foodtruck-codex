@@ -3,6 +3,42 @@ defined( 'ABSPATH' ) || exit;
 
 /** Planner and resumable local sample/full importer. Never executes source SQL. */
 class FTUY_User_Migration {
+    /** Fill missing native WP names only, using the primary historical identity. */
+    public static function name_updates( $users, $hash ) {
+        $updates = array(); $seen = array();
+        foreach ( $users as $row ) {
+            $legacy_id = (int) $row['idUser'];
+            if ( $legacy_id < 1 || isset( $seen[$legacy_id] ) ) { throw new RuntimeException( 'ID histórico inválido o repetido.' ); }
+            $seen[$legacy_id] = true;
+            $id = FTUY_Accounts::legacy_owner( $legacy_id );
+            if ( ! $id || user_can( $id, 'manage_options' ) || (int) get_user_meta( $id, FTUY_Accounts::LEGACY_META, true ) !== $legacy_id || get_user_meta( $id, 'ftuy_migration_source_sha256', true ) !== $hash ) { continue; }
+            foreach ( array( 'first_name' => 'firstname', 'last_name' => 'lastname' ) as $field => $source ) {
+                $value = sanitize_text_field( trim( (string) $row[$source] ) );
+                if ( $value !== '' && trim( (string) get_user_meta( $id, $field, true ) ) === '' ) { $updates[] = array( 'id' => $id, 'field' => $field, 'value' => $value ); }
+            }
+        }
+        return $updates;
+    }
+    public static function names_command( $args, $assoc ) {
+        try {
+            if ( ! FTUY_Accounts::local() || ! current_user_can( 'manage_options' ) || ! isset( $assoc['source'] ) || ( (int) isset( $assoc['dry-run'] ) + (int) isset( $assoc['apply'] ) !== 1 ) ) { throw new RuntimeException( 'Solo local: requiere administrador, --source y --dry-run o --apply.' ); }
+            $data = FTUY_Legacy_SQL::read( $assoc['source'], array( 'users' => array( 'idUser', 'firstname', 'lastname' ) ) );
+            $updates = self::name_updates( $data['users'], hash_file( 'sha256', $assoc['source'] ) );
+            $totals = array( 'accounts' => count( array_unique( array_column( $updates, 'id' ) ) ), 'first_name' => 0, 'last_name' => 0 );
+            foreach ( $updates as $update ) { $totals[$update['field']]++; }
+            WP_CLI::log( wp_json_encode( $totals ) );
+            if ( isset( $assoc['apply'] ) ) {
+                global $wpdb; $backup = $assoc['backup'] ?? '';
+                if ( ! is_file( $backup ) || ! is_readable( $backup ) || realpath( $backup ) === realpath( $assoc['source'] ) || filesize( $backup ) < 1024 || strpos( file_get_contents( $backup, false, null, 0, 1048576 ), 'CREATE TABLE `' . $wpdb->options . '`' ) === false ) { throw new RuntimeException( 'Aplicar requiere --backup de WordPress local.' ); }
+                foreach ( $updates as $update ) {
+                    if ( trim( (string) get_user_meta( $update['id'], $update['field'], true ) ) !== '' ) { continue; }
+                    update_user_meta( $update['id'], $update['field'], $update['value'] );
+                    if ( get_user_meta( $update['id'], $update['field'], true ) !== $update['value'] ) { throw new RuntimeException( 'No se pudo guardar un nombre; avance conservado para reintentar.' ); }
+                }
+                WP_CLI::success( 'Nombre y apellido completados. Sin cambiar usuarios, nombres públicos, claves ni fotos.' );
+            } else { WP_CLI::success( 'Simulación sin cambios.' ); }
+        } catch ( Throwable $e ) { WP_CLI::error( $e->getMessage() ); }
+    }
     public static function current_users() {
         $result = array();
         foreach ( get_users() as $user ) {
@@ -50,6 +86,8 @@ class FTUY_User_Migration {
             if ( count( $members ) > 1 ) { $summary['merged_email_groups']++; $summary['alias_ids_to_preserve'] += count( $members ) - 1; }
             $avatar = null; foreach ( $members as $member ) { $avatar = self::media( $media_root, 'users', (int) $member['idUser'], $member['photo'] ); if ( $avatar ) { break; } }
             $row = array( 'legacy_primary_id' => $ids[0], 'legacy_alias_ids' => array_slice( $ids, 1 ), 'email' => $email, 'display_name' => sanitize_text_field( trim( $primary['firstname'] . ' ' . $primary['lastname'] ) ) ?: 'Usuario', 'legacy_created_at' => $primary['creationDate'] === '0000-00-00 00:00:00' ? null : $primary['creationDate'], 'avatar_source' => $avatar, 'action' => $action, 'target_wp_user_id' => $target ? (int) $target['id'] : null, 'preserve_admin' => $target && $target['is_admin'], 'publication_count' => 0, 'block_reason' => $reason );
+            $row['first_name'] = sanitize_text_field( trim( (string) $primary['firstname'] ) );
+            $row['last_name'] = sanitize_text_field( trim( (string) $primary['lastname'] ) );
             $index = count( $rows ); $rows[] = $row; foreach ( $ids as $id ) { $by_legacy[$id] = $index; }
             $key = array( 'create_subscriber' => 'would_create_subscribers', 'link_existing_preserve_permissions' => 'would_link_existing', 'already_mapped' => 'already_mapped', 'blocked' => 'blocked_conflicts' )[$action]; $summary[$key]++;
         }
@@ -130,7 +168,7 @@ class FTUY_User_Migration {
                 if ( $row['target_wp_user_id'] && ( ! $user || (int) $user->ID !== $row['target_wp_user_id'] ) ) { throw new RuntimeException( 'La cuenta cambió durante la importación. Repetir la simulación.' ); }
                 if ( ! $row['target_wp_user_id'] && $user && get_user_meta( $user->ID, 'ftuy_migration_source_sha256', true ) !== $hash ) { throw new RuntimeException( 'Apareció otra cuenta durante la importación. Repetir la simulación.' ); }
                 if ( ! $user ) {
-                    $id = wp_insert_user( array( 'user_login' => 'ft_' . str_replace( '-', '', wp_generate_uuid4() ), 'user_email' => $row['email'], 'display_name' => $row['display_name'], 'user_pass' => wp_generate_password( 64 ), 'role' => 'subscriber', 'meta_input' => array( 'ftuy_account_status' => 'legacy_pending', 'ftuy_migration_source_sha256' => $hash ) ) );
+                    $id = wp_insert_user( array( 'user_login' => 'ft_' . str_replace( '-', '', wp_generate_uuid4() ), 'user_email' => $row['email'], 'display_name' => $row['display_name'], 'first_name' => $row['first_name'] ?? '', 'last_name' => $row['last_name'] ?? '', 'user_pass' => wp_generate_password( 64 ), 'role' => 'subscriber', 'meta_input' => array( 'ftuy_account_status' => 'legacy_pending', 'ftuy_migration_source_sha256' => $hash ) ) );
                     if ( is_wp_error( $id ) ) { throw new RuntimeException( 'No se pudo crear una cuenta de la muestra. Revisar y retomar.' ); }
                     $user = get_user_by( 'id', $id ); $created = true;
                 }

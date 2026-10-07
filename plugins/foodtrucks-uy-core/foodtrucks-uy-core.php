@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Foodtrucks UY Core
  * Description: Plataforma compartida de Foodtrucks Uruguay para el sitio y la aplicación.
- * Version: 0.13.0
+ * Version: 0.13.1
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: foodtrucks-uy-core
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FOODTRUCKS_UY_CORE_VERSION', '0.13.0' );
+define( 'FOODTRUCKS_UY_CORE_VERSION', '0.13.1' );
 define( 'FTUY_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FTUY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -56,6 +56,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
     require_once FTUY_PATH . 'includes/class-ftuy-user-migration.php';
     require_once FTUY_PATH . 'includes/class-ftuy-publication-migration.php';
     WP_CLI::add_command( 'ftuy migrate-users', array( 'FTUY_User_Migration', 'command' ) );
+    WP_CLI::add_command( 'ftuy migrate-user-names', array( 'FTUY_User_Migration', 'names_command' ) );
     WP_CLI::add_command( 'ftuy migrate-publications', array( 'FTUY_Publication_Migration', 'command' ) );
     WP_CLI::add_command( 'ftuy sample-foodtrucks', function () { WP_CLI::log( wp_json_encode( FTUY_Foodtrucks::sample(), JSON_UNESCAPED_UNICODE ) ); } );
     WP_CLI::add_command( 'ftuy import-events', function ( $args, $assoc ) {
