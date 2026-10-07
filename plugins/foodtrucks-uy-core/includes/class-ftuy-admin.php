@@ -65,7 +65,9 @@ class FTUY_Admin {
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/media.php';
         require_once ABSPATH . 'wp-admin/includes/image.php';
-        return media_handle_upload( 'event_image', 0, array(), array( 'test_form' => false, 'mimes' => array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) ) );
+        return FTUY_Media::store( 'eventos', function () {
+            return media_handle_upload( 'event_image', 0, array(), array( 'test_form' => false, 'mimes' => array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) ) );
+        } );
     }
     public static function handle() {
         if ( ! current_user_can( 'manage_ft_events' ) ) { wp_die( 'Sin permiso.', '', array( 'response' => 403 ) ); }

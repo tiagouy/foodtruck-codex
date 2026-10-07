@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1 — 2026-10-07
+
+- Nuevas subidas de eventos y foodtrucks a `/media/`, separadas de `wp-content`, con categorías y UUID por adjunto; perfiles/publicaciones preparados para futuras APIs e importación.
+- Rutas relativas configurables, miniaturas/srcset y eliminación de archivos propios integrados con WordPress. Subidas ajenas y medios históricos intactos.
+- Protección Apache contra ejecución PHP e índices vacíos; instrucciones para otros servidores y respaldo transitorio de ambos almacenes.
+- 27 comprobaciones de almacenamiento, 17 de compresión de imágenes y 74 HTTP de formularios, incluida carga real.
+
 ## 0.9.0 — 2026-10-07
 
 - Planificador `wp ftuy migrate-users --dry-run`, solo local, con lector de literales del SQL sin ejecutar el dump. Aplicación real aún no implementada.
