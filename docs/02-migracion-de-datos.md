@@ -49,3 +49,14 @@ Importar los usuarios elegibles como pendientes de activación, emitir emails co
 ### 5. Migración final y corte
 
 Pausar modificaciones en el sistema viejo, ejecutar la importación final, hacer controles de cantidad y muestras manuales, y publicar la nueva plataforma.
+
+## Criterios acordados de cuentas y fotos · 2026-10-07
+
+- El usuario confirma que la cuenta de la app cuyo email coincide con el administrador WordPress es suya. Usar la cuenta existente y conservar sus permisos; vincular su ID histórico sin duplicarla ni exigir una reactivación que bloquee el acceso administrativo.
+- Las 16 cuentas sin email utilizable se descartan del conjunto a migrar. No modificar ni borrar filas del SQL de respaldo original. La auditoría confirmó que ninguna es autora de las 51 publicaciones del snapshot.
+- Las dos cuentas que comparten email se unifican en una cuenta de destino. La selección del ID histórico principal y el tratamiento de la equivalencia del segundo ID se resolverán en el importador; no eliminar una identidad de origen arbitrariamente. Ninguna tiene publicaciones entre las 51 actuales.
+- Conservar las 51 publicaciones, sus imágenes y la asociación con sus 28 autores: son contenido inicial de la app, no datos de prueba para descartar. La migración no significa publicarlas automáticamente sin conservar/revisar su estado histórico.
+- Conservar las fotos de perfil existentes y mantener la posibilidad de subir/cambiar la foto desde la app. Preparar un medio propio referenciado por metadata del usuario WordPress, no depender únicamente de Gravatar. No implementado aún. Auditoría: 1.314 archivos localizados de 1.318 referencias de avatar; revisar las 4 referencias restantes y usar una imagen predeterminada si no se recuperan.
+- Las 546 fechas `0000-00-00 00:00:00` son fechas históricas desconocidas, no usuarios sin ID ni fotos sin autor. No descartar esas cuentas ni inventar su fecha original. Separar fecha de creación del usuario nuevo y dato histórico desconocido.
+
+Estos acuerdos definen el filtro y la preservación para la futura migración; todavía no se ejecutó una importación ni se eliminaron cuentas reales.

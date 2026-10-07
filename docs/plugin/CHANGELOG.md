@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0 — 2026-10-07
+
+- Planificador `wp ftuy migrate-users --dry-run`, solo local, con lector de literales del SQL sin ejecutar el dump. Aplicación real aún no implementada.
+- Exclusión de emails inválidos, unificación del duplicado con principal/alias, vínculo del administrador sin cambios de permisos y control de conflictos.
+- Comprobación de referencias de avatar y conservación de la correspondencia de las 51 publicaciones con sus autores.
+- Muestra determinista de cinco cuentas e informe agregado sin datos personales. Sin cambios de usuarios, medios, publicaciones ni correos.
+- 20 comprobaciones del plan, incluyendo huellas de usuarios/metadata/correo/SQL antes y después; 24 de regresión de cuentas. Rechazo verificado al ejecutar sin --dry-run.
+
 ## 0.8.1 — 2026-10-07
 
 - Reactivar cuenta destacado en un bloque antes de los formularios de ingreso/registro y en el menú Mi cuenta sin sesión.

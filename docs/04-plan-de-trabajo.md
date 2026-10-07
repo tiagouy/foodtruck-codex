@@ -10,6 +10,7 @@ Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las func
 - Próximo paso de cuentas: auditoría de emails/IDs antiguos y migración pequeña de ensayo, luego sesiones de app. Ver [cuentas](plugin/cuentas-0.8.0.md).
 - **Descartada la relación entre eventos y foodtrucks**; no implementar participantes ni asociaciones. Fotos de comunidad se suben solo desde la app, no desde el sitio.
 - La home/tema histórico sigue pendiente; la navegación propia ya es común a los módulos del plugin.
+- 0.9.0: simulación de migración local implementada y ejecutada. Propone 3.659 suscriptores nuevos más la cuenta administrativa existente; conserva la correspondencia de las 51 publicaciones. Muestra de cinco cuentas seleccionada en memoria, aún sin importar. Ver [simulación](plugin/migracion-usuarios-0.9.0.md).
 
 ## 0. Base preparada
 
