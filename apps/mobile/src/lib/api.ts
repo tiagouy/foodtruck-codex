@@ -146,10 +146,11 @@ export function validateContent(kind: Kind, item: unknown): item is Content {
   );
 }
 
-async function request(
+export async function request(
   path: string,
   signal?: AbortSignal,
   body?: Record<string, string>,
+  token?: string,
 ): Promise<unknown> {
   const controller = new AbortController();
   const abort = () => controller.abort();
@@ -163,11 +164,13 @@ async function request(
       `${siteURL()}/wp-json/foodtrucks-uy/v1/${path}`,
       {
         signal: controller.signal,
+        credentials: 'omit',
         method: body ? 'POST' : 'GET',
         body: body ? JSON.stringify(body) : undefined,
         headers: {
           Accept: 'application/json',
           'Cache-Control': 'no-cache',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...(body ? { 'Content-Type': 'application/json' } : {}),
         },
       },
@@ -179,7 +182,7 @@ async function request(
           const error = await response.json();
           if (
             typeof error?.message === 'string' &&
-            [400, 429, 503].includes(response.status)
+            [400, 401, 429, 503].includes(response.status)
           ) {
             message = error.message.replace(/<[^>]*>/g, '').slice(0, 500);
           }

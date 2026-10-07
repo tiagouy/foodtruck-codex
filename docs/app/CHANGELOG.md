@@ -1,5 +1,11 @@
 # Changelog de la app
 
+## 0.3.0 — 2026-10-07
+
+- Mi cuenta con ingreso nativo por email/contraseña arriba, sin botón al sitio; registro, reactivación y recuperación conservados.
+- Sesión persistente en Keychain/Keystore, contraseña no guardada, validación al restaurar y cierre con revocación.
+- Inicio como ruta inicial explícita. Face ID/huella pendientes de pruebas nativas; subida de fotos y edición de perfil aún no implementadas.
+
 ## 0.2.0 — 2026-10-07
 
 - Formularios nativos Reactivar cuenta, Registrarme y Recordar contraseña conectados a las APIs existentes del plugin; ya no abren la web para solicitar el correo.

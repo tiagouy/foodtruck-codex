@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0 — 2026-10-07
+
+- API de ingreso móvil, consulta y cierre de sesión; token aleatorio almacenado solo como hash, vencimiento, revocación y vínculo con contraseña.
+- Cuentas pendientes y administrativas sin acceso móvil; HTTPS requerido fuera de local, límites por IP/email y respuestas de cuentas no cacheables.
+- Pruebas locales de autenticación y regresiones de cuentas; diagnóstico SMTP/DNS sin cambios en producción.
+
 ## 0.13.1 — 2026-10-07
 
 - Nombre y apellido originales en los campos nativos WordPress, también en importaciones nuevas.

@@ -8,6 +8,13 @@ import AccountRequestScreen from '../src/screens/AccountRequestScreen';
 import { list, detail, accountRequest } from '../src/lib/api';
 import { TextInput } from 'react-native';
 import { Button } from '../src/components/State';
+import { login, logout, restoreSession, saveSession } from '../src/lib/session';
+jest.mock('../src/lib/session', () => ({
+  login: jest.fn(),
+  logout: jest.fn(),
+  restoreSession: jest.fn(),
+  saveSession: jest.fn(),
+}));
 
 jest.mock('../src/lib/api', () => ({
   ...jest.requireActual('../src/lib/api'),
@@ -35,6 +42,10 @@ function texts(tree: Renderer.ReactTestRenderer) {
     .join(' ');
 }
 beforeEach(() => {
+  (restoreSession as jest.Mock).mockResolvedValue(null);
+  (login as jest.Mock).mockReset();
+  (saveSession as jest.Mock).mockReset();
+  (logout as jest.Mock).mockReset();
   mockList.mockReset();
   mockDetail.mockReset();
   (accountRequest as jest.Mock).mockReset();
@@ -64,13 +75,44 @@ test('one home resource failure does not hide the other resources', async () => 
   expect(texts(tree)).toContain('preparando el directorio');
   await act(async () => tree.unmount());
 });
-test('account is explicit about web fallback rather than pretending native login exists', async () => {
+test('account shows native email/password first without a website login button', async () => {
   let tree!: Renderer.ReactTestRenderer;
   await act(async () => {
     tree = Renderer.create(<AccountScreen />);
   });
   expect(texts(tree)).toContain('Reactivar cuenta');
-  expect(texts(tree)).toContain('sesión en la app');
+  expect(tree.root.findAllByType(TextInput)).toHaveLength(2);
+  expect(tree.root.findAllByType(Button)[0].props.label).toBe('Ingresar');
+  expect(texts(tree)).not.toContain('Ingresar en el sitio');
+  await act(async () => tree.unmount());
+});
+
+test('native login saves only session and clears password; logout revokes it', async () => {
+  const session = {
+    token: 'fixture-token',
+    user: { id: 9, name: 'Fixture', email: 'fixture@example.test' },
+  };
+  (login as jest.Mock).mockResolvedValue(session);
+  (saveSession as jest.Mock).mockResolvedValue(undefined);
+  (logout as jest.Mock).mockResolvedValue(undefined);
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(<AccountScreen />);
+  });
+  await act(async () => {
+    tree.root
+      .findAllByType(TextInput)[0]
+      .props.onChangeText('fixture@example.test');
+    tree.root
+      .findAllByType(TextInput)[1]
+      .props.onChangeText('fixture-password');
+  });
+  await act(async () => tree.root.findAllByType(Button)[0].props.onPress());
+  expect(saveSession).toHaveBeenCalledWith('fixture-token');
+  expect(texts(tree)).toContain('Fixture');
+  await act(async () => tree.root.findAllByType(Button)[0].props.onPress());
+  expect(logout).toHaveBeenCalledWith('fixture-token');
+  expect(tree.root.findAllByType(TextInput)[1].props.value).toBe('');
   await act(async () => tree.unmount());
 });
 

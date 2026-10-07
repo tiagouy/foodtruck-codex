@@ -1,0 +1,69 @@
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/** App-only bearer sessions; no WordPress cookies, passwords or tokens returned as profile data. */
+class FTUY_App_Sessions {
+    const PREFIX = 'ftuy_app_session_';
+    public static function init() {
+        add_action( 'rest_api_init', function () {
+            foreach ( array( 'login' => 'POST', 'session' => 'GET', 'logout' => 'POST' ) as $action => $method ) {
+                register_rest_route( 'foodtrucks-uy/v1', '/accounts/' . $action, array( 'methods' => $method, 'permission_callback' => '__return_true', 'callback' => array( __CLASS__, $action ) ) );
+            }
+        } );
+        add_filter( 'rest_post_dispatch', function ( $response, $server, $request ) {
+            if ( strpos( $request->get_route(), '/foodtrucks-uy/v1/accounts/' ) === 0 ) { $response->header( 'Cache-Control', 'no-store, private' ); }
+            return $response;
+        }, 10, 3 );
+    }
+    public static function transport() {
+        return is_ssl() || FTUY_Accounts::local();
+    }
+    public static function error() { return new WP_Error( 'app_login', 'No pudimos ingresar. Revisá email y contraseña; si tenías una cuenta anterior, reactivala primero.', array( 'status' => 401 ) ); }
+    public static function allowed( $user ) {
+        return $user && ! user_can( $user, 'manage_options' ) && in_array( 'subscriber', $user->roles, true ) && in_array( get_user_meta( $user->ID, 'ftuy_account_status', true ), array( '', 'active' ), true );
+    }
+    public static function profile( $user ) {
+        return array( 'id' => (int) $user->ID, 'name' => $user->display_name, 'first_name' => get_user_meta( $user->ID, 'first_name', true ), 'last_name' => get_user_meta( $user->ID, 'last_name', true ), 'email' => $user->user_email );
+    }
+    public static function login( $request ) {
+        if ( ! self::transport() ) { return new WP_Error( 'https', 'El ingreso requiere una conexión segura.', array( 'status' => 503 ) ); }
+        $email = $request['email']; $password = $request['password'];
+        if ( ! is_string( $email ) || ! is_string( $password ) || ! is_email( trim( $email ) ) || strlen( $email ) > 100 || ! $password || strlen( $password ) > 4096 ) { return self::error(); }
+        $email = strtolower( trim( $email ) );
+        if ( FTUY_Accounts::limited( 'app-login-ip-' . ( $_SERVER['REMOTE_ADDR'] ?? 'unknown' ), 30, 15 * MINUTE_IN_SECONDS ) || FTUY_Accounts::limited( 'app-login-email-' . $email, 10, 15 * MINUTE_IN_SECONDS ) ) { return new WP_Error( 'rate', 'Hubo varios intentos. Probá nuevamente más tarde.', array( 'status' => 429 ) ); }
+        $user = wp_authenticate( $email, $password );
+        if ( is_wp_error( $user ) || ! self::allowed( $user ) ) { return self::error(); }
+        $secret = bin2hex( random_bytes( 32 ) ); $token = $user->ID . '.' . $secret;
+        $key = self::PREFIX . hash( 'sha256', $secret ); $expiry = time() + 30 * DAY_IN_SECONDS;
+        // Keep at most five sessions. Store only a hash, never the bearer secret.
+        $sessions = array();
+        foreach ( get_user_meta( $user->ID ) as $name => $values ) {
+            if ( strpos( $name, self::PREFIX ) !== 0 ) { continue; }
+            $row = get_user_meta( $user->ID, $name, true );
+            if ( ! is_array( $row ) || ( $row['expires'] ?? 0 ) <= time() ) { delete_user_meta( $user->ID, $name ); }
+            else { $sessions[$name] = $row['expires']; }
+        }
+        asort( $sessions );
+        while ( count( $sessions ) >= 5 ) { $old = key( $sessions ); delete_user_meta( $user->ID, $old ); unset( $sessions[$old] ); }
+        if ( ! add_user_meta( $user->ID, $key, array( 'expires' => $expiry, 'password_signature' => hash_hmac( 'sha256', $user->user_pass, wp_salt( 'auth' ) ) ), true ) ) { return new WP_Error( 'session', 'No pudimos guardar la sesión.', array( 'status' => 503 ) ); }
+        return new WP_REST_Response( array( 'token' => $token, 'expires_at' => gmdate( 'c', $expiry ), 'user' => self::profile( $user ) ), 200 );
+    }
+    public static function authenticate( $request ) {
+        if ( ! self::transport() || ! preg_match( '/^Bearer ([1-9][0-9]*)\.([a-f0-9]{64})$/D', (string) $request->get_header( 'authorization' ), $match ) ) { return self::error(); }
+        $user = get_user_by( 'id', (int) $match[1] );
+        if ( ! self::allowed( $user ) ) { return self::error(); }
+        $key = self::PREFIX . hash( 'sha256', $match[2] ); $row = get_user_meta( $user->ID, $key, true );
+        if ( ! is_array( $row ) || ( $row['expires'] ?? 0 ) <= time() || ! hash_equals( hash_hmac( 'sha256', $user->user_pass, wp_salt( 'auth' ) ), (string) ( $row['password_signature'] ?? '' ) ) ) { delete_user_meta( $user->ID, $key ); return self::error(); }
+        return array( 'user' => $user, 'key' => $key );
+    }
+    public static function session( $request ) {
+        $auth = self::authenticate( $request );
+        return is_wp_error( $auth ) ? $auth : new WP_REST_Response( array( 'user' => self::profile( $auth['user'] ) ), 200 );
+    }
+    public static function logout( $request ) {
+        $auth = self::authenticate( $request );
+        if ( is_wp_error( $auth ) ) { return $auth; }
+        delete_user_meta( $auth['user']->ID, $auth['key'] );
+        return new WP_REST_Response( array( 'message' => 'Sesión cerrada.' ), 200 );
+    }
+}
