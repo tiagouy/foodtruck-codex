@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.0 — 2026-10-07
+
+- Listado/detalle web en las rutas históricas `/fotosusuarios/` y `/fotousuario/{slug}/`, listados por autor y compatibilidad con index.php/oferta.php.
+- Solo publicadas; enlaces de pendientes/despublicadas responden 404 sin foto, texto ni vista previa. Páginas no cacheables, canonical y previews solo para publicadas.
+- API agrega `share_url` estable. Slugs históricos preservados; el texto editable no determina el enlace.
+- Navegación Fotos, estilos móviles y carga nativa de imágenes/avatares sin placeholders JavaScript de Eventchamp.
+- 25 pruebas web, 31 de modelo y 12 HTTP de moderación. QA visual de listado/detalle/404 y móvil; fixtures retirados. Importación y asociaciones móviles pendientes.
+
 ## 0.11.0 — 2026-10-07
 
 - Sección Publicaciones dentro de Foodtrucks UY: listado/filtros, edición de texto/ubicación, publicar/despublicar y notas/historial de moderación.

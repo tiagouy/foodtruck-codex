@@ -5,6 +5,7 @@
 <a href="<?php echo esc_url( home_url( '/foodtrucks/' ) ); ?>">Foodtrucks</a>
 <a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Eventos</a>
 <a href="<?php echo esc_url( home_url( '/eventos/pasados/' ) ); ?>">Eventos pasados</a>
+<a href="<?php echo esc_url( home_url( '/fotosusuarios/' ) ); ?>">Fotos</a>
 <details class="ft-account-menu">
 <summary>Mi cuenta</summary>
 <div class="ft-account-links">

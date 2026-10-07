@@ -1,5 +1,7 @@
 # Publicaciones de la comunidad — 0.11.0
 
+Actualización: [0.12.0](fotos-web-0.12.0.md) ya implementa las páginas web y rutas compartidas mencionadas como pendientes en este documento. Importación y asociaciones de nueva app siguen pendientes.
+
 ## Administración
 
 WordPress → Foodtrucks UY → Publicaciones (`admin.php?page=ftuy-publications`). Capacidad propia `manage_ft_publications`, concedida solo al rol administrador. No se otorgan permisos de moderación a suscriptores.

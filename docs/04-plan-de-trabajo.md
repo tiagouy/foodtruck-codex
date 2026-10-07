@@ -14,6 +14,7 @@ Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las func
 - 0.9.1: nuevas subidas del plugin en `/media/`, fuera de `wp-content`; categorías para eventos/foodtrucks y futuras fotos de perfil/publicaciones. Medios históricos sin mover: respaldar también `uploads` y las fuentes antiguas. Ver [imágenes y respaldos](plugin/imagenes-0.9.1.md).
 - 0.10.0: [muestra real importada](plugin/migracion-muestra-0.10.0.md): cuatro suscriptores pendientes, administrador vinculado sin cambiar credenciales/permisos y tres avatares en media/perfiles. Alias y reactivación probados con datos sintéticos. Importación masiva y 51 publicaciones pendientes.
 - 0.11.0: [Publicaciones en el admin](plugin/publicaciones-0.11.0.md), editar texto/ubicación, publicar/despublicar, denuncias manuales e historial. API nueva de lectura solo de publicadas. Sin importar aún las 51 antiguas; subida/denuncias de app y compatibilidad de URLs pendientes.
+- 0.12.0: [listado/detalle web de fotos](plugin/fotos-web-0.12.0.md) en `/fotosusuarios/` y `/fotousuario/{slug}/`, solo publicadas, 404 sin imagen ni preview para pendientes/despublicadas. share_url en API. Rutas web listas; asociaciones de nueva app Android/iOS y migración real pendientes.
 
 ## 0. Base preparada
 
@@ -82,7 +83,8 @@ Resultado: API usable por sitio y app con un contrato compartido.
 
 - [ ] Elegir tema y ubicación del código visual propio; documentar y versionar las personalizaciones.
 - [ ] Construir inicio, directorio y detalle de foodtruck, agenda y detalle de evento.
-- [ ] Conservar rutas históricas verificadas: `/fotosusuarios/` (listado) y `/fotousuario/{slug}` (detalle compartido), con apertura de web/app mediante enlaces asociados de Android/iOS. Sin subida de fotos de comunidad desde el sitio. Despublicar debe ocultar de app, listado web, perfil público y detalle compartido; el enlace de una despublicada debe responder no disponible/404, sin foto ni metadata de vista previa.
+- [x] Implementar listado/detalle web en rutas históricas verificadas: `/fotosusuarios/` y `/fotousuario/{slug}/`. Sin subida web; pendientes/despublicadas ocultas en listado/autor/detalle y con 404 sin foto ni metadata de preview.
+- [ ] Migrar slugs/datos antiguos y configurar/probar enlaces asociados Android/iOS de la nueva app, con fallback a la web; la app debe revalidar estado al abrir enlaces compartidos.
 - [ ] Construir cuenta, perfil, alta/gestión de foodtruck y sugerencia de evento. Las publicaciones de fotos se crean desde la app.
 - [ ] Mostrar estados de revisión y mensajes claros para formularios y errores.
 - [ ] Implementar búsqueda, filtros, diseño móvil, accesibilidad y SEO.
