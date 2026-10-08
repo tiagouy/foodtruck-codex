@@ -1,8 +1,26 @@
-import React, { useCallback, useState } from 'react';
-import { Image, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Flag } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Content, detail, Event, Foodtruck, Publication } from '../lib/api';
+import {
+  Content,
+  detail,
+  Event,
+  Foodtruck,
+  Publication,
+  request,
+} from '../lib/api';
+import { restoreSession } from '../lib/session';
 import { dateLabel, plain } from '../lib/presentation';
 import { mediaURL, siteURL } from '../lib/config';
 import { openLink } from '../lib/links';
@@ -13,12 +31,86 @@ import Avatar from '../components/Avatar';
 
 export default function DetailScreen({
   route,
+  navigation,
 }: NativeStackScreenProps<RootStack, 'Detalle'>) {
   const { kind, contentKey } = route.params;
   const [item, setItem] = useState<Content | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshKey, refresh] = useState(0);
+  const reporting = useRef(false);
+  const photoId = kind === 'publications' ? item?.id : undefined;
+  const sendReport = useCallback(async () => {
+    if (!photoId || reporting.current) {
+      return;
+    }
+    reporting.current = true;
+    try {
+      const session = await restoreSession();
+      if (!session) {
+        Alert.alert(
+          'Ingresá a tu cuenta',
+          'Para denunciar una publicación, ingresá o registrate.',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Ingresar',
+              onPress: () =>
+                navigation.navigate('Principal', { screen: 'Cuenta' }),
+            },
+          ],
+        );
+        return;
+      }
+      await request(
+        `publications/${photoId}/report`,
+        undefined,
+        {},
+        session.token,
+      );
+      Alert.alert(
+        'Denuncia recibida',
+        'Gracias por avisarnos. Revisaremos esta publicación.',
+      );
+    } catch (failure) {
+      Alert.alert(
+        'No pudimos enviar la denuncia',
+        failure instanceof Error ? failure.message : 'Intentá nuevamente.',
+      );
+    } finally {
+      reporting.current = false;
+    }
+  }, [photoId, navigation]);
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: photoId
+        ? () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Denunciar publicación"
+              hitSlop={10}
+              style={styles.reportButton}
+              onPress={() =>
+                Alert.alert(
+                  '¿Denunciar esta publicación?',
+                  'Nos avisarás para que revisemos la foto y su contenido.',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Denunciar',
+                      style: 'destructive',
+                      onPress: sendReport,
+                    },
+                  ],
+                )
+              }
+            >
+              <Flag size={22} color={colors.dark} />
+            </Pressable>
+          )
+        : undefined,
+    });
+  }, [navigation, photoId, sendReport]);
   useFocusEffect(
     useCallback(() => {
       const controller = new AbortController();
@@ -205,6 +297,12 @@ export default function DetailScreen({
   );
 }
 const styles = StyleSheet.create({
+  reportButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   content: { padding: 20, gap: 18, paddingBottom: 44 },
   image: {
     width: '100%',

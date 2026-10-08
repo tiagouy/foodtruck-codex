@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.17.0 — 2026-10-07
+
+- POST autenticado `/publications/{id}/report`: denunciante derivado del token, publicación publicada y registro atómico con historial.
+- Aparece en Publicaciones → Denunciadas y avisa al email administrador. No cambia el estado de la foto; repetir una denuncia abierta no duplica registro ni correo. Límite de diez nuevas denuncias por cuenta/hora.
+- El registro se conserva aunque falle el envío de email; la entrega real depende del servidor. En local se capturan los correos. Diez comprobaciones de integración con fixtures descartables.
+
 ## 0.16.1 — 2026-10-07
 
 - Listado web de fotos alineado con las tarjetas móviles: imagen con proporción 1.35, bordes redondeados, avatar/nombre, fecha/dirección y texto de hasta tres líneas visuales.

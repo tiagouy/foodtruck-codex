@@ -43,9 +43,32 @@ class FTUY_Publications {
         $post = get_post( $row['image_id'] ); $path = get_attached_file( $row['image_id'] );
         return get_user_by( 'id', $row['author_user_id'] ) && $post && wp_attachment_is_image( $post->ID ) && (int) $post->post_author === (int) $row['author_user_id'] && get_post_meta( $post->ID, '_ftuy_media_category', true ) === 'publicaciones' && $path && is_file( $path );
     }
-    private static function audit( $id, $action, $before, $after, $note ) {
+    private static function audit( $id, $action, $before, $after, $note, $actor = null ) {
         global $wpdb;
-        return $wpdb->insert( self::table( 'publication_audit' ), array( 'publication_id' => $id, 'actor_user_id' => get_current_user_id(), 'action' => $action, 'before_json' => wp_json_encode( $before ), 'after_json' => wp_json_encode( $after ), 'note' => $note, 'created_at' => current_time( 'mysql', true ) ) ) !== false;
+        return $wpdb->insert( self::table( 'publication_audit' ), array( 'publication_id' => $id, 'actor_user_id' => $actor === null ? get_current_user_id() : $actor, 'action' => $action, 'before_json' => wp_json_encode( $before ), 'after_json' => wp_json_encode( $after ), 'note' => $note, 'created_at' => current_time( 'mysql', true ) ) ) !== false;
+    }
+    /** The reporter comes exclusively from a validated app token, never client fields. */
+    public static function app_report( $request ) {
+        $auth = FTUY_App_Sessions::authenticate( $request );
+        if ( is_wp_error( $auth ) ) { return $auth; }
+        $actor = (int) $auth['user']->ID; $id = (int) $request['id'];
+        global $wpdb; $wpdb->query( 'START TRANSACTION' );
+        $row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id=%d FOR UPDATE', $id ), ARRAY_A );
+        if ( ! $row || $row['status'] !== 'published' ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'not_found', 'Esta publicación ya no está disponible.', array( 'status' => 404 ) ); }
+        $existing = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . self::table( 'publication_reports' ) . " WHERE publication_id=%d AND added_by=%d AND status='open' LIMIT 1", $id, $actor ) );
+        if ( $existing ) { $wpdb->query( 'COMMIT' ); return self::report_response(); }
+        if ( FTUY_Accounts::limited( 'report-user-' . $actor, 10, HOUR_IN_SECONDS ) ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'rate', 'Enviaste varias denuncias. Probá nuevamente más tarde.', array( 'status' => 429 ) ); }
+        $data = array( 'publication_id' => $id, 'reason' => 'Publicación denunciada desde la app. Revisar foto y texto.', 'added_by' => $actor, 'created_at' => current_time( 'mysql', true ) );
+        $ok = $wpdb->insert( self::table( 'publication_reports' ), $data ) !== false && self::audit( $id, 'report', array(), $data, '', $actor );
+        $wpdb->query( $ok ? 'COMMIT' : 'ROLLBACK' );
+        if ( ! $ok ) { return new WP_Error( 'save', 'No pudimos registrar la denuncia. Intentá nuevamente.', array( 'status' => 503 ) ); }
+        // A failed mail delivery must never discard the durable moderation queue entry.
+        wp_mail( get_option( 'admin_email' ), '[Foodtrucks UY] Publicación denunciada #' . $id, 'Recibimos una denuncia desde la app. La foto sigue publicada hasta que la revises.' . "\n\n" . admin_url( 'admin.php?page=ftuy-publications&edit=' . $id ) );
+        return self::report_response();
+    }
+    private static function report_response() {
+        $response = new WP_REST_Response( array( 'received' => true ), 202 );
+        $response->header( 'Cache-Control', 'no-store, private' ); return $response;
     }
     /** Backend-only creation service; no website or REST upload form. */
     public static function create( $input, $author, $image ) {
@@ -130,6 +153,7 @@ class FTUY_Publications {
         );
     }
     public static function api() {
+        register_rest_route( 'foodtrucks-uy/v1', '/publications/(?P<id>[1-9][0-9]*)/report', array( 'methods' => 'POST', 'permission_callback' => '__return_true', 'callback' => array( __CLASS__, 'app_report' ) ) );
         register_rest_route( 'foodtrucks-uy/v1', '/publications/by-slug/(?P<slug>[a-zA-Z0-9-]+)', array( 'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => function ( $request ) {
             $row = FTUY_Publication_Public::by_slug( $request['slug'] );
             if ( ! $row ) { return new WP_Error( 'not_found', 'Publicación no encontrada.', array( 'status' => 404 ) ); }

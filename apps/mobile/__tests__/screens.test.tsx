@@ -1,12 +1,12 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { Text, Image } from 'react-native';
+import { Text, Image, Alert } from 'react-native';
 import HomeScreen from '../src/screens/HomeScreen';
 import AccountScreen from '../src/screens/AccountScreen';
 import AccountSettingsScreen from '../src/screens/AccountSettingsScreen';
 import DetailScreen from '../src/screens/DetailScreen';
 import AccountRequestScreen from '../src/screens/AccountRequestScreen';
-import { list, detail, accountRequest } from '../src/lib/api';
+import { list, detail, accountRequest, request } from '../src/lib/api';
 import { TextInput } from 'react-native';
 import { Button } from '../src/components/State';
 import {
@@ -35,6 +35,7 @@ jest.mock('../src/lib/api', () => ({
   list: jest.fn(),
   detail: jest.fn(),
   accountRequest: jest.fn(),
+  request: jest.fn(),
 }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn() }),
@@ -77,6 +78,64 @@ test('home works without community activity and distinguishes empty directory/hi
   expect(texts(tree)).toContain('preparando el directorio');
   expect(texts(tree)).toContain('Todavía no hay fotos');
   await act(async () => tree.unmount());
+});
+test('photo header confirms report and sends only authenticated publication reference', async () => {
+  mockDetail.mockResolvedValue({
+    id: 12,
+    author: { id: 2, name: 'Fixture' },
+    image: {},
+    caption: 'Foto',
+    created_at: '',
+    address: '',
+  });
+  (restoreSession as jest.Mock).mockResolvedValue({ token: 'fixture-token' });
+  (request as jest.Mock).mockResolvedValue({ received: true });
+  const alerts = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const navigation = { setOptions: jest.fn(), navigate: jest.fn() };
+  let tree!: Renderer.ReactTestRenderer;
+  let header!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <DetailScreen
+        route={{ params: { kind: 'publications', contentKey: '12' } }}
+        navigation={navigation as any}
+        {...({} as any)}
+      />,
+    );
+  });
+  await act(async () => {
+    header = Renderer.create(
+      navigation.setOptions.mock.calls.at(-1)![0].headerRight(),
+    );
+  });
+  const button = header.root.findByProps({
+    accessibilityLabel: 'Denunciar publicación',
+  });
+  await act(async () => button.props.onPress());
+  expect(request).not.toHaveBeenCalled();
+  const confirm = alerts.mock.calls.at(-1)![2]![1].onPress!;
+  await act(async () => {
+    await confirm();
+  });
+  expect(request).toHaveBeenCalledWith(
+    'publications/12/report',
+    undefined,
+    {},
+    'fixture-token',
+  );
+  expect(alerts.mock.calls.at(-1)![0]).toBe('Denuncia recibida');
+  (restoreSession as jest.Mock).mockResolvedValue(null);
+  (request as jest.Mock).mockClear();
+  await act(async () => {
+    await confirm();
+  });
+  expect(request).not.toHaveBeenCalled();
+  expect(alerts.mock.calls.at(-1)![0]).toBe('Ingresá a tu cuenta');
+  await act(async () => {
+    header.unmount();
+    tree.unmount();
+  });
+  alerts.mockRestore();
 });
 test('one home resource failure does not hide the other resources', async () => {
   mockList.mockImplementation((kind: string) =>
@@ -410,6 +469,7 @@ test('unpublished detail shows no stale photo or caption', async () => {
   await act(async () => {
     tree = Renderer.create(
       <DetailScreen
+        navigation={{ setOptions: jest.fn(), navigate: jest.fn() } as any}
         route={{ params: { kind: 'publications', contentKey: '1' } }}
         {...({} as any)}
       />,

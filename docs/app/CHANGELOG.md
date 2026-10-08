@@ -1,5 +1,11 @@
 # Changelog de la app
 
+## 0.6.0 — 2026-10-07
+
+- Bandera en el cabezal derecho del detalle de una publicación, con confirmación antes de denunciar.
+- Requiere sesión activa; sin sesión invita a ingresar. Envía el ID de publicación con el token seguro y muestra el resultado real del servidor.
+- No despublica automáticamente. 41 pruebas Jest, TypeScript y lint.
+
 ## 0.5.2 — 2026-10-07
 
 - Avatar circular del autor junto al nombre en tarjetas de fotos de la comunidad (Inicio/Fotos) y detalle.
