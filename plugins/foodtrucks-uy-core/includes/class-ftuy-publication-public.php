@@ -11,6 +11,17 @@ class FTUY_Publication_Public {
         return ! empty( $row['legacy_slug'] ) && preg_match( '/^[a-zA-Z0-9-]{1,200}$/D', $row['legacy_slug'] ) ? $row['legacy_slug'] : 'p-' . (int) $row['id'];
     }
     public static function url( $row ) { return home_url( '/fotousuario/' . self::slug( $row ) . '/' ); }
+    public static function map_url( $row ) {
+        $lat = $row['latitude'] ?? null; $lng = $row['longitude'] ?? null;
+        $valid = is_numeric( $lat ) && is_finite( (float) $lat ) && abs( (float) $lat ) <= 90 && is_numeric( $lng ) && is_finite( (float) $lng ) && abs( (float) $lng ) <= 180;
+        $query = $valid ? (float) $lat . ',' . (float) $lng : trim( (string) ( $row['address'] ?? '' ) );
+        return $query !== '' ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $query ) : '';
+    }
+    public static function meta( $row ) {
+        $html = '<time datetime="' . esc_attr( self::datetime( $row ) ) . '">' . esc_html( mysql2date( 'd/m/Y', $row['created_at'] ) ) . '</time>';
+        if ( ! empty( $row['address'] ) ) { $html .= ' · <a class="ft-photo-map" href="' . esc_url( self::map_url( $row ) ) . '" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr( 'Abrir ' . $row['address'] . ' en Google Maps' ) . '">' . esc_html( $row['address'] ) . '</a>'; }
+        return $html;
+    }
     public static function datetime( $row ) {
         // Legacy server timezone is unknown: retain its date without claiming UTC.
         return ! empty( $row['legacy_id'] ) ? substr( $row['created_at'], 0, 10 ) : str_replace( ' ', 'T', $row['created_at'] ) . 'Z';

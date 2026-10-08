@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Foodtrucks UY Core
  * Description: Plataforma compartida de Foodtrucks Uruguay para el sitio y la aplicación.
- * Version: 0.19.0
+ * Version: 0.19.1
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: foodtrucks-uy-core
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FOODTRUCKS_UY_CORE_VERSION', '0.19.0' );
+define( 'FOODTRUCKS_UY_CORE_VERSION', '0.19.1' );
 define( 'FTUY_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FTUY_URL', plugin_dir_url( __FILE__ ) );
 

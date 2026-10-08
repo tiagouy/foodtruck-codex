@@ -18,6 +18,10 @@ try {
     $id = FTUY_Publications::create( $input, $uid, $image ); if ( is_wp_error( $id ) ) { throw new RuntimeException( 'No pudo crear publicación de prueba.' ); } $ids[] = $id;
     $url = '/fotousuario/p-' . $id . '/';
     $detail = $call( $url );
+    $assert( strpos( $detail[1], 'class="ft-photo-map"' ) !== false && strpos( $detail[1], 'query=Direcci%C3%B3n%20ficticia' ) !== false, 'Lugar enlazado a Google Maps por texto cuando no hay coordenadas.' );
+    $assert( strpos( $detail[1], 'class="ft-photo-meta"' ) < strpos( $detail[1], 'class="ft-photo-caption"' ), 'Fecha y lugar aparecen antes del texto en detalle.' );
+    $assert( FTUY_Publication_Public::map_url( array( 'latitude' => '-34.9', 'longitude' => '-56.2', 'address' => 'Lugar' ) ) === 'https://www.google.com/maps/search/?api=1&query=-34.9%2C-56.2', 'Maps prioriza coordenadas.' );
+    $assert( FTUY_Publication_Public::map_url( array( 'latitude' => '0', 'longitude' => '0', 'address' => 'Lugar' ) ) === 'https://www.google.com/maps/search/?api=1&query=0%2C0', 'Coordenadas cero válidas.' );
     $assert( $detail[0] === 200 && strpos( $detail[1], esc_html( $input['caption'] ) ) !== false, 'Detalle público muestra texto.' );
     $assert( strpos( $detail[1], 'property="og:image"' ) !== false && strpos( $detail[1], 'Enlace para compartir' ) !== false, 'Vista previa y enlace compartible publicados.' );
     $assert( stripos( $detail[2], 'no-store' ) !== false, 'HTML no cacheable.' );
@@ -26,6 +30,7 @@ try {
     $assert( $call( '/fotousuario/p-' . $id )[0] === 301, 'Normaliza slash de detalle.' );
     $assert( $call( '/fotosusuarios' )[0] === 301 && $call( '/fotosusuarios/index.php' )[0] === 301, 'Normaliza URLs de listado.' );
     $list = $call( '/fotosusuarios/' ); $assert( $list[0] === 200 && strpos( $list[1], '/fotousuario/p-' . $id . '/' ) !== false, 'Listado incluye foto publicada.' );
+    $assert( strpos( $list[1], 'class="ft-photo-map"' ) !== false, 'Listado también permite abrir el lugar en Maps.' );
     $assert( strpos( $list[1], 'gt-lazy-load' ) === false && strpos( $list[1], 'loading="lazy"' ) !== false, 'Listado con lazy loading nativo.' );
     $fallback = FTUY_Publication_Public::avatar( $uid );
     $assert( strpos( $fallback, '<svg' ) !== false && strpos( $fallback, '<img' ) === false, 'Autor sin avatar usa icono de persona.' );

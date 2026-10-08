@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.8.3 — 2026-10-08
+
+- Lista y detalle comparten PhotoMeta: nombre → fecha/lugar → texto. Lugar subrayado abre Google Maps, priorizando coordenadas válidas y usando búsqueda textual si faltan. No dispara a la vez la apertura del detalle de la tarjeta.
+- 51 pruebas Jest, TypeScript/lint y QA nativa con Expo Café Uruguay. No modifica publicación/ubicación ni solicita GPS.
+
 ## 0.8.2 — 2026-10-08
 
 - Seleccionar un lugar conserva el nombre del resultado (Expo Café Uruguay), no lo sustituye por su calle. Dirección postal y LAT/LONG se envían por separado, solo mientras la selección siga vigente.

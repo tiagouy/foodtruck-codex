@@ -13,6 +13,7 @@ import { cardData, plain } from '../lib/presentation';
 import { mediaURL } from '../lib/config';
 import { colors } from './AppHeader';
 import Avatar from './Avatar';
+import PhotoMeta from './PhotoMeta';
 
 export default function ContentCard({
   kind,
@@ -67,7 +68,11 @@ export default function ContentCard({
         ) : (
           <Text style={styles.title}>{plain(data.title)}</Text>
         )}
-        <Text style={styles.meta}>{plain(data.subtitle)}</Text>
+        {kind === 'publications' ? (
+          <PhotoMeta photo={item as Publication} />
+        ) : (
+          <Text style={styles.meta}>{plain(data.subtitle)}</Text>
+        )}
         {kind === 'publications' && (
           <Text numberOfLines={3} style={styles.caption}>
             {plain((item as Publication).caption)}

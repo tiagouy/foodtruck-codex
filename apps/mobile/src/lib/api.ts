@@ -44,6 +44,8 @@ export type Publication = {
   id: number;
   caption: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   created_at: string;
   created_timezone: string | null;
   share_url: string;

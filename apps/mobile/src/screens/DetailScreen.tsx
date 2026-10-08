@@ -28,6 +28,7 @@ import { RootStack } from '../navigation';
 import { colors } from '../components/AppHeader';
 import State, { Button } from '../components/State';
 import Avatar from '../components/Avatar';
+import PhotoMeta from '../components/PhotoMeta';
 
 export default function DetailScreen({
   route,
@@ -173,11 +174,14 @@ export default function DetailScreen({
         />
       )}
       {photo ? (
-        <View style={styles.authorRow}>
-          <Avatar url={photo.author.avatar} size={44} />
-          <Text accessibilityRole="header" style={styles.authorName}>
-            {plain(photo.author.name)}
-          </Text>
+        <View>
+          <View style={styles.authorRow}>
+            <Avatar url={photo.author.avatar} size={44} />
+            <Text accessibilityRole="header" style={styles.authorName}>
+              {plain(photo.author.name)}
+            </Text>
+          </View>
+          <PhotoMeta photo={photo} />
         </View>
       ) : (
         <Text accessibilityRole="header" style={styles.title}>
@@ -276,9 +280,7 @@ export default function DetailScreen({
       )}
       {photo && (
         <>
-          <Text style={styles.meta}>{dateLabel(photo.created_at)}</Text>
-          <Text style={styles.text}>{plain(photo.caption)}</Text>
-          <Text style={styles.meta}>{photo.address}</Text>
+          <Text style={styles.photoText}>{plain(photo.caption)}</Text>
           <Button
             label="Compartir"
             onPress={() => {
@@ -297,6 +299,7 @@ export default function DetailScreen({
   );
 }
 const styles = StyleSheet.create({
+  photoText: { fontSize: 16, lineHeight: 22, color: colors.dark },
   reportButton: {
     width: 44,
     height: 44,

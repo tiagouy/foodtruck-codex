@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.19.1 — 2026-10-08
+
+- Lista y detalle web de fotos usan fecha/lugar juntos antes del texto, alineados con la app; tipografía/espaciado del detalle acercados a las tarjetas.
+- Lugar enlazado a Maps con LAT/LONG válidas o búsqueda por texto si faltan, nueva pestaña segura. URLs escapadas, sin claves ni consultas al cargar la página. 34 comprobaciones web incluyendo orden, enlaces y despublicación.
+- URLs universales según [documentación de Google Maps](https://developers.google.com/maps/documentation/urls/get-started). No cambia los datos guardados.
+
 ## 0.19.0 — 2026-10-08
 
 - Publicaciones esquema 4 agrega `street_address` opcional: preserva dirección postal de Google separada del nombre/lugar visible guardado en `address`. Coordenadas se conservan. Nuevas publicaciones muestran el lugar en web/app mediante el campo público existente.
