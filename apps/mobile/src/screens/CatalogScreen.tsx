@@ -1,13 +1,21 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import {
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Content, Kind, list, mergeItems } from '../lib/api';
+import { Content, Event, Kind, list, mergeItems } from '../lib/api';
 import { cardData } from '../lib/presentation';
 import { RootStack } from '../navigation';
 import AppHeader, { colors } from '../components/AppHeader';
 import ContentCard from '../components/ContentCard';
+import EventCarousel from '../components/EventCarousel';
 import State, { Button } from '../components/State';
 
 const labels = {
@@ -84,6 +92,74 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
       };
     }, [load]),
   );
+  if (kind === 'events') {
+    return (
+      <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
+        <AppHeader title="Tu próxima salida" />
+        <ScrollView
+          style={styles.body}
+          contentContainerStyle={styles.eventContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading && page === 0}
+              onRefresh={() => load(1)}
+            />
+          }
+        >
+          <View style={styles.eventHeading}>
+            <Text style={styles.eventTitle}>Agenda de eventos</Text>
+            <Text style={styles.notice}>
+              Deslizá y descubrí dónde nos encontramos.
+            </Text>
+            <View style={styles.tabs}>
+              {(['upcoming', 'past'] as const).map(option => (
+                <Text
+                  key={option}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: view === option }}
+                  onPress={() => setView(option)}
+                  style={[styles.tab, view === option && styles.selectedTab]}
+                >
+                  {option === 'upcoming' ? 'Próximos' : 'Pasados'}
+                </Text>
+              ))}
+            </View>
+          </View>
+          {items.length ? (
+            <EventCarousel
+              key={view}
+              items={items as Event[]}
+              onPress={item =>
+                navigation.navigate('Detalle', {
+                  kind: 'events',
+                  contentKey: item.slug,
+                })
+              }
+            />
+          ) : (
+            <State
+              loading={loading}
+              message={error || empty.events}
+              retry={error ? () => load(1) : undefined}
+            />
+          )}
+          <View style={styles.eventHeading}>
+            {items.length > 0 &&
+              (error ? (
+                <State message={error} retry={() => load(page + 1)} />
+              ) : loading ? (
+                <State loading />
+              ) : page * 12 < total ? (
+                <Button
+                  label="Cargar más eventos"
+                  onPress={() => load(page + 1)}
+                />
+              ) : null)}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
       <AppHeader title={labels[kind]} />
@@ -108,20 +184,6 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
         )}
         ListHeaderComponent={
           <View>
-            {kind === 'events' && (
-              <View style={styles.filters}>
-                <Button
-                  label="Próximos"
-                  disabled={view === 'upcoming'}
-                  onPress={() => setView('upcoming')}
-                />
-                <Button
-                  label="Pasados"
-                  disabled={view === 'past'}
-                  onPress={() => setView('past')}
-                />
-              </View>
-            )}
             {kind === 'publications' && (
               <View style={styles.upload}>
                 <Button
@@ -164,6 +226,30 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.dark },
   body: { backgroundColor: colors.background },
   content: { padding: 18 },
-  filters: { flexDirection: 'row', gap: 10, marginBottom: 18 },
+  eventContent: { paddingVertical: 22 },
+  eventHeading: { paddingHorizontal: 20 },
+  eventTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: colors.dark,
+    marginBottom: 8,
+  },
+  tabs: {
+    flexDirection: 'row',
+    backgroundColor: '#EEE5DB',
+    padding: 4,
+    borderRadius: 28,
+    marginBottom: 10,
+  },
+  tab: {
+    flex: 1,
+    textAlign: 'center',
+    paddingVertical: 12,
+    borderRadius: 24,
+    color: colors.muted,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  selectedTab: { backgroundColor: colors.dark, color: '#FFFFFF' },
   notice: { lineHeight: 21, color: colors.muted, marginBottom: 18 },
 });

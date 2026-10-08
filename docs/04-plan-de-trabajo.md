@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-08 · app 0.9.0 / plugin 0.19.1
+
+Home y agenda incorporan [carrusel de eventos](app/carrusel-eventos-0.9.0.md) con imágenes cuadradas, centro destacado y vecinos escalados. Conserva próximos/pasados y paginación. QA visual con históricos, 53 pruebas; pendiente gesto manual y Android. Subida real de la foto de flores confirmada por el usuario; nombre del lugar, dirección postal y coordenadas guardados. Lista/detalle de fotos alineados con enlaces Maps. No hay despliegue productivo ni envío a tiendas.
+
 Actualización posterior: app 0.8.0 incorpora recorte nativo cuadrado; plugin 0.18.1 corrige autocompletado local reutilizando la clave web existente. Google real y LAT/LONG verificados. Para producción todavía se debe configurar la clave privada dedicada; no hace falta otra activación para probar en local.
 
 ## Actualización · 2026-10-08 · plugin 0.18.0 / app 0.7.0

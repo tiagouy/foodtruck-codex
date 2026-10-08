@@ -1,5 +1,12 @@
 # Changelog de la app
 
+## 0.9.0 — 2026-10-08
+
+- Home y agenda usan EventCarousel: poster cuadrado, tarjeta centrada y vecinos reducidos que crecen progresivamente al desplazarse, con snap y animación nativa. Sin autoplay ni duplicar eventos para simular un bucle.
+- Agenda conserva próximos/pasados, recarga, errores y paginación. Flechas accesibles y contador; Reduce Motion desactiva el cambio de escala y desplazamiento animado por flechas.
+- 53 pruebas Jest, TypeScript/lint. QA en iPhone 17: cuatro eventos históricos, segundo centrado con ambos vecinos visibles, avance por flecha y apertura del detalle. El gesto de arrastre automatizado no quedó validado (abrió el detalle); pendiente prueba manual del deslizamiento y QA Android.
+- Plugin y datos intactos. Home sigue mostrando solo próximos reales; no usa históricos para rellenar un vacío.
+
 ## 0.8.3 — 2026-10-08
 
 - Lista y detalle comparten PhotoMeta: nombre → fecha/lugar → texto. Lugar subrayado abre Google Maps, priorizando coordenadas válidas y usando búsqueda textual si faltan. No dispara a la vez la apertura del detalle de la tarjeta.

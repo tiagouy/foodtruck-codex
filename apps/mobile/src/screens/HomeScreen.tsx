@@ -9,11 +9,12 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Content, Kind, list } from '../lib/api';
+import { Content, Event, Kind, list } from '../lib/api';
 import { cardData } from '../lib/presentation';
 import { RootStack, Tabs } from '../navigation';
 import AppHeader, { colors } from '../components/AppHeader';
 import ContentCard from '../components/ContentCard';
+import EventCarousel from '../components/EventCarousel';
 import State, { Button } from '../components/State';
 
 type Block = { kind: Kind; title: string; tab: keyof Tabs; empty: string };
@@ -119,19 +120,33 @@ export default function HomeScreen() {
                   retry={() => refresh(key => key + 1)}
                 />
               ) : result.items.length ? (
-                result.items.map(item => (
-                  <ContentCard
-                    key={item.id}
-                    kind={block.kind}
-                    item={item}
-                    onPress={() =>
-                      navigation.navigate('Detalle', {
-                        kind: block.kind,
-                        contentKey: cardData(block.kind, item).key,
-                      })
-                    }
-                  />
-                ))
+                block.kind === 'events' ? (
+                  <View style={styles.carousel}>
+                    <EventCarousel
+                      items={result.items as Event[]}
+                      onPress={item =>
+                        navigation.navigate('Detalle', {
+                          kind: 'events',
+                          contentKey: item.slug,
+                        })
+                      }
+                    />
+                  </View>
+                ) : (
+                  result.items.map(item => (
+                    <ContentCard
+                      key={item.id}
+                      kind={block.kind}
+                      item={item}
+                      onPress={() =>
+                        navigation.navigate('Detalle', {
+                          kind: block.kind,
+                          contentKey: cardData(block.kind, item).key,
+                        })
+                      }
+                    />
+                  ))
+                )
               ) : (
                 <State message={block.empty} />
               )}
@@ -159,6 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   section: { marginBottom: 32 },
+  carousel: { marginHorizontal: -18 },
   title: {
     fontSize: 22,
     fontWeight: '800',
