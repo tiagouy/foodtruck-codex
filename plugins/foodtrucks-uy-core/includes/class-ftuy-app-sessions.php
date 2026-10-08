@@ -6,7 +6,7 @@ class FTUY_App_Sessions {
     const PREFIX = 'ftuy_app_session_';
     public static function init() {
         add_action( 'rest_api_init', function () {
-            foreach ( array( 'login' => 'POST', 'session' => 'GET', 'logout' => 'POST', 'update_profile' => 'POST' ) as $action => $method ) {
+            foreach ( array( 'login' => 'POST', 'session' => 'GET', 'logout' => 'POST', 'update_profile' => 'POST', 'avatar' => 'POST' ) as $action => $method ) {
                 $path = $action === 'update_profile' ? 'profile' : $action;
                 register_rest_route( 'foodtrucks-uy/v1', '/accounts/' . $path, array( 'methods' => $method, 'permission_callback' => '__return_true', 'callback' => array( __CLASS__, $action ) ) );
             }
@@ -37,6 +37,27 @@ class FTUY_App_Sessions {
         $id = wp_update_user( array( 'ID' => $auth['user']->ID, 'first_name' => $first, 'last_name' => $last, 'display_name' => trim( $first . ' ' . $last ) ) );
         if ( is_wp_error( $id ) ) { return new WP_Error( 'profile', 'No pudimos guardar el perfil.', array( 'status' => 503 ) ); }
         return new WP_REST_Response( array( 'user' => self::profile( get_user_by( 'id', $id ) ) ), 200 );
+    }
+    public static function avatar( $request ) {
+        $auth = self::authenticate( $request );
+        if ( is_wp_error( $auth ) ) { return $auth; }
+        $id = $auth['user']->ID; $files = $request->get_file_params(); $file = $files['photo'] ?? null;
+        if ( is_array( $file ) && in_array( $file['error'] ?? -1, array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) ) { return new WP_Error( 'weight', 'La imagen pesa demasiado. Elegí una de hasta 5 MB.', array( 'status' => 413 ) ); }
+        if ( ! is_array( $file ) || ( $file['error'] ?? -1 ) !== UPLOAD_ERR_OK || ! is_string( $file['tmp_name'] ?? null ) || ! is_uploaded_file( $file['tmp_name'] ) ) { return new WP_Error( 'upload', 'Elegí una foto para tu perfil.', array( 'status' => 400 ) ); }
+        if ( FTUY_Accounts::limited( 'avatar-user-' . $id, 10, HOUR_IN_SECONDS ) ) { return new WP_Error( 'rate', 'Hubo varios intentos. Probá nuevamente más tarde.', array( 'status' => 429 ) ); }
+        $lock = 'ftuy_avatar_lock_' . $id;
+        $previous = get_option( $lock );
+        if ( $previous && (int) $previous < time() - 300 ) {
+            global $wpdb;
+            $wpdb->delete( $wpdb->options, array( 'option_name' => $lock, 'option_value' => (string) $previous ) );
+            wp_cache_delete( $lock, 'options' );
+        }
+        if ( ! add_option( $lock, time(), '', false ) ) { return new WP_Error( 'busy', 'Hay una foto procesándose. Probá nuevamente en un momento.', array( 'status' => 429 ) ); }
+        try {
+            $image = FTUY_Profile_Images::replace( $id, $file['tmp_name'] );
+            if ( is_wp_error( $image ) ) { return new WP_Error( 'avatar', $image->get_error_message(), array( 'status' => 400 ) ); }
+            return new WP_REST_Response( array( 'user' => self::profile( get_user_by( 'id', $id ) ) ), 200 );
+        } finally { delete_option( $lock ); }
     }
     public static function login( $request ) {
         if ( ! self::transport() ) { return new WP_Error( 'https', 'El ingreso requiere una conexión segura.', array( 'status' => 503 ) ); }

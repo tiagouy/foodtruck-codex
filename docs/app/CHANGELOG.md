@@ -1,5 +1,11 @@
 # Changelog de la app
 
+## 0.5.0 — 2026-10-07
+
+- Foto de perfil seleccionable desde Editar perfil, preview local y subida al guardar; límite de peso con mensajes simples.
+- Mi cuenta con avatar circular a la derecha (20% del ancho del teléfono, con límite para tablets), nombre a 20 y Mis fotos a 17 puntos.
+- Selector nativo de biblioteca, configuración de privacidad iOS y recompilación; sin pedir cámara ni permisos Android de almacenamiento general.
+
 ## 0.4.0 — 2026-10-07
 
 - Mi cuenta autenticada muestra nombre, avatar propio si existe y Mis fotos en grilla cuadrada de dos columnas, paginación y acceso al detalle.

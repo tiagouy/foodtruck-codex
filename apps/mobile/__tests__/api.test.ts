@@ -4,6 +4,7 @@ import {
   list,
   mergeItems,
   accountRequest,
+  request,
 } from '../src/lib/api';
 import { dateLabel, plain } from '../src/lib/presentation';
 import { mediaURL, siteURL } from '../src/lib/config';
@@ -21,6 +22,16 @@ const photo = {
   share_url: 'https://example.test/fotousuario/una/',
 };
 beforeEach(() => mockFetch.mockReset());
+test('multipart avatar keeps FormData and lets the native transport set its boundary', async () => {
+  response({ message: 'ok' });
+  const body = new FormData();
+  body.append('photo', 'fixture');
+  await request('accounts/avatar', undefined, body, 'fixture-token');
+  const options = mockFetch.mock.calls[0][1];
+  expect(options.body).toBe(body);
+  expect(options.headers['Content-Type']).toBeUndefined();
+  expect(options.headers.Authorization).toBe('Bearer fixture-token');
+});
 function response(body: unknown, status = 200) {
   mockFetch.mockResolvedValue({
     ok: status >= 200 && status < 300,

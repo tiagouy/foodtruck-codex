@@ -149,8 +149,9 @@ export function validateContent(kind: Kind, item: unknown): item is Content {
 export async function request(
   path: string,
   signal?: AbortSignal,
-  body?: Record<string, string>,
+  body?: Record<string, string> | FormData,
   token?: string,
+  timeoutMs = 15000,
 ): Promise<unknown> {
   const controller = new AbortController();
   const abort = () => controller.abort();
@@ -158,7 +159,8 @@ export async function request(
   if (signal?.aborted) {
     controller.abort();
   }
-  const timeout = setTimeout(abort, 15000);
+  const timeout = setTimeout(abort, timeoutMs);
+  const multipart = body instanceof FormData;
   try {
     const response = await fetch(
       `${siteURL()}/wp-json/foodtrucks-uy/v1/${path}`,
@@ -166,12 +168,12 @@ export async function request(
         signal: controller.signal,
         credentials: 'omit',
         method: body ? 'POST' : 'GET',
-        body: body ? JSON.stringify(body) : undefined,
+        body: body ? (multipart ? body : JSON.stringify(body)) : undefined,
         headers: {
           Accept: 'application/json',
           'Cache-Control': 'no-cache',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          ...(body ? { 'Content-Type': 'application/json' } : {}),
+          ...(body && !multipart ? { 'Content-Type': 'application/json' } : {}),
         },
       },
     );
@@ -182,7 +184,7 @@ export async function request(
           const error = await response.json();
           if (
             typeof error?.message === 'string' &&
-            [400, 401, 429, 503].includes(response.status)
+            [400, 401, 413, 429, 503].includes(response.status)
           ) {
             message = error.message.replace(/<[^>]*>/g, '').slice(0, 500);
           }

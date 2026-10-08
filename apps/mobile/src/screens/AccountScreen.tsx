@@ -8,12 +8,14 @@ import {
   TextInput,
   Image,
   Pressable,
+  View,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppHeader, { colors } from '../components/AppHeader';
 import State, { Button } from '../components/State';
 import MyPhotos from '../components/MyPhotos';
-import { Settings } from 'lucide-react-native';
+import { Settings, UserRound } from 'lucide-react-native';
 import { mediaURL } from '../lib/config';
 import { accountFieldsError } from '../lib/api';
 import {
@@ -28,6 +30,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStack } from '../navigation';
 
 export default function AccountScreen() {
+  const avatarSize = Math.round(
+    Math.min(useWindowDimensions().width * 0.2, 128),
+  );
   const navigation = useNavigation<NativeStackNavigationProp<RootStack>>();
   const [session, setSession] = useState<AppSession | null>(null);
   const [email, setEmail] = useState('');
@@ -148,13 +153,31 @@ export default function AccountScreen() {
             <State loading />
           ) : session ? (
             <>
-              {mediaURL(session.user.avatar) ? (
-                <Image
-                  source={{ uri: mediaURL(session.user.avatar) }}
-                  style={styles.avatar}
-                />
-              ) : null}
-              <Text style={styles.title}>{session.user.name}</Text>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileName}>{session.user.name}</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Editar mi foto de perfil"
+                  onPress={() => navigation.navigate('ConfiguracionCuenta')}
+                  style={[
+                    styles.avatar,
+                    {
+                      width: avatarSize,
+                      height: avatarSize,
+                      borderRadius: avatarSize / 2,
+                    },
+                  ]}
+                >
+                  {mediaURL(session.user.avatar) ? (
+                    <Image
+                      source={{ uri: mediaURL(session.user.avatar) }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  ) : (
+                    <UserRound color={colors.muted} size={avatarSize * 0.45} />
+                  )}
+                </Pressable>
+              </View>
               <MyPhotos author={session.user.id} />
             </>
           ) : (
@@ -243,7 +266,19 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.dark },
   settings: { padding: 8 },
-  avatar: { width: 84, height: 84, borderRadius: 42, alignSelf: 'center' },
+  avatar: {
+    backgroundColor: colors.line,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    justifyContent: 'space-between',
+  },
+  profileName: { fontSize: 20, fontWeight: '600', color: colors.dark, flex: 1 },
   flex: { flex: 1 },
   body: { backgroundColor: colors.background },
   content: { padding: 20, gap: 16 },

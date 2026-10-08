@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Image,
+  Pressable,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStack } from '../navigation';
@@ -14,9 +16,14 @@ import {
   logout,
   restoreSession,
   updateProfile,
+  uploadAvatar,
+  ProfilePhoto,
 } from '../lib/session';
 import State, { Button } from '../components/State';
 import { colors } from '../components/AppHeader';
+import { mediaURL } from '../lib/config';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { UserRound } from 'lucide-react-native';
 
 export default function AccountSettingsScreen({
   navigation,
@@ -24,6 +31,7 @@ export default function AccountSettingsScreen({
   const [session, setSession] = useState<AppSession | null>(null);
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
+  const [photo, setPhoto] = useState<ProfilePhoto | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -60,6 +68,67 @@ export default function AccountSettingsScreen({
       mounted.current = false;
     };
   }, [navigation]);
+  const selectPhoto = async () => {
+    if (working.current || !session) {
+      return;
+    }
+    working.current = true;
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+        selectionLimit: 1,
+        assetRepresentationMode: 'compatible',
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.9,
+      });
+      if (!mounted.current || result.didCancel) {
+        return;
+      }
+      if (result.errorCode) {
+        throw new Error(
+          'No pudimos abrir tus fotos. Revisá los permisos y volvé a intentar.',
+        );
+      }
+      const asset = result.assets?.[0];
+      if (!asset?.uri) {
+        throw new Error('No pudimos leer esa foto. Elegí otra.');
+      }
+      if ((asset.fileSize || 0) > 5 * 1024 * 1024) {
+        throw new Error('La imagen pesa demasiado. Elegí una de hasta 5 MB.');
+      }
+      if (
+        !['image/jpeg', 'image/png', 'image/webp'].includes(
+          asset.type || 'image/jpeg',
+        )
+      ) {
+        throw new Error(
+          'No pudimos leer esa imagen. Elegí una foto JPG, PNG o WebP.',
+        );
+      }
+      setPhoto({
+        uri: asset.uri,
+        type: asset.type || 'image/jpeg',
+        name: asset.fileName || 'perfil.jpg',
+      });
+    } catch (reason) {
+      if (mounted.current) {
+        setError(
+          reason instanceof Error
+            ? reason.message
+            : 'No pudimos seleccionar la foto.',
+        );
+      }
+    } finally {
+      working.current = false;
+      if (mounted.current) {
+        setBusy(false);
+      }
+    }
+  };
   const save = async () => {
     if (!session || working.current) {
       return;
@@ -72,18 +141,30 @@ export default function AccountSettingsScreen({
     setBusy(true);
     setError('');
     setNotice('');
+    let namesSaved = false;
     try {
-      const user = await updateProfile(session.token, first, last);
+      let user = await updateProfile(session.token, first, last);
+      namesSaved = true;
       if (mounted.current) {
         setSession({ ...session, user });
+      }
+      if (photo) {
+        user = await uploadAvatar(session.token, photo);
+      }
+      if (mounted.current) {
+        setSession({ ...session, user });
+        setPhoto(null);
         setNotice('Guardamos tu perfil.');
       }
     } catch (reason) {
       if (mounted.current) {
         setError(
-          reason instanceof Error
-            ? reason.message
-            : 'No pudimos guardar el perfil.',
+          (namesSaved && photo
+            ? 'Guardamos tu nombre y apellido, pero no la foto. '
+            : '') +
+            (reason instanceof Error
+              ? reason.message
+              : 'No pudimos guardar el perfil.'),
         );
       }
     } finally {
@@ -131,6 +212,32 @@ export default function AccountSettingsScreen({
         <Text style={styles.title}>Editar perfil</Text>
         {session ? (
           <>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Elegir foto de perfil"
+              disabled={busy}
+              onPress={selectPhoto}
+              style={styles.avatar}
+            >
+              {photo?.uri || mediaURL(session.user.avatar) ? (
+                <Image
+                  source={{ uri: photo?.uri || mediaURL(session.user.avatar) }}
+                  style={StyleSheet.absoluteFill}
+                />
+              ) : (
+                <UserRound color={colors.muted} size={38} />
+              )}
+            </Pressable>
+            <Button
+              label={photo ? 'Elegir otra foto' : 'Cambiar foto de perfil'}
+              disabled={busy}
+              onPress={selectPhoto}
+            />
+            {photo ? (
+              <Text style={styles.text}>
+                La foto se guardará al tocar Guardar cambios.
+              </Text>
+            ) : null}
             <Text style={styles.label}>Nombre</Text>
             <TextInput
               accessibilityLabel="Nombre"
@@ -194,4 +301,14 @@ const styles = StyleSheet.create({
   },
   text: { fontSize: 16, color: colors.muted },
   error: { fontSize: 16, color: '#A12323' },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: colors.line,
+    overflow: 'hidden',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

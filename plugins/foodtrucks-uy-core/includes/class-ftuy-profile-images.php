@@ -20,6 +20,21 @@ class FTUY_Profile_Images {
         if ( self::attachment( $user_id ) !== $id ) { wp_delete_attachment( $id, true ); return new WP_Error( 'profile_image', 'No se pudo vincular la imagen de perfil.' ); }
         return $id;
     }
+    /** Process a replacement before linking it; keep the previous medium recoverable. */
+    public static function replace( $user_id, $source ) {
+        if ( ! get_user_by( 'id', $user_id ) || ! is_file( $source ) ) { return new WP_Error( 'profile_image', 'No se encuentra la imagen de perfil.' ); }
+        $old = self::attachment( $user_id );
+        $id = FTUY_Foodtruck_Images::process( $source, 'logo', 'perfil', 'perfiles' );
+        if ( is_wp_error( $id ) ) { return $id; }
+        $result = wp_update_post( array( 'ID' => $id, 'post_author' => $user_id ), true );
+        if ( is_wp_error( $result ) ) { wp_delete_attachment( $id, true ); return $result; }
+        update_user_meta( $user_id, self::META, $id );
+        if ( self::attachment( $user_id ) !== $id ) {
+            if ( $old ) { update_user_meta( $user_id, self::META, $old ); } else { delete_user_meta( $user_id, self::META ); }
+            wp_delete_attachment( $id, true ); return new WP_Error( 'profile_image', 'No se pudo guardar la foto de perfil.' );
+        }
+        return $id;
+    }
     public static function avatar( $args, $identity ) {
         $user_id = is_numeric( $identity ) ? (int) $identity : 0;
         if ( $identity instanceof WP_User ) { $user_id = $identity->ID; }

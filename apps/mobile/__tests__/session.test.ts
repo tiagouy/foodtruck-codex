@@ -1,6 +1,12 @@
 import * as Keychain from 'react-native-keychain';
 import { APIError, request } from '../src/lib/api';
-import { login, restoreSession, saveSession, logout } from '../src/lib/session';
+import {
+  login,
+  restoreSession,
+  saveSession,
+  logout,
+  uploadAvatar,
+} from '../src/lib/session';
 jest.mock('react-native-keychain', () => ({
   ACCESSIBLE: { WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'device-only' },
   getGenericPassword: jest.fn(),
@@ -20,6 +26,21 @@ const user = {
   last_name: '',
 };
 beforeEach(() => jest.clearAllMocks());
+test('avatar upload uses bearer and multipart without accepting a user ID', async () => {
+  (request as jest.Mock).mockResolvedValue({ user });
+  await uploadAvatar(token, {
+    uri: 'file:///fixture.jpg',
+    type: 'image/jpeg',
+    name: 'fixture.jpg',
+  });
+  expect(request).toHaveBeenCalledWith(
+    'accounts/avatar',
+    undefined,
+    expect.any(FormData),
+    token,
+    45000,
+  );
+});
 test('login normalizes email but never trims a password', async () => {
   (request as jest.Mock).mockResolvedValue({ token, user });
   expect(await login(' Fixture@Example.test ', ' spaced ')).toEqual({

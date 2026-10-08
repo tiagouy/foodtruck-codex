@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.0 — 2026-10-07
+
+- API autenticada de avatar por multipart; propietario derivado del token, validación de carga/MIME/peso real y procesamiento optimizado en media/perfiles.
+- Reemplazo conserva el medio anterior y no pierde avatar si el procesamiento falla. Límite por usuario y exclusión de cargas simultáneas con recuperación de bloqueo vencido.
+- Pruebas HTTP reales con cuenta/imágenes ficticias: subida, reemplazo, optimización, formato falso, exceso de peso y falta de sesión.
+
 ## 0.15.0 — 2026-10-07
 
 - API autenticada para editar nombre y apellido propios, actualizando el nombre público. Ignora IDs, roles, email y contraseña del cliente.

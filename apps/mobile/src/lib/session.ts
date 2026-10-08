@@ -48,6 +48,24 @@ export async function updateProfile(
   )) as { user: unknown };
   return userFrom(result?.user);
 }
+export type ProfilePhoto = { uri: string; type: string; name: string };
+export async function uploadAvatar(
+  token: string,
+  photo: ProfilePhoto,
+): Promise<AccountUser> {
+  const form = new FormData();
+  form.append('photo', photo as unknown as Blob);
+  const result = (await request(
+    'accounts/avatar',
+    undefined,
+    form,
+    token,
+    45000,
+  )) as {
+    user: unknown;
+  };
+  return userFrom(result?.user);
+}
 export async function login(
   email: string,
   password: string,

@@ -15,6 +15,7 @@ import {
   restoreSession,
   saveSession,
   updateProfile,
+  uploadAvatar,
 } from '../src/lib/session';
 jest.mock('../src/lib/session', () => ({
   login: jest.fn(),
@@ -22,6 +23,11 @@ jest.mock('../src/lib/session', () => ({
   restoreSession: jest.fn(),
   saveSession: jest.fn(),
   updateProfile: jest.fn(),
+  uploadAvatar: jest.fn(),
+}));
+import { launchImageLibrary } from 'react-native-image-picker';
+jest.mock('react-native-image-picker', () => ({
+  launchImageLibrary: jest.fn(),
 }));
 
 jest.mock('../src/lib/api', () => ({
@@ -54,6 +60,8 @@ beforeEach(() => {
   (login as jest.Mock).mockReset();
   (saveSession as jest.Mock).mockReset();
   (logout as jest.Mock).mockReset();
+  (uploadAvatar as jest.Mock).mockReset();
+  (launchImageLibrary as jest.Mock).mockResolvedValue({ didCancel: true });
   mockList.mockReset();
   mockList.mockResolvedValue({ items: [], total: 0, page: 1 });
   mockDetail.mockReset();
@@ -206,16 +214,120 @@ test('settings edits names and closes the session from inside settings', async (
   await act(async () =>
     tree.root.findAllByType(TextInput)[1].props.onChangeText('Nuevo'),
   );
-  await act(async () => tree.root.findAllByType(Button)[0].props.onPress());
+  await act(async () =>
+    tree.root
+      .findAllByType(Button)
+      .find(button => button.props.label === 'Guardar cambios')!
+      .props.onPress(),
+  );
   expect(updateProfile).toHaveBeenCalledWith(
     'fixture-token',
     'Fixture',
     'Nuevo',
   );
   expect(texts(tree)).toContain('Guardamos tu perfil');
-  await act(async () => tree.root.findAllByType(Button)[1].props.onPress());
+  await act(async () =>
+    tree.root
+      .findAllByType(Button)
+      .find(button => button.props.label === 'Cerrar sesión')!
+      .props.onPress(),
+  );
   expect(logout).toHaveBeenCalledWith('fixture-token');
   expect(back).toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+
+test('profile photo selection previews locally and uploads only when saving', async () => {
+  const user = {
+    id: 9,
+    name: 'Fixture',
+    first_name: 'Fixture',
+    last_name: '',
+    email: 'fixture@example.test',
+  };
+  (restoreSession as jest.Mock).mockResolvedValue({
+    token: 'fixture-token',
+    user,
+  });
+  (launchImageLibrary as jest.Mock).mockResolvedValue({
+    assets: [
+      {
+        uri: 'file:///fixture.jpg',
+        fileName: 'fixture.jpg',
+        type: 'image/jpeg',
+        fileSize: 1000,
+      },
+    ],
+  });
+  (updateProfile as jest.Mock).mockResolvedValue(user);
+  (uploadAvatar as jest.Mock).mockResolvedValue({
+    ...user,
+    avatar: 'https://example.test/avatar.jpg',
+  });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <AccountSettingsScreen
+        navigation={{ goBack: jest.fn() } as any}
+        {...({} as any)}
+      />,
+    );
+  });
+  await act(async () =>
+    tree.root
+      .findAllByType(Button)
+      .find(button => button.props.label === 'Cambiar foto de perfil')!
+      .props.onPress(),
+  );
+  expect(uploadAvatar).not.toHaveBeenCalled();
+  expect(texts(tree)).toContain('La foto se guardará');
+  await act(async () =>
+    tree.root
+      .findAllByType(Button)
+      .find(button => button.props.label === 'Guardar cambios')!
+      .props.onPress(),
+  );
+  expect(uploadAvatar).toHaveBeenCalledWith('fixture-token', {
+    uri: 'file:///fixture.jpg',
+    name: 'fixture.jpg',
+    type: 'image/jpeg',
+  });
+  expect(texts(tree)).toContain('Guardamos tu perfil');
+  await act(async () => tree.unmount());
+});
+
+test('oversized profile photo is rejected before upload', async () => {
+  (restoreSession as jest.Mock).mockResolvedValue({
+    token: 'fixture',
+    user: {
+      id: 9,
+      name: 'Fixture',
+      first_name: 'Fixture',
+      last_name: '',
+      email: 'fixture@example.test',
+    },
+  });
+  (launchImageLibrary as jest.Mock).mockResolvedValue({
+    assets: [
+      {
+        uri: 'file:///large.jpg',
+        type: 'image/jpeg',
+        fileSize: 6 * 1024 * 1024,
+      },
+    ],
+  });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <AccountSettingsScreen
+        navigation={{ goBack: jest.fn() } as any}
+        {...({} as any)}
+      />,
+    );
+  });
+  await act(async () => tree.root.findAllByType(Button)[0].props.onPress());
+  expect(texts(tree)).toContain('pesa demasiado');
+  expect(uploadAvatar).not.toHaveBeenCalled();
   await act(async () => tree.unmount());
 });
 

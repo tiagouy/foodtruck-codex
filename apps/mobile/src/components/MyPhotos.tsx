@@ -133,7 +133,7 @@ export default function MyPhotos({ author }: { author: number }) {
 }
 const styles = StyleSheet.create({
   section: { gap: 14 },
-  title: { fontSize: 22, fontWeight: '700', color: colors.dark },
+  title: { fontSize: 17, fontWeight: '600', color: colors.dark },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
