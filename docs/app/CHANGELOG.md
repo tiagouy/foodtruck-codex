@@ -1,5 +1,12 @@
 # Changelog de la app
 
+## 0.8.0 — 2026-10-08
+
+- Editor nativo de recorte cuadrado después de elegir una foto de publicación: mover/zoom, Usar foto o Cancelar; cancelar conserva la selección previa.
+- Usa el archivo realmente recortado en preview/subida. Vista previa cuadrada, sin franjas. No cambia fotos históricas ni avatar.
+- Dependencia nativa fijada en 0.52.0; sin pedir cámara ni almacenamiento general. [Documentación](recorte-0.8.0.md). 47 pruebas Jest, TypeScript y lint.
+- iOS compilado e instalado en iPhone 17: editor y confirmación verificados; preview cuadrado sin publicar. Android: integración/manifiesto compilados, sin WRITE_EXTERNAL_STORAGE; gestos en dispositivo Android todavía pendientes.
+
 ## 0.7.0 — 2026-10-08
 
 - Subir foto desde Fotos o Mi cuenta: biblioteca, preview, texto/dirección, sin puntaje; sesión obligatoria y publicación directa.

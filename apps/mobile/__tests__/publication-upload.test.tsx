@@ -2,6 +2,7 @@ import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
 import { TextInput, Text } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
+import ImageCropPicker from 'react-native-image-crop-picker';
 import { APIError, request } from '../src/lib/api';
 import { restoreSession } from '../src/lib/session';
 import {
@@ -12,6 +13,9 @@ import PublicationUploadScreen from '../src/screens/PublicationUploadScreen';
 import { Button } from '../src/components/State';
 jest.mock('react-native-image-picker', () => ({
   launchImageLibrary: jest.fn(),
+}));
+jest.mock('react-native-image-crop-picker', () => ({
+  openCropper: jest.fn(),
 }));
 jest.mock('../src/lib/api', () => ({
   ...jest.requireActual('../src/lib/api'),
@@ -38,18 +42,85 @@ beforeEach(() => {
   (launchImageLibrary as jest.Mock).mockResolvedValue({
     assets: [{ ...photo, fileSize: 1000 }],
   });
+  (ImageCropPicker.openCropper as jest.Mock).mockResolvedValue({
+    path: '/tmp/fixture-cropped.jpg',
+    mime: 'image/jpeg',
+    width: 900,
+    height: 900,
+    size: 1000,
+  });
 });
 test('picker normalizes iOS JPEG, cancels safely and rejects oversized files', async () => {
   (launchImageLibrary as jest.Mock).mockResolvedValue({
     assets: [{ ...photo, type: 'image/jpg' }],
   });
   expect((await choosePublicationPhoto())?.type).toBe('image/jpeg');
+  expect(ImageCropPicker.openCropper).toHaveBeenCalledWith(
+    expect.objectContaining({
+      path: photo.uri,
+      width: 900,
+      height: 900,
+      freeStyleCropEnabled: false,
+      cropperChooseText: 'Usar foto',
+    }),
+  );
   (launchImageLibrary as jest.Mock).mockResolvedValue({ didCancel: true });
   expect(await choosePublicationPhoto()).toBeNull();
   (launchImageLibrary as jest.Mock).mockResolvedValue({
     assets: [{ ...photo, fileSize: 6 * 1024 * 1024 }],
   });
   await expect(choosePublicationPhoto()).rejects.toThrow('pesa demasiado');
+});
+test('uses the actual cropped file, handles crop cancellation and rejects invalid crop results', async () => {
+  expect(await choosePublicationPhoto()).toEqual({
+    uri: 'file:///tmp/fixture-cropped.jpg',
+    type: 'image/jpeg',
+    name: 'foto-recortada.jpg',
+  });
+  (ImageCropPicker.openCropper as jest.Mock).mockRejectedValue({
+    code: 'E_PICKER_CANCELLED',
+  });
+  expect(await choosePublicationPhoto()).toBeNull();
+  (ImageCropPicker.openCropper as jest.Mock).mockResolvedValue({
+    path: '/tmp/crop.jpg',
+    mime: 'image/jpeg',
+    width: 900,
+    height: 600,
+    size: 1000,
+  });
+  await expect(choosePublicationPhoto()).rejects.toThrow('recortar');
+  (ImageCropPicker.openCropper as jest.Mock).mockRejectedValue(
+    new Error('Native failure'),
+  );
+  await expect(choosePublicationPhoto()).rejects.toThrow('recortar');
+});
+test('canceling a replacement crop preserves the previous preview', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <PublicationUploadScreen
+        navigation={navigation as any}
+        {...({} as any)}
+      />,
+    );
+  });
+  const button = (label: string) =>
+    tree.root.findAllByType(Button).find(b => b.props.label === label)!;
+  await act(async () => {
+    await button('Elegir foto').props.onPress();
+  });
+  const preview = () =>
+    tree.root.findByProps({ accessibilityLabel: 'Vista previa de tu foto' });
+  expect(preview().props.source.uri).toBe('file:///tmp/fixture-cropped.jpg');
+  (ImageCropPicker.openCropper as jest.Mock).mockRejectedValue({
+    code: 'E_PICKER_CANCELLED',
+  });
+  await act(async () => {
+    await button('Cambiar foto').props.onPress();
+  });
+  expect(preview().props.source.uri).toBe('file:///tmp/fixture-cropped.jpg');
+  expect(request).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
 });
 test('multipart contains no author, status or rating; coordinates match only unchanged address', async () => {
   (request as jest.Mock).mockResolvedValue({ publication_id: 25 });

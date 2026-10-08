@@ -8,6 +8,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -29,6 +30,10 @@ import { colors } from '../components/AppHeader';
 export default function PublicationUploadScreen({
   navigation,
 }: NativeStackScreenProps<RootStack, 'SubirFoto'>) {
+  const previewEdge = Math.min(
+    420,
+    Math.max(1, useWindowDimensions().width - 40),
+  );
   const [session, setSession] = useState<AppSession | null>(null);
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -280,7 +285,7 @@ export default function PublicationUploadScreen({
         {photo ? (
           <Image
             source={{ uri: photo.uri }}
-            style={styles.photo}
+            style={[styles.photo, { width: previewEdge, height: previewEdge }]}
             resizeMode="contain"
             accessibilityLabel="Vista previa de tu foto"
           />
@@ -390,8 +395,7 @@ const styles = StyleSheet.create({
   },
   caption: { minHeight: 100, textAlignVertical: 'top' },
   photo: {
-    width: '100%',
-    height: 260,
+    alignSelf: 'center',
     borderRadius: 16,
     backgroundColor: colors.line,
   },

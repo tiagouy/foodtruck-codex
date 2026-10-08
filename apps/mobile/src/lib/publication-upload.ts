@@ -1,4 +1,5 @@
 import { launchImageLibrary } from 'react-native-image-picker';
+import ImageCropPicker from 'react-native-image-crop-picker';
 import { APIError, request } from './api';
 import { ProfilePhoto } from './session';
 
@@ -36,7 +37,71 @@ export async function choosePublicationPhoto(): Promise<ProfilePhoto | null> {
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(type)) {
     throw new Error('Elegí una foto JPG, PNG o WebP.');
   }
-  return { uri: asset.uri, type, name: asset.fileName || 'foto.jpg' };
+  try {
+    // The system picker stays in place; this module only edits the selected local file.
+    const cropped = await ImageCropPicker.openCropper({
+      mediaType: 'photo',
+      path: asset.uri,
+      width: 900,
+      height: 900,
+      cropping: true,
+      freeStyleCropEnabled: false,
+      cropperCircleOverlay: false,
+      avoidEmptySpaceAroundImage: true,
+      forceJpg: true,
+      compressImageQuality: 0.85,
+      includeBase64: false,
+      includeExif: false,
+      cropperToolbarTitle: 'Encuadrá tu foto',
+      cropperChooseText: 'Usar foto',
+      cropperCancelText: 'Cancelar',
+      cropperChooseColor: '#C34416',
+      cropperCancelColor: '#FFFFFF',
+      cropperToolbarColor: '#28231F',
+      cropperToolbarWidgetColor: '#FFFFFF',
+      cropperActiveWidgetColor: '#C34416',
+      showCropGuidelines: true,
+      showCropFrame: true,
+    });
+    const mime = (cropped.mime || '').toLowerCase();
+    if (
+      !cropped.path ||
+      !/^(file:\/\/|\/)/.test(cropped.path) ||
+      !Number.isFinite(cropped.width) ||
+      !Number.isFinite(cropped.height) ||
+      cropped.width < 1 ||
+      cropped.width !== cropped.height ||
+      !['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(mime)
+    ) {
+      throw new Error('crop_result');
+    }
+    if (
+      !Number.isFinite(cropped.size) ||
+      cropped.size < 1 ||
+      cropped.size > 5 * 1024 * 1024
+    ) {
+      throw new Error('crop_weight');
+    }
+    return {
+      uri: cropped.path.startsWith('file://')
+        ? cropped.path
+        : `file://${cropped.path}`,
+      type: mime === 'image/jpg' ? 'image/jpeg' : mime,
+      name:
+        mime === 'image/png'
+          ? 'foto-recortada.png'
+          : mime === 'image/webp'
+          ? 'foto-recortada.webp'
+          : 'foto-recortada.jpg',
+    };
+  } catch (failure) {
+    if ((failure as { code?: string })?.code === 'E_PICKER_CANCELLED') {
+      return null;
+    }
+    throw new Error(
+      'No pudimos recortar esa foto. Volvé a elegirla e intentá nuevamente.',
+    );
+  }
 }
 export type PhotoLocation = {
   address: string;

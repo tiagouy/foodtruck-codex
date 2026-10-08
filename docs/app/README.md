@@ -6,6 +6,8 @@ La aplicación consumirá exclusivamente la API versionada del plugin `Foodtruck
 
 Estado 0.7.0: [subida de fotos y autocompletado](subir-fotos-0.7.0.md), denuncia desde el detalle, [foto de perfil editable](avatar-0.5.0.md) y [Mi cuenta con Mis fotos/Configuración](perfil-0.4.0.md). Mantiene [ingreso y sesión segura](ingreso-0.3.0.md), [registro, reactivación y recuperación](cuentas-0.2.0.md). Pendientes clave/prueba real de Places, Face ID y QA de subida completa en dispositivos. Sin artefacto publicable ni entrega productiva de correo validada.
 
+0.8.0 agrega [encuadre y recorte cuadrado de publicaciones](recorte-0.8.0.md), antes de enviar. Requiere binario actualizado por la dependencia nativa nueva.
+
 Actualización 0.1.1: objetivo de tiendas confirmado como actualización de apps existentes. Android toma el applicationId del APK anterior, con debug separado; iOS presenta identificadores contradictorios y espera confirmación de App Store Connect. Ver [continuidad de tiendas y firma](continuidad-tiendas.md). No crear apps nuevas ni publicar la identidad de desarrollo.
 
 ## Inicio y navegación — propuesta 2026-10-07
