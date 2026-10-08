@@ -2,6 +2,12 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-08 · plugin 0.18.0 / app 0.7.0
+
+App nativa local con lectura pública, sesiones seguras, perfil/avatar, Mis fotos, denuncia y [subida directa de fotos](app/subir-fotos-0.7.0.md) (foto + texto + dirección, sin puntaje ni aprobación previa). Administración y despublicación en el plugin. Subida HTTP, optimización e idempotencia probadas con fixtures; selector/formulario comprobados en el simulador.
+
+Pendiente inmediato: configurar la clave privada de Places para servidor y probar autocompletado real; hasta entonces funciona dirección manual. Luego probar el circuito completo desde la app y Android/XR, resolver identidad/firma de tiendas, enlaces universales, entrega productiva de email, términos/privacidad y despliegue. No hay aún versión enviada a tiendas ni cambios productivos. Las actualizaciones de abajo son históricas, no el estado actual.
+
 ## Actualización · 2026-10-07 · 0.13.0
 
 Migración completa aplicada **solo en local**: 3.659 suscriptores pendientes de reactivación, administrador conservado, 1.311 avatares y 51 publicaciones de 28 autores. IDs/alias históricos preservados; 16 emails inválidos excluidos y un duplicado unificado. Dos falsos avatares HTML quedan marcados para revisión. Respaldos privados y fuentes intactas, sin correos reales. Ver [resultado y procedimiento](plugin/migracion-completa-0.13.0.md).

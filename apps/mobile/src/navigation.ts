@@ -12,4 +12,5 @@ export type RootStack = {
   Detalle: { kind: Kind; contentKey: string };
   CuentaSolicitud: { action: AccountAction };
   ConfiguracionCuenta: undefined;
+  SubirFoto: undefined;
 };

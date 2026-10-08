@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Foodtrucks UY Core
  * Description: Plataforma compartida de Foodtrucks Uruguay para el sitio y la aplicación.
- * Version: 0.17.0
+ * Version: 0.18.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: foodtrucks-uy-core
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FOODTRUCKS_UY_CORE_VERSION', '0.17.0' );
+define( 'FOODTRUCKS_UY_CORE_VERSION', '0.18.0' );
 define( 'FTUY_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FTUY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -32,6 +32,8 @@ require_once FTUY_PATH . 'includes/class-ftuy-app-sessions.php';
 require_once FTUY_PATH . 'includes/class-ftuy-profile-images.php';
 FTUY_Profile_Images::init();
 require_once FTUY_PATH . 'includes/class-ftuy-publications.php';
+require_once FTUY_PATH . 'includes/class-ftuy-publication-upload.php';
+require_once FTUY_PATH . 'includes/class-ftuy-app-places.php';
 require_once FTUY_PATH . 'includes/class-ftuy-publication-admin.php';
 require_once FTUY_PATH . 'includes/class-ftuy-publication-public.php';
 
@@ -39,6 +41,8 @@ register_activation_hook( __FILE__, array( 'FTUY_Events', 'install' ) );
 add_action( 'plugins_loaded', function () {
     FTUY_Accounts::init();
     FTUY_App_Sessions::init();
+    FTUY_Publication_Upload::init();
+    FTUY_App_Places::init();
     if ( get_option( 'ftuy_schema_version' ) !== '3' ) {
         FTUY_Events::install();
     }
@@ -48,7 +52,7 @@ add_action( 'plugins_loaded', function () {
     FTUY_Foodtruck_Admin::init();
     FTUY_Foodtruck_Public::init();
     FTUY_Instagram::init();
-    if ( get_option( 'ftuy_publication_schema' ) !== '2' ) { FTUY_Publications::install(); }
+    if ( get_option( 'ftuy_publication_schema' ) !== '3' ) { FTUY_Publications::install(); }
     FTUY_Publication_Admin::init();
     FTUY_Publication_Public::init();
 } );

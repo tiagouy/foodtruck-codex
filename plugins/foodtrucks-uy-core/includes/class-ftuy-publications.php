@@ -8,6 +8,7 @@ class FTUY_Publications {
     public static function install() {
         global $wpdb; require_once ABSPATH . 'wp-admin/includes/upgrade.php'; $c = $wpdb->get_charset_collate();
         $definitions = array(
+            'publication_uploads' => "request_key varchar(64) NOT NULL,\n publication_id bigint(20) unsigned NOT NULL,\n PRIMARY KEY  (request_key),\n UNIQUE KEY publication_id (publication_id)",
             'publications' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n author_user_id bigint(20) unsigned NOT NULL,\n image_id bigint(20) unsigned NOT NULL,\n caption text NOT NULL,\n address varchar(255) NOT NULL DEFAULT '',\n latitude decimal(10,7) DEFAULT NULL,\n longitude decimal(10,7) DEFAULT NULL,\n status varchar(24) NOT NULL DEFAULT 'pending',\n version bigint(20) unsigned NOT NULL DEFAULT 1,\n legacy_id bigint(20) unsigned DEFAULT NULL,\n legacy_author_id bigint(20) unsigned DEFAULT NULL,\n legacy_slug varchar(200) NOT NULL DEFAULT '',\n legacy_status int DEFAULT NULL,\n legacy_metadata longtext DEFAULT NULL,\n created_at datetime NOT NULL,\n updated_at datetime NOT NULL,\n PRIMARY KEY  (id),\n UNIQUE KEY legacy_id (legacy_id),\n KEY feed (status,created_at,id),\n KEY author (author_user_id,status)",
             'publication_reports' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n publication_id bigint(20) unsigned NOT NULL,\n reason text NOT NULL,\n status varchar(16) NOT NULL DEFAULT 'open',\n added_by bigint(20) unsigned NOT NULL,\n resolved_by bigint(20) unsigned NOT NULL DEFAULT 0,\n created_at datetime NOT NULL,\n resolved_at datetime DEFAULT NULL,\n PRIMARY KEY  (id),\n KEY queue (status,publication_id)",
             'publication_audit' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n publication_id bigint(20) unsigned NOT NULL,\n actor_user_id bigint(20) unsigned NOT NULL,\n action varchar(32) NOT NULL,\n before_json longtext NOT NULL,\n after_json longtext NOT NULL,\n note text NOT NULL,\n created_at datetime NOT NULL,\n PRIMARY KEY  (id),\n KEY history (publication_id,id)"
@@ -18,7 +19,7 @@ class FTUY_Publications {
             if ( ! $table || $table['Engine'] !== 'InnoDB' ) { return; }
         }
         if ( $role = get_role( 'administrator' ) ) { $role->add_cap( 'manage_ft_publications' ); }
-        update_option( 'ftuy_publication_schema', '2', false );
+        update_option( 'ftuy_publication_schema', '3', false );
     }
     public static function get( $id ) { global $wpdb; return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id=%d', $id ), ARRAY_A ); }
     public static function validate( $input ) {

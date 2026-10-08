@@ -1,0 +1,171 @@
+import React from 'react';
+import Renderer, { act } from 'react-test-renderer';
+import { TextInput, Text } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { APIError, request } from '../src/lib/api';
+import { restoreSession } from '../src/lib/session';
+import {
+  choosePublicationPhoto,
+  publishPhoto,
+} from '../src/lib/publication-upload';
+import PublicationUploadScreen from '../src/screens/PublicationUploadScreen';
+import { Button } from '../src/components/State';
+jest.mock('react-native-image-picker', () => ({
+  launchImageLibrary: jest.fn(),
+}));
+jest.mock('../src/lib/api', () => ({
+  ...jest.requireActual('../src/lib/api'),
+  request: jest.fn(),
+}));
+jest.mock('../src/lib/session', () => ({ restoreSession: jest.fn() }));
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: (callback: () => void) =>
+    require('react').useEffect(callback, [callback]),
+}));
+const photo = {
+  uri: 'file:///fixture.jpg',
+  type: 'image/jpeg',
+  name: 'fixture.jpg',
+};
+const navigation = {
+  navigate: jest.fn(),
+  replace: jest.fn(),
+  goBack: jest.fn(),
+};
+beforeEach(() => {
+  jest.clearAllMocks();
+  (restoreSession as jest.Mock).mockResolvedValue({ token: 'fixture' });
+  (launchImageLibrary as jest.Mock).mockResolvedValue({
+    assets: [{ ...photo, fileSize: 1000 }],
+  });
+});
+test('picker normalizes iOS JPEG, cancels safely and rejects oversized files', async () => {
+  (launchImageLibrary as jest.Mock).mockResolvedValue({
+    assets: [{ ...photo, type: 'image/jpg' }],
+  });
+  expect((await choosePublicationPhoto())?.type).toBe('image/jpeg');
+  (launchImageLibrary as jest.Mock).mockResolvedValue({ didCancel: true });
+  expect(await choosePublicationPhoto()).toBeNull();
+  (launchImageLibrary as jest.Mock).mockResolvedValue({
+    assets: [{ ...photo, fileSize: 6 * 1024 * 1024 }],
+  });
+  await expect(choosePublicationPhoto()).rejects.toThrow('pesa demasiado');
+});
+test('multipart contains no author, status or rating; coordinates match only unchanged address', async () => {
+  (request as jest.Mock).mockResolvedValue({ publication_id: 25 });
+  expect(
+    await publishPhoto(
+      'fixture',
+      'request-fixture-123456',
+      photo,
+      'Texto',
+      'Nueva dirección',
+      { address: 'Vieja dirección', latitude: -34, longitude: -56 },
+    ),
+  ).toBe(25);
+  const form = (request as jest.Mock).mock.calls[0][2];
+  const fields = Array.from(form.keys());
+  expect(fields).toEqual(['request_id', 'photo', 'caption', 'address']);
+  (request as jest.Mock).mockResolvedValue({ publication_id: 'incorrecto' });
+  await expect(
+    publishPhoto(
+      'fixture',
+      'request-fixture-123456',
+      photo,
+      'Texto',
+      'Lugar',
+      null,
+    ),
+  ).rejects.toThrow('confirmar');
+});
+test('guest is invited to sign in instead of seeing upload controls', async () => {
+  (restoreSession as jest.Mock).mockResolvedValue(null);
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <PublicationUploadScreen
+        navigation={navigation as any}
+        {...({} as any)}
+      />,
+    );
+  });
+  expect(tree.root.findAllByType(TextInput)).toHaveLength(0);
+  await act(async () => tree.root.findByType(Button).props.onPress());
+  expect(navigation.navigate).toHaveBeenCalledWith('Principal', {
+    screen: 'Cuenta',
+  });
+  await act(async () => tree.unmount());
+});
+test('upload validates, publishes directly and retries unknown outcome with the same request id', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  (request as jest.Mock).mockImplementation((path: string) =>
+    path === 'publications/upload'
+      ? Promise.reject(new APIError('Sin conexión'))
+      : Promise.resolve({ suggestions: [] }),
+  );
+  await act(async () => {
+    tree = Renderer.create(
+      <PublicationUploadScreen
+        navigation={navigation as any}
+        {...({} as any)}
+      />,
+    );
+  });
+  const button = (label: string) =>
+    tree.root.findAllByType(Button).find(b => b.props.label === label)!;
+  await act(async () => {
+    await button('Publicar foto').props.onPress();
+  });
+  expect(request).not.toHaveBeenCalled();
+  await act(async () => {
+    await button('Elegir foto').props.onPress();
+  });
+  await act(async () => {
+    tree.root
+      .findByProps({ accessibilityLabel: 'Texto de la foto' })
+      .props.onChangeText('Texto');
+    tree.root
+      .findByProps({ accessibilityLabel: 'Dirección de la foto' })
+      .props.onChangeText('Dirección manual');
+  });
+  await act(async () => {
+    await button('Publicar foto').props.onPress();
+  });
+  expect(
+    tree.root.findByProps({ accessibilityLabel: 'Texto de la foto' }).props
+      .editable,
+  ).toBe(false);
+  const first = (request as jest.Mock).mock.calls
+    .find(c => c[0] === 'publications/upload')![2]
+    .get('request_id');
+  (request as jest.Mock).mockRejectedValue(
+    new APIError('Hay una foto procesándose.', 429),
+  );
+  await act(async () => {
+    await button('Reintentar publicación').props.onPress();
+  });
+  expect(
+    tree.root.findByProps({ accessibilityLabel: 'Texto de la foto' }).props
+      .editable,
+  ).toBe(false);
+  (request as jest.Mock).mockResolvedValue({ publication_id: 25 });
+  await act(async () => {
+    await button('Reintentar publicación').props.onPress();
+  });
+  const calls = (request as jest.Mock).mock.calls.filter(
+    c => c[0] === 'publications/upload',
+  );
+  expect(calls[1][2].get('request_id')).toBe(first);
+  expect(calls[2][2].get('request_id')).toBe(first);
+  expect(
+    tree.root
+      .findAllByType(Text)
+      .some(t => t.props.children === '¡Foto publicada!'),
+  ).toBe(true);
+  await act(async () => button('Ver mi foto').props.onPress());
+  expect(navigation.replace).toHaveBeenCalledWith('Detalle', {
+    kind: 'publications',
+    contentKey: '25',
+  });
+  await act(async () => tree.unmount());
+});

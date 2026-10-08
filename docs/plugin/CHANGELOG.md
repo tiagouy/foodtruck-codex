@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.18.0 — 2026-10-08
+
+- Subida multipart autenticada de publicaciones: identidad desde bearer, imagen optimizada en media/publicaciones, publicación directa e historial.
+- Esquema de publicaciones 3 agrega recibos privados de reintento; no altera usuarios, fotos históricas ni estados anteriores. Mismo request_id/cuenta no duplica ni republica retiradas.
+- Proxy autenticado de Places API New, clave únicamente en entorno privado del servidor, cuotas por cuenta y validación de sugerencia/sesión. Configuración de clave real pendiente.
+- [Documentación](../app/subir-fotos-0.7.0.md): 14 comprobaciones HTTP reales y 10 de Places con respuestas simuladas.
+
 ## 0.17.0 — 2026-10-07
 
 - POST autenticado `/publications/{id}/report`: denunciante derivado del token, publicación publicada y registro atómico con historial.

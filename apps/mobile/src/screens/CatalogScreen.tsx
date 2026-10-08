@@ -123,10 +123,15 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
               </View>
             )}
             {kind === 'publications' && (
-              <Text style={styles.notice}>
-                Fotos compartidas por la comunidad. Conservamos su fecha
-                original.
-              </Text>
+              <View style={styles.upload}>
+                <Button
+                  label="Subir foto"
+                  onPress={() => navigation.navigate('SubirFoto')}
+                />
+                <Text style={styles.notice}>
+                  Fotos compartidas por la comunidad.
+                </Text>
+              </View>
             )}
           </View>
         }
@@ -155,6 +160,7 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
   );
 }
 const styles = StyleSheet.create({
+  upload: { gap: 12 },
   screen: { flex: 1, backgroundColor: colors.dark },
   body: { backgroundColor: colors.background },
   content: { padding: 18 },

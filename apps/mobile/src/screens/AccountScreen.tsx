@@ -178,6 +178,10 @@ export default function AccountScreen() {
                   )}
                 </Pressable>
               </View>
+              <Button
+                label="Subir foto"
+                onPress={() => navigation.navigate('SubirFoto')}
+              />
               <MyPhotos author={session.user.id} />
             </>
           ) : (

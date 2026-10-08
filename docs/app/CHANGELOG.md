@@ -1,5 +1,12 @@
 # Changelog de la app
 
+## 0.7.0 — 2026-10-08
+
+- Subir foto desde Fotos o Mi cuenta: biblioteca, preview, texto/dirección, sin puntaje; sesión obligatoria y publicación directa.
+- Multipart y reintento con el mismo identificador ante resultado incierto, sin duplicar en el servidor. Vista de éxito con acceso a detalle/Mis fotos.
+- Autocompletado conectado al proxy privado Places; dirección manual si falla/no está configurado. La clave de servidor y prueba real de Google siguen pendientes.
+- [Circuito, configuración y verificación](subir-fotos-0.7.0.md). 45 pruebas Jest, TypeScript/lint y subida HTTP de fixtures.
+
 ## 0.6.0 — 2026-10-07
 
 - Bandera en el cabezal derecho del detalle de una publicación, con confirmación antes de denunciar.

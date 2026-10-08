@@ -11,6 +11,7 @@ import DetailScreen from './src/screens/DetailScreen';
 import AccountScreen from './src/screens/AccountScreen';
 import AccountRequestScreen from './src/screens/AccountRequestScreen';
 import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
+import PublicationUploadScreen from './src/screens/PublicationUploadScreen';
 import { colors } from './src/components/AppHeader';
 import { RootStack, Tabs } from './src/navigation';
 
@@ -78,6 +79,11 @@ export default function App() {
             headerTintColor: '#FFFFFF',
           }}
         >
+          <Stack.Screen
+            name="SubirFoto"
+            component={PublicationUploadScreen}
+            options={{ title: 'Subir foto', headerBackTitle: 'Volver' }}
+          />
           <Stack.Screen
             name="ConfiguracionCuenta"
             component={AccountSettingsScreen}
