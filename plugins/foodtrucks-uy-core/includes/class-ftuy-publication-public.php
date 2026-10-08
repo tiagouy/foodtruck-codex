@@ -21,6 +21,11 @@ class FTUY_Publication_Public {
         $srcset = wp_get_attachment_image_srcset( $id, $size );
         return '<img src="' . esc_url( $image[0] ) . '" width="' . (int) $image[1] . '" height="' . (int) $image[2] . '" alt="' . esc_attr( $alt ) . '" loading="' . esc_attr( $loading ) . '" decoding="async"' . ( $srcset ? ' srcset="' . esc_attr( $srcset ) . '" sizes="' . esc_attr( $sizes ) . '"' : '' ) . '>';
     }
+    public static function avatar( $user_id, $loading = 'lazy', $size = 36 ) {
+        $id = FTUY_Profile_Images::attachment( $user_id );
+        $image = $id ? self::image( $id, 'thumbnail', '', $loading, $size . 'px' ) : '';
+        return '<span class="ft-photo-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>' . $image . '</span>';
+    }
     public static function by_slug( $slug ) {
         if ( ! is_string( $slug ) || ! preg_match( '/^[a-zA-Z0-9-]{1,200}$/D', $slug ) ) { return null; }
         global $wpdb;

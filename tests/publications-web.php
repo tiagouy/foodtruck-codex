@@ -1,6 +1,6 @@
 <?php
 if ( ! defined( 'ABSPATH' ) || ! FTUY_Accounts::local() ) { throw new RuntimeException( 'Solo local.' ); }
-global $wpdb; $old_user = get_current_user_id(); $uid = 0; $ids = array(); $image = 0; $source = null; $count = 0;
+global $wpdb; $old_user = get_current_user_id(); $uid = 0; $ids = array(); $image = 0; $avatar = 0; $source = null; $count = 0;
 $assert = function ( $ok, $message ) use ( &$count ) { if ( ! $ok ) { throw new RuntimeException( $message ); } $count++; };
 $call = function ( $path ) {
     $curl = curl_init( home_url( $path ) ); curl_setopt_array( $curl, array( CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false, CURLOPT_TIMEOUT => 20, CURLOPT_HEADER => true ) );
@@ -27,6 +27,14 @@ try {
     $assert( $call( '/fotosusuarios' )[0] === 301 && $call( '/fotosusuarios/index.php' )[0] === 301, 'Normaliza URLs de listado.' );
     $list = $call( '/fotosusuarios/' ); $assert( $list[0] === 200 && strpos( $list[1], '/fotousuario/p-' . $id . '/' ) !== false, 'Listado incluye foto publicada.' );
     $assert( strpos( $list[1], 'gt-lazy-load' ) === false && strpos( $list[1], 'loading="lazy"' ) !== false, 'Listado con lazy loading nativo.' );
+    $fallback = FTUY_Publication_Public::avatar( $uid );
+    $assert( strpos( $fallback, '<svg' ) !== false && strpos( $fallback, '<img' ) === false, 'Autor sin avatar usa icono de persona.' );
+    $assert( strpos( $list[1], 'ft-photo-author' ) !== false && strpos( $list[1], 'ft-photo-card-caption' ) !== false && strpos( $list[1], 'assets/publications.js' ) !== false, 'Tarjetas y fallback de imagen similares a app.' );
+    $avatar = FTUY_Profile_Images::replace( $uid, get_attached_file( $image ) );
+    if ( is_wp_error( $avatar ) ) { throw new RuntimeException( 'No pudo crear avatar fixture.' ); }
+    $avatar_url = wp_get_attachment_image_url( $avatar, 'thumbnail' );
+    $assert( strpos( $call( '/fotosusuarios/?autor=' . $uid )[1], esc_url( $avatar_url ) ) !== false, 'Listado muestra avatar actual.' );
+    $assert( strpos( $call( $url )[1], esc_url( $avatar_url ) ) !== false, 'Detalle conserva avatar actual.' );
     $assert( strpos( $call( '/fotosusuarios/?autor=' . $uid )[1], esc_html( $input['caption'] ) ) !== false, 'Lista por autor.' );
     $legacy = '999999-foto-historica-de-prueba'; $wpdb->update( FTUY_Publications::table(), array( 'legacy_slug' => $legacy ), array( 'id' => $id ) );
     $historical = $call( '/fotousuario/' . $legacy . '/' );
@@ -50,6 +58,7 @@ try {
 } finally {
     foreach ( $ids as $id ) { foreach ( array( 'publication_reports', 'publication_audit' ) as $table ) { $wpdb->delete( FTUY_Publications::table( $table ), array( 'publication_id' => $id ) ); } $wpdb->delete( FTUY_Publications::table(), array( 'id' => $id ) ); }
     if ( $image && ! is_wp_error( $image ) ) { wp_delete_attachment( $image, true ); }
+    if ( $avatar && ! is_wp_error( $avatar ) ) { wp_delete_attachment( $avatar, true ); }
     if ( $source && is_file( $source ) ) { wp_delete_file( $source ); }
     if ( $uid && ! is_wp_error( $uid ) ) { require_once ABSPATH . 'wp-admin/includes/user.php'; wp_delete_user( $uid ); }
     wp_set_current_user( $old_user );

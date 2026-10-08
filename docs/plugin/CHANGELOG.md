@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.1 — 2026-10-07
+
+- Listado web de fotos alineado con las tarjetas móviles: imagen con proporción 1.35, bordes redondeados, avatar/nombre, fecha/dirección y texto de hasta tres líneas visuales.
+- Avatar circular actual en listado y detalle, icono de persona cuando falta o falla la imagen. Script externo de fallback, sin URLs de Gravatar ni JS inline.
+- Diseño adaptable de tres/dos/una columnas y paleta cálida limitada a las páginas de fotos. Enlaces históricos, filtros por autor, paginación y despublicación conservados.
+
 ## 0.16.0 — 2026-10-07
 
 - API autenticada de avatar por multipart; propietario derivado del token, validación de carga/MIME/peso real y procesamiento optimizado en media/perfiles.
