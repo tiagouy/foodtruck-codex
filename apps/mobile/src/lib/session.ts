@@ -7,6 +7,7 @@ export type AccountUser = {
   first_name: string;
   last_name: string;
   email: string;
+  avatar?: string | null;
 };
 export type AppSession = { token: string; user: AccountUser };
 const service = 'foodtrucks-uy.session';
@@ -33,6 +34,19 @@ export async function validateSession(token: string): Promise<AppSession> {
     token,
   )) as { user: unknown };
   return { token, user: userFrom(result?.user) };
+}
+export async function updateProfile(
+  token: string,
+  first: string,
+  last: string,
+): Promise<AccountUser> {
+  const result = (await request(
+    'accounts/profile',
+    undefined,
+    { first_name: first.trim(), last_name: last.trim() },
+    token,
+  )) as { user: unknown };
+  return userFrom(result?.user);
 }
 export async function login(
   email: string,

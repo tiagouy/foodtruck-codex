@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.0 — 2026-10-07
+
+- API autenticada para editar nombre y apellido propios, actualizando el nombre público. Ignora IDs, roles, email y contraseña del cliente.
+- Perfil móvil incluye avatar migrado propio si existe. Sesiones y vínculos históricos conservados.
+- Pruebas de autorización, campos y preservación de email/permisos/contraseña.
+
 ## 0.14.1 — 2026-10-07
 
 - Mínimo de contraseña de ocho caracteres al confirmar, reactivar o recuperar cuenta, a pedido de Santi. Validación de servidor y formulario alineadas.

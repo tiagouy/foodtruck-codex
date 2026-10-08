@@ -21,6 +21,14 @@ try {
     $data = $result->get_data(); $token = $data['token'];
     $assert( $data['user']['id'] === $id && ! isset( $data['user']['legacy_id'], $data['user']['user_pass'] ), 'Perfil sin datos internos.' );
     $assert( ! is_wp_error( FTUY_App_Sessions::session( $auth( $token ) ) ), 'Sesión válida.' );
+    $before = get_userdata( $id );
+    $r = $auth( $token ); $r['first_name'] = 'Nombre'; $r['last_name'] = 'Nuevo'; $r['ID'] = 1; $r['role'] = 'administrator'; $r['email'] = 'otro@example.invalid';
+    $saved = FTUY_App_Sessions::update_profile( $r );
+    $assert( $saved instanceof WP_REST_Response && $saved->get_data()['user']['name'] === 'Nombre Nuevo', 'Edita nombre y apellido propios.' );
+    $after = get_userdata( $id );
+    $assert( $after->roles === array( 'subscriber' ) && $after->user_email === $before->user_email && $after->user_pass === $before->user_pass && $after->ID === $before->ID, 'Ignora ID, rol y email manipulados; conserva contraseña.' );
+    $r['first_name'] = ''; $assert( is_wp_error( FTUY_App_Sessions::update_profile( $r ) ), 'Nombre vacío rechazado.' );
+    $assert( is_wp_error( FTUY_App_Sessions::update_profile( new WP_REST_Request( 'POST' ) ) ), 'Perfil requiere token.' );
     $assert( is_wp_error( FTUY_App_Sessions::session( $auth( $id . '.' . str_repeat( '0', 64 ) ) ) ), 'Token falso rechazado.' );
     $meta = get_user_meta( $id ); $assert( strpos( serialize( $meta ), explode( '.', $token )[1] ) === false, 'Secreto no guardado en texto claro.' );
     FTUY_App_Sessions::logout( $auth( $token ) );

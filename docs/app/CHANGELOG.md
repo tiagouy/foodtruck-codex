@@ -1,5 +1,12 @@
 # Changelog de la app
 
+## 0.4.0 — 2026-10-07
+
+- Mi cuenta autenticada muestra nombre, avatar propio si existe y Mis fotos en grilla cuadrada de dos columnas, paginación y acceso al detalle.
+- Engranaje arriba a la derecha para Configuración: editar nombre/apellido, email de solo lectura y Cerrar sesión. No se cambia email ni foto de perfil todavía.
+- Espera de restauración de sesión sin mostrar transitoriamente el formulario de ingreso; revalidación al volver de Configuración.
+- Consultas por autor WordPress; solo publicaciones visibles, sin exponer IDs antiguos ni volver a importar datos.
+
 ## 0.3.0 — 2026-10-07
 
 - Mi cuenta con ingreso nativo por email/contraseña arriba, sin botón al sitio; registro, reactivación y recuperación conservados.

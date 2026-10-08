@@ -9,13 +9,20 @@ export const colors = {
   muted: '#675E56',
   line: '#E9DFD3',
 };
-export default function AppHeader({ title }: { title: string }) {
+export default function AppHeader({
+  title,
+  action,
+}: {
+  title: string;
+  action?: React.ReactNode;
+}) {
   return (
     <View style={styles.header}>
       <Text style={styles.brand}>FOODTRUCKS UY</Text>
       <Text accessibilityRole="header" style={styles.title}>
         {title}
       </Text>
+      {action ? <View style={styles.action}>{action}</View> : null}
     </View>
   );
 }
@@ -32,4 +39,5 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   title: { color: '#FFFFFF', fontSize: 25, fontWeight: '700', marginTop: 5 },
+  action: { position: 'absolute', right: 16, top: 20 },
 });

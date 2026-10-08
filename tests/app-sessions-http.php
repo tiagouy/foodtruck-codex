@@ -14,6 +14,9 @@ try {
     $headers = array( 'Authorization' => 'Bearer ' . $token );
     $response = wp_remote_get( $url . 'session', array( 'timeout' => 15, 'headers' => $headers ) );
     $assert( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 && strpos( wp_remote_retrieve_header( $response, 'cache-control' ), 'no-store' ) !== false );
+    $response = wp_remote_post( $url . 'profile', array( 'timeout' => 15, 'headers' => array_merge( $headers, array( 'Content-Type' => 'application/json' ) ), 'body' => wp_json_encode( array( 'first_name' => 'Fixture', 'last_name' => 'Actualizado', 'ID' => 1 ) ) ) );
+    $profile = json_decode( wp_remote_retrieve_body( $response ), true );
+    $assert( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 && $profile['user']['id'] === $id && $profile['user']['name'] === 'Fixture Actualizado' );
     $response = wp_remote_post( $url . 'logout', array( 'timeout' => 15, 'headers' => $headers ) );
     $assert( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 );
     $response = wp_remote_get( $url . 'session', array( 'timeout' => 15, 'headers' => $headers ) );

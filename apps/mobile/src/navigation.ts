@@ -11,4 +11,5 @@ export type RootStack = {
   Principal: NavigatorScreenParams<Tabs> | undefined;
   Detalle: { kind: Kind; contentKey: string };
   CuentaSolicitud: { action: AccountAction };
+  ConfiguracionCuenta: undefined;
 };

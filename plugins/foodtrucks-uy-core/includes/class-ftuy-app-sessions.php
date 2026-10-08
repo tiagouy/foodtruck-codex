@@ -6,8 +6,9 @@ class FTUY_App_Sessions {
     const PREFIX = 'ftuy_app_session_';
     public static function init() {
         add_action( 'rest_api_init', function () {
-            foreach ( array( 'login' => 'POST', 'session' => 'GET', 'logout' => 'POST' ) as $action => $method ) {
-                register_rest_route( 'foodtrucks-uy/v1', '/accounts/' . $action, array( 'methods' => $method, 'permission_callback' => '__return_true', 'callback' => array( __CLASS__, $action ) ) );
+            foreach ( array( 'login' => 'POST', 'session' => 'GET', 'logout' => 'POST', 'update_profile' => 'POST' ) as $action => $method ) {
+                $path = $action === 'update_profile' ? 'profile' : $action;
+                register_rest_route( 'foodtrucks-uy/v1', '/accounts/' . $path, array( 'methods' => $method, 'permission_callback' => '__return_true', 'callback' => array( __CLASS__, $action ) ) );
             }
         } );
         add_filter( 'rest_post_dispatch', function ( $response, $server, $request ) {
@@ -23,7 +24,19 @@ class FTUY_App_Sessions {
         return $user && ! user_can( $user, 'manage_options' ) && in_array( 'subscriber', $user->roles, true ) && in_array( get_user_meta( $user->ID, 'ftuy_account_status', true ), array( '', 'active' ), true );
     }
     public static function profile( $user ) {
-        return array( 'id' => (int) $user->ID, 'name' => $user->display_name, 'first_name' => get_user_meta( $user->ID, 'first_name', true ), 'last_name' => get_user_meta( $user->ID, 'last_name', true ), 'email' => $user->user_email );
+        $avatar = FTUY_Profile_Images::attachment( $user->ID );
+        return array( 'id' => (int) $user->ID, 'name' => $user->display_name, 'first_name' => get_user_meta( $user->ID, 'first_name', true ), 'last_name' => get_user_meta( $user->ID, 'last_name', true ), 'email' => $user->user_email, 'avatar' => $avatar ? ( wp_get_attachment_image_url( $avatar, 'thumbnail' ) ?: null ) : null );
+    }
+    public static function update_profile( $request ) {
+        $auth = self::authenticate( $request );
+        if ( is_wp_error( $auth ) ) { return $auth; }
+        $first = $request['first_name']; $last = $request['last_name'];
+        if ( ! is_string( $first ) || ! is_string( $last ) || strlen( $first ) > 200 || strlen( $last ) > 200 ) { return new WP_Error( 'fields', 'Revisá tu nombre y apellido.', array( 'status' => 400 ) ); }
+        $first = sanitize_text_field( trim( $first ) ); $last = sanitize_text_field( trim( $last ) );
+        if ( ! $first ) { return new WP_Error( 'fields', 'Ingresá tu nombre.', array( 'status' => 400 ) ); }
+        $id = wp_update_user( array( 'ID' => $auth['user']->ID, 'first_name' => $first, 'last_name' => $last, 'display_name' => trim( $first . ' ' . $last ) ) );
+        if ( is_wp_error( $id ) ) { return new WP_Error( 'profile', 'No pudimos guardar el perfil.', array( 'status' => 503 ) ); }
+        return new WP_REST_Response( array( 'user' => self::profile( get_user_by( 'id', $id ) ) ), 200 );
     }
     public static function login( $request ) {
         if ( ! self::transport() ) { return new WP_Error( 'https', 'El ingreso requiere una conexión segura.', array( 'status' => 503 ) ); }

@@ -6,10 +6,15 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Image,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppHeader, { colors } from '../components/AppHeader';
-import { Button } from '../components/State';
+import State, { Button } from '../components/State';
+import MyPhotos from '../components/MyPhotos';
+import { Settings } from 'lucide-react-native';
+import { mediaURL } from '../lib/config';
 import { accountFieldsError } from '../lib/api';
 import {
   AppSession,
@@ -18,7 +23,7 @@ import {
   restoreSession,
   saveSession,
 } from '../lib/session';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStack } from '../navigation';
 
@@ -28,6 +33,7 @@ export default function AccountScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(true);
+  const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
   const mounted = useRef(true);
   const working = useRef(false);
@@ -53,16 +59,21 @@ export default function AccountScreen() {
       working.current = false;
       if (mounted.current) {
         setBusy(false);
+        setChecking(false);
       }
     }
   }, []);
   useEffect(() => {
     mounted.current = true;
-    restore();
     return () => {
       mounted.current = false;
     };
-  }, [restore]);
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      restore();
+    }, [restore]),
+  );
   const enter = async () => {
     if (working.current) {
       return;
@@ -106,34 +117,24 @@ export default function AccountScreen() {
       }
     }
   };
-  const exit = async () => {
-    if (!session || working.current) {
-      return;
-    }
-    working.current = true;
-    setBusy(true);
-    setError('');
-    try {
-      await logout(session.token);
-      if (mounted.current) {
-        setSession(null);
-      }
-    } catch {
-      if (mounted.current) {
-        setError(
-          'No pudimos cerrar la sesión en el servidor. Revisá tu conexión y reintentá.',
-        );
-      }
-    } finally {
-      working.current = false;
-      if (mounted.current) {
-        setBusy(false);
-      }
-    }
-  };
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
-      <AppHeader title="Mi cuenta" />
+      <AppHeader
+        title="Mi cuenta"
+        action={
+          session ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Configuración de mi cuenta"
+              hitSlop={12}
+              onPress={() => navigation.navigate('ConfiguracionCuenta')}
+              style={styles.settings}
+            >
+              <Settings color="#FFFFFF" size={25} />
+            </Pressable>
+          ) : undefined
+        }
+      />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -143,19 +144,18 @@ export default function AccountScreen() {
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          {session ? (
+          {checking && !session ? (
+            <State loading />
+          ) : session ? (
             <>
-              <Text style={styles.title}>Hola, {session.user.name}</Text>
-              <Text style={styles.text}>{session.user.email}</Text>
-              <Text style={styles.text}>
-                Ya ingresaste con tu cuenta. La subida de fotos y la edición del
-                perfil serán el próximo paso.
-              </Text>
-              <Button
-                label={busy ? 'Cerrando…' : 'Cerrar sesión'}
-                disabled={busy}
-                onPress={exit}
-              />
+              {mediaURL(session.user.avatar) ? (
+                <Image
+                  source={{ uri: mediaURL(session.user.avatar) }}
+                  style={styles.avatar}
+                />
+              ) : null}
+              <Text style={styles.title}>{session.user.name}</Text>
+              <MyPhotos author={session.user.id} />
             </>
           ) : (
             <>
@@ -242,6 +242,8 @@ export default function AccountScreen() {
 }
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.dark },
+  settings: { padding: 8 },
+  avatar: { width: 84, height: 84, borderRadius: 42, alignSelf: 'center' },
   flex: { flex: 1 },
   body: { backgroundColor: colors.background },
   content: { padding: 20, gap: 16 },

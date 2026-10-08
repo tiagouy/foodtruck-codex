@@ -262,11 +262,18 @@ export async function list<T extends Content>(
   view = 'upcoming',
   perPage = 12,
   signal?: AbortSignal,
+  author?: number,
 ): Promise<Page<T>> {
+  if (
+    author !== undefined &&
+    (kind !== 'publications' || !Number.isInteger(author) || author < 1)
+  ) {
+    throw new APIError('No pudimos identificar tus fotos.');
+  }
   const value = (await request(
     `${kind}?page=${page}&per_page=${perPage}${
       kind === 'events' ? `&view=${encodeURIComponent(view)}` : ''
-    }`,
+    }${author !== undefined ? `&author=${author}` : ''}`,
     signal,
   )) as Page<T>;
   if (
@@ -275,7 +282,9 @@ export async function list<T extends Content>(
     !Number.isInteger(value.total) ||
     value.total < 0 ||
     value.page !== page ||
-    !value.items.every(item => validateContent(kind, item))
+    !value.items.every(item => validateContent(kind, item)) ||
+    (author !== undefined &&
+      value.items.some(item => (item as Publication).author.id !== author))
   ) {
     throw new APIError('El servidor respondió con datos inesperados.');
   }
