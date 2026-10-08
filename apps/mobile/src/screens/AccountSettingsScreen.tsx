@@ -100,18 +100,16 @@ export default function AccountSettingsScreen({
       if ((asset.fileSize || 0) > 5 * 1024 * 1024) {
         throw new Error('La imagen pesa demasiado. Elegí una de hasta 5 MB.');
       }
-      if (
-        !['image/jpeg', 'image/png', 'image/webp'].includes(
-          asset.type || 'image/jpeg',
-        )
-      ) {
+      const sourceType = (asset.type || 'image/jpeg').trim().toLowerCase();
+      const mime = sourceType === 'image/jpg' ? 'image/jpeg' : sourceType;
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
         throw new Error(
           'No pudimos leer esa imagen. Elegí una foto JPG, PNG o WebP.',
         );
       }
       setPhoto({
         uri: asset.uri,
-        type: asset.type || 'image/jpeg',
+        type: mime,
         name: asset.fileName || 'perfil.jpg',
       });
     } catch (reason) {
@@ -154,7 +152,11 @@ export default function AccountSettingsScreen({
       if (mounted.current) {
         setSession({ ...session, user });
         setPhoto(null);
-        setNotice('Guardamos tu perfil.');
+        setNotice(
+          photo
+            ? 'Guardamos tu perfil y la foto.'
+            : 'Guardamos tu nombre y apellido.',
+        );
       }
     } catch (reason) {
       if (mounted.current) {

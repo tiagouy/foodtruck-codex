@@ -1,5 +1,7 @@
 # Foto de perfil — app 0.5.0 / plugin 0.16.0
 
+Corrección app 0.5.1: el selector iOS 8.2.1 devuelve JPEG como `image/jpg`; la validación inicial solo aceptaba `image/jpeg` y los rechazaba antes de subir. Se normaliza el alias, sin modificar el módulo nativo ni relajar la validación de contenido del servidor. Prueba con imagen de muestra del simulador hasta vista previa, sin guardar una foto en la cuenta de Santi. El aviso de guardado distingue nombres solamente de nombres y foto.
+
 Editar perfil permite elegir una imagen de la biblioteca del dispositivo y previsualizarla en un círculo. Solo se sube al tocar Guardar cambios. Cancelar el selector no modifica el perfil. Una imagen demasiado pesada o no compatible muestra un mensaje sin subirla. Se guardan primero los nombres y luego la foto: si falla la foto, el mensaje informa el guardado parcial y permite reintentar.
 
 Mi cuenta muestra nombre a 20 puntos y avatar circular arriba a la derecha. Diámetro aproximado de 20% del ancho del teléfono, máximo 128 puntos para tablets. Sin avatar aparece un icono de persona; tocarlo abre Configuración. Mis fotos pasa a 17 puntos. Se mantienen las nueve fotos históricas de Santi y la grilla de dos columnas.

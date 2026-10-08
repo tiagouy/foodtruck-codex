@@ -225,7 +225,7 @@ test('settings edits names and closes the session from inside settings', async (
     'Fixture',
     'Nuevo',
   );
-  expect(texts(tree)).toContain('Guardamos tu perfil');
+  expect(texts(tree)).toContain('Guardamos tu nombre y apellido');
   await act(async () =>
     tree.root
       .findAllByType(Button)
@@ -237,7 +237,7 @@ test('settings edits names and closes the session from inside settings', async (
   await act(async () => tree.unmount());
 });
 
-test('profile photo selection previews locally and uploads only when saving', async () => {
+test('iOS image/jpg is normalized to JPEG, previewed and uploaded only when saving', async () => {
   const user = {
     id: 9,
     name: 'Fixture',
@@ -254,7 +254,7 @@ test('profile photo selection previews locally and uploads only when saving', as
       {
         uri: 'file:///fixture.jpg',
         fileName: 'fixture.jpg',
-        type: 'image/jpeg',
+        type: 'image/jpg',
         fileSize: 1000,
       },
     ],

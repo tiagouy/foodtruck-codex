@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.5.1 — 2026-10-07
+
+- Corrige JPEG de iOS reportados por el selector como `image/jpg`: se normalizan a `image/jpeg` antes de validar y subir. La validación anterior rechazaba fotos válidas antes de crear la vista previa.
+- Mensajes de guardado distinguen nombres solamente de perfil con foto. Regresión con el MIME real del selector y comprobación nativa de vista previa.
+
 ## 0.5.0 — 2026-10-07
 
 - Foto de perfil seleccionable desde Editar perfil, preview local y subida al guardar; límite de peso con mensajes simples.
