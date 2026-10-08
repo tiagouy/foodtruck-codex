@@ -22,7 +22,7 @@ La app pide sugerencias después de tres caracteres y 450 ms de pausa. Las solic
 
 El plugin hace de proxy autenticado para Places API New (`places/autocomplete`, `places/details`). No distribuye claves a la app. Solo Uruguay/español; máximo cinco sugerencias; campos mínimos. El detalle debe corresponder a una sugerencia reciente de esa cuenta/sesión. IDs temporales durante cinco minutos; límite 120 consultas por cuenta/hora.
 
-**Configuración real pendiente:** definir `FTUY_GOOGLE_PLACES_SERVER_KEY` en el entorno privado de WordPress (`wp-config.php`, fuera del repo). Usar una clave destinada a servidor, restringida a Places API New y a IP del servidor cuando sea posible, con cuotas/alertas. No reutilizar ni quitar restricciones a la clave web por comodidad; no pegar claves en chat ni subirlas a Git.
+**Actualización plugin 0.18.1:** en local se reutiliza la clave web existente cuando no está definida la constante privada de servidor. Verificada contra Places New sin cambiar restricciones. La clave nunca se entrega a la app. En producción definir `FTUY_GOOGLE_PLACES_SERVER_KEY` en el entorno privado de WordPress (`wp-config.php`, fuera del repo), destinada a servidor, restringida a Places API New y a IP del servidor cuando sea posible, con cuotas/alertas. No quitar restricciones a la clave web por comodidad; no pegar claves en chat ni subirlas a Git.
 
 Documentación oficial: [Autocomplete New](https://developers.google.com/maps/documentation/places/web-service/place-autocomplete), [Place Details](https://developers.google.com/maps/documentation/places/web-service/place-details), [sesiones](https://developers.google.com/maps/documentation/places/web-service/using-session-tokens), [políticas y atribuciones](https://developers.google.com/maps/documentation/places/web-service/policies). La lista compacta muestra atribución Google Maps. Antes de publicar en tiendas: validar clave, cuotas, políticas de conservación de datos/ubicaciones y avisos públicos de privacidad/términos. No se almacena caché de respuestas de Google.
 
@@ -30,5 +30,5 @@ Documentación oficial: [Autocomplete New](https://developers.google.com/maps/do
 
 - 45 pruebas Jest de app, TypeScript y lint.
 - 14 comprobaciones HTTP reales de subida contra WordPress local con usuario e imágenes sintéticos, limpiados al terminar: autenticación, campos, optimización, autor, publicación inmediata, reintentos y despublicación.
-- 10 comprobaciones del proxy Places con respuestas simuladas: sin clave real, sin consultas externas/gasto; falta prueba real de Google.
+- 10 comprobaciones del proxy Places con respuestas simuladas: sin consultas externas/gasto. En plugin 0.18.1 también se verificó Google real con la clave web existente desde local: sugerencias/dirección/latitud/longitud para Plaza Villa Biarritz usando cuenta sintética limpiada. Sugerencias visibles en la app para la búsqueda Villa d, conservando borrador real sin publicar.
 - QA en iPhone 17: acceso, formulario, selector nativo y cancelación. Sin publicar fotos nuevas con la cuenta real del usuario. Android y flujo real completo desde teléfono pendientes.

@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-/** Restricted authenticated proxy: never returns or reuses the browser Google key. */
+/** Authenticated proxy; keys stay on the server. Local development can use the existing web key. */
 class FTUY_App_Places {
     public static function init() {
         add_action( 'rest_api_init', function () {
@@ -14,7 +14,13 @@ class FTUY_App_Places {
             return $response;
         }, 10, 3 );
     }
-    private static function key() { return defined( 'FTUY_GOOGLE_PLACES_SERVER_KEY' ) ? (string) FTUY_GOOGLE_PLACES_SERVER_KEY : ''; }
+    private static function key() {
+        if ( defined( 'FTUY_GOOGLE_PLACES_SERVER_KEY' ) ) { return (string) FTUY_GOOGLE_PLACES_SERVER_KEY; }
+        // Verified against Places New locally. Never silently reuse a public web key in production.
+        if ( ! FTUY_Accounts::local() ) { return ''; }
+        $legacy = get_option( 'option_tree', array() );
+        return (string) ( get_option( 'ftuy_google_maps_key', '' ) ?: ( is_array( $legacy ) ? ( $legacy['googlemapapi'] ?? '' ) : '' ) );
+    }
     private static function context( $request ) {
         $auth = FTUY_App_Sessions::authenticate( $request );
         if ( is_wp_error( $auth ) ) { return $auth; }

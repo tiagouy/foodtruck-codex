@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.18.1 — 2026-10-08
+
+- Corrige autocompletado móvil local: si no hay clave privada de servidor configurada, usa la clave que ya está configurada para la web. Consulta real a Places New confirmada con HTTP 200; no se cambiaron claves/restricciones en Google.
+- La constante de servidor mantiene prioridad (también si está vacía). El fallback solo aplica en entorno local; producción sigue requiriendo clave privada dedicada. No expone la clave a la app ni la guarda en Git.
+- Verificación real: búsqueda desde la app para Villa d y proxy completo con cuenta sintética para Plaza Villa Biarritz → dirección, latitud y longitud. Borrador real conservado y sin publicar; fixture limpiada. Diez regresiones simuladas pasan.
+
 ## 0.18.0 — 2026-10-08
 
 - Subida multipart autenticada de publicaciones: identidad desde bearer, imagen optimizada en media/publicaciones, publicación directa e historial.

@@ -8,6 +8,8 @@ Estado 0.7.0: [subida de fotos y autocompletado](subir-fotos-0.7.0.md), denuncia
 
 0.8.0 agrega [encuadre y recorte cuadrado de publicaciones](recorte-0.8.0.md), antes de enviar. Requiere binario actualizado por la dependencia nativa nueva.
 
+Plugin 0.18.1: autocompletado real funcionando en local con la clave web existente, incluyendo LAT/LONG; ya no está pendiente para probar localmente. La clave de servidor dedicada sigue pendiente para producción.
+
 Actualización 0.1.1: objetivo de tiendas confirmado como actualización de apps existentes. Android toma el applicationId del APK anterior, con debug separado; iOS presenta identificadores contradictorios y espera confirmación de App Store Connect. Ver [continuidad de tiendas y firma](continuidad-tiendas.md). No crear apps nuevas ni publicar la identidad de desarrollo.
 
 ## Inicio y navegación — propuesta 2026-10-07

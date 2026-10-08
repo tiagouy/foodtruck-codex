@@ -2,6 +2,8 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+Actualización posterior: app 0.8.0 incorpora recorte nativo cuadrado; plugin 0.18.1 corrige autocompletado local reutilizando la clave web existente. Google real y LAT/LONG verificados. Para producción todavía se debe configurar la clave privada dedicada; no hace falta otra activación para probar en local.
+
 ## Actualización · 2026-10-08 · plugin 0.18.0 / app 0.7.0
 
 App nativa local con lectura pública, sesiones seguras, perfil/avatar, Mis fotos, denuncia y [subida directa de fotos](app/subir-fotos-0.7.0.md) (foto + texto + dirección, sin puntaje ni aprobación previa). Administración y despublicación en el plugin. Subida HTTP, optimización e idempotencia probadas con fixtures; selector/formulario comprobados en el simulador.
