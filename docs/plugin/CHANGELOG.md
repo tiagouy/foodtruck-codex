@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.1 — 2026-10-07
+
+- Mínimo de contraseña de ocho caracteres al confirmar, reactivar o recuperar cuenta, a pedido de Santi. Validación de servidor y formulario alineadas.
+- Prueba HTTP rechaza siete caracteres, acepta ocho y verifica ingreso; sin modificar contraseñas existentes.
+
 ## 0.14.0 — 2026-10-07
 
 - API de ingreso móvil, consulta y cierre de sesión; token aleatorio almacenado solo como hash, vencimiento, revocación y vínculo con contraseña.

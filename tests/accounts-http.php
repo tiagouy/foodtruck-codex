@@ -25,8 +25,9 @@ try {
     $assert( $user->roles === array( 'subscriber' ) && ! get_user_meta( $uid, FTUY_Accounts::LEGACY_META, true ), 'Servidor fuerza suscriptor e ignora ID antiguo.' );
     wp_cache_delete( 'ftuy_account_mail_local', 'options' ); $mails = get_option( 'ftuy_account_mail_local' ); $mail = end( $mails ); preg_match( '#https?://[^\s]+#', $mail['message'], $link ); $reset_url = $link[0];
     list( $code, $body ) = $call( $reset_url ); $reset_nonce = $nonce( $body ); $assert( $code === 200 && strpos( $body, 'name="password_confirm"' ) !== false, 'Enlace abre nuestra pantalla de contraseña.' );
-    list( $code, $body ) = $call( $reset_url, array( '_wpnonce' => $reset_nonce, 'password' => 'short', 'password_confirm' => 'short' ) ); $assert( $code === 200 && strpos( $body, 'al menos 12' ) !== false, 'Contraseña breve rechazada.' );
-    $password = 'Clave-http-' . wp_generate_uuid4();
+    $assert( strpos( $body, 'minlength="8"' ) !== false && strpos( $body, 'Usá al menos 8' ) !== false, 'Formulario informa mínimo de ocho.' );
+    list( $code, $body ) = $call( $reset_url, array( '_wpnonce' => $reset_nonce, 'password' => 'short77', 'password_confirm' => 'short77' ) ); $assert( $code === 200 && strpos( $body, 'al menos 8' ) !== false, 'Siete caracteres rechazados.' );
+    $password = wp_generate_password( 8 );
     list( $code, $body, $redirect ) = $call( $reset_url, array( '_wpnonce' => $reset_nonce, 'password' => $password, 'password_confirm' => $password ) ); $assert( $code === 302 && strpos( $redirect, '/ingresar/' ) !== false, 'Confirmación vuelve al login propio.' );
     list( $code, $body ) = $call( $reset_url ); $assert( strpos( $body, 'ya fue utilizado' ) !== false && strpos( $body, 'name="password_confirm"' ) === false, 'Enlace de un solo uso.' );
     list( $code, $body ) = $call( '/ingresar/' ); $login_nonce = $nonce( $body );

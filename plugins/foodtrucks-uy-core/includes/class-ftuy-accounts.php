@@ -192,7 +192,7 @@ class FTUY_Accounts {
             } elseif ( self::$view === 'reset' ) {
                 $user = self::reset_user(); $password = $input['password'] ?? ''; $confirm = $input['password_confirm'] ?? '';
                 if ( is_wp_error( $user ) ) { self::$error = 'El enlace no es válido o venció. Solicitá uno nuevo.'; }
-                elseif ( ! is_string( $password ) || strlen( $password ) < 12 || strlen( $password ) > 4096 || $password !== $confirm ) { self::$error = 'Elegí una contraseña de al menos 12 caracteres y repetila igual.'; }
+                elseif ( ! is_string( $password ) || strlen( $password ) < 8 || strlen( $password ) > 4096 || $password !== $confirm ) { self::$error = 'Elegí una contraseña de al menos 8 caracteres y repetila igual.'; }
                 else { reset_password( $user, $password ); wp_safe_redirect( add_query_arg( 'updated', 1, home_url( '/ingresar/' ) ) ); exit; }
             } elseif ( self::$view === 'account' && is_user_logged_in() ) {
                 if ( ! self::$name || strlen( self::$name ) > 200 ) { self::$error = 'Ingresá tu nombre.'; }
