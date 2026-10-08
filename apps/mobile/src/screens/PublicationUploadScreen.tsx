@@ -3,6 +3,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,6 +11,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { MapPin } from 'lucide-react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStack } from '../navigation';
@@ -330,15 +332,35 @@ export default function PublicationUploadScreen({
         ) : null}
         {places.length ? (
           <View style={styles.suggestions}>
-            {places.map(p => (
-              <Button
+            {places.map((p, index) => (
+              <Pressable
                 key={p.id}
-                label={p.label}
+                accessibilityRole="button"
+                accessibilityLabel={p.label}
                 disabled={!editable}
                 onPress={() => choosePlace(p)}
-              />
+                style={({ pressed }) => [
+                  styles.suggestionRow,
+                  index > 0 && styles.suggestionDivider,
+                  pressed && styles.suggestionPressed,
+                ]}
+              >
+                <MapPin size={19} color={colors.muted} />
+                <View style={styles.suggestionText}>
+                  <Text style={styles.suggestionName}>
+                    {p.label.split(',')[0].trim()}
+                  </Text>
+                  {p.label.includes(',') ? (
+                    <Text style={styles.suggestionAddress}>
+                      {p.label.slice(p.label.indexOf(',') + 1).trim()}
+                    </Text>
+                  ) : null}
+                </View>
+              </Pressable>
             ))}
-            <Text style={styles.google}>Google Maps</Text>
+            <View style={styles.suggestionFooter}>
+              <Text style={styles.google}>Google Maps</Text>
+            </View>
           </View>
         ) : null}
         {location ? (
@@ -399,6 +421,36 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.line,
   },
-  suggestions: { gap: 6 },
+  suggestions: {
+    marginTop: -12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DADCE0',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 60,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  suggestionDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#E8EAED',
+  },
+  suggestionPressed: { backgroundColor: '#F1F3F4' },
+  suggestionText: { flex: 1, gap: 3 },
+  suggestionName: { fontSize: 16, color: '#202124' },
+  suggestionAddress: { fontSize: 13, lineHeight: 18, color: '#5F6368' },
+  suggestionFooter: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#E8EAED',
+  },
   google: { fontSize: 12, fontWeight: '400', color: '#5E5E5E' },
 });

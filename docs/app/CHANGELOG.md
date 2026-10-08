@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.8.1 — 2026-10-08
+
+- Autocompletado de direcciones como desplegable de filas blancas con pin, nombre/dirección y separadores, en vez de botones naranjas individuales. Atribución Google Maps al pie.
+- Conserva selección y coordenadas, sin alterar el borrador. QA visual con Expo Café Uruguay; regresión de selección. 48 pruebas Jest, TypeScript y lint.
+
 ## 0.8.0 — 2026-10-08
 
 - Editor nativo de recorte cuadrado después de elegir una foto de publicación: mover/zoom, Usar foto o Cancelar; cancelar conserva la selección previa.

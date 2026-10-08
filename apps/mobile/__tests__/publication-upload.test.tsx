@@ -36,6 +36,71 @@ const navigation = {
   replace: jest.fn(),
   goBack: jest.fn(),
 };
+test('autocomplete uses plain rows and selecting one fills the address', async () => {
+  jest.useFakeTimers();
+  (request as jest.Mock).mockImplementation((path: string) =>
+    Promise.resolve(
+      path === 'places/autocomplete'
+        ? {
+            suggestions: [
+              { id: 'fixture-place', label: 'Villa Dolores, Montevideo' },
+            ],
+          }
+        : {
+            address: 'Villa Dolores, Montevideo',
+            latitude: -34.9,
+            longitude: -56.2,
+          },
+    ),
+  );
+  let tree!: Renderer.ReactTestRenderer;
+  try {
+    await act(async () => {
+      tree = Renderer.create(
+        <PublicationUploadScreen
+          navigation={navigation as any}
+          {...({} as any)}
+        />,
+      );
+    });
+    await act(async () => {
+      tree.root
+        .findByProps({ accessibilityLabel: 'Dirección de la foto' })
+        .props.onChangeText('Villa');
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(450);
+    });
+    expect(request).toHaveBeenCalled();
+    await act(async () => {});
+    const row = tree.root.findByProps({
+      accessibilityLabel: 'Villa Dolores, Montevideo',
+    });
+    expect(row).toBeDefined();
+    expect(
+      tree.root
+        .findAllByType(Button)
+        .some(b => b.props.label === 'Villa Dolores, Montevideo'),
+    ).toBe(false);
+    await act(async () => {
+      await row.props.onPress();
+    });
+    expect(
+      tree.root.findByProps({ accessibilityLabel: 'Dirección de la foto' })
+        .props.value,
+    ).toBe('Villa Dolores, Montevideo');
+    expect(
+      (request as jest.Mock).mock.calls.some(
+        c => c[0] === 'places/details' && c[2].place_id === 'fixture-place',
+      ),
+    ).toBe(true);
+  } finally {
+    if (tree) {
+      await act(async () => tree.unmount());
+    }
+    jest.useRealTimers();
+  }
+});
 beforeEach(() => {
   jest.clearAllMocks();
   (restoreSession as jest.Mock).mockResolvedValue({ token: 'fixture' });
