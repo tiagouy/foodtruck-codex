@@ -105,6 +105,7 @@ export async function choosePublicationPhoto(): Promise<ProfilePhoto | null> {
 }
 export type PhotoLocation = {
   address: string;
+  name?: string;
   latitude: number;
   longitude: number;
 };
@@ -167,7 +168,8 @@ export async function publishPhoto(
   body.append('photo', photo as unknown as Blob);
   body.append('caption', caption.trim());
   body.append('address', address.trim());
-  if (location && location.address === address) {
+  if (location && (location.name || location.address) === address) {
+    body.append('street_address', location.address);
     body.append('latitude', String(location.latitude));
     body.append('longitude', String(location.longitude));
   }

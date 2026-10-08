@@ -169,8 +169,9 @@ export default function PublicationUploadScreen({
     try {
       const value = await selectPlace(session.token, searchId.current, p.id);
       if (live.current && current === revision.current) {
-        setAddress(value.address);
-        setLocation(value);
+        const name = p.label.split(',')[0].trim();
+        setAddress(name);
+        setLocation({ ...value, name });
         searchId.current = uploadID();
       }
     } catch (failure) {

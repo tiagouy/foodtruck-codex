@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.19.0 — 2026-10-08
+
+- Publicaciones esquema 4 agrega `street_address` opcional: preserva dirección postal de Google separada del nombre/lugar visible guardado en `address`. Coordenadas se conservan. Nuevas publicaciones muestran el lugar en web/app mediante el campo público existente.
+- Campo postal editable dentro del administrador, con validación y registro en el historial. Los datos históricos no se reemplazan: la columna nueva arranca vacía para ellos. Editar con un cliente anterior sin el campo no lo borra.
+- 15 comprobaciones HTTP de subida y 31 de administración; fixtures limpiadas. Ver [flujo actualizado](../app/subir-fotos-0.7.0.md).
+
 ## 0.18.1 — 2026-10-08
 
 - Corrige autocompletado móvil local: si no hay clave privada de servidor configurada, usa la clave que ya está configurada para la web. Consulta real a Places New confirmada con HTTP 200; no se cambiaron claves/restricciones en Google.

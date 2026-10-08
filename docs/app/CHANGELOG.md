@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.8.2 — 2026-10-08
+
+- Seleccionar un lugar conserva el nombre del resultado (Expo Café Uruguay), no lo sustituye por su calle. Dirección postal y LAT/LONG se envían por separado, solo mientras la selección siga vigente.
+- QA nativa real: elegir Expo Café Uruguay mantiene ese nombre en Dónde fue. Sin publicar. 49 pruebas Jest, TypeScript/lint y 15 comprobaciones HTTP de guardado.
+
 ## 0.8.1 — 2026-10-08
 
 - Autocompletado de direcciones como desplegable de filas blancas con pin, nombre/dirección y separadores, en vez de botones naranjas individuales. Atribución Google Maps al pie.

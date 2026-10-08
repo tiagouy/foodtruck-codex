@@ -64,6 +64,7 @@ class FTUY_Publication_Admin {
         if ( $row['status'] === 'published' ) { echo '<p><a class="button" href="' . esc_url( FTUY_Publication_Public::url( $row ) ) . '">Ver enlace público</a></p>'; }
         echo '<div style="max-width:480px">' . wp_get_attachment_image( $row['image_id'], 'medium_large', false, array( 'style' => 'max-width:100%;height:auto' ) ) . '</div>';
         self::form_start( $id );
+        echo '<p><label>Dirección postal (opcional)<br><input class="large-text" name="street_address" maxlength="255" value="' . esc_attr( $row['street_address'] ?? '' ) . '"></label></p>';
         echo '<input type="hidden" name="version" value="' . (int) $row['version'] . '"><p><label>Texto<br><textarea class="large-text" rows="5" name="caption" maxlength="10000">' . esc_textarea( $row['caption'] ) . '</textarea></label></p><p><label>Ubicación / dirección<br><input class="large-text" name="address" maxlength="255" value="' . esc_attr( $row['address'] ) . '"></label></p>';
         foreach ( array( 'latitude' => 'Latitud', 'longitude' => 'Longitud' ) as $key => $label ) { echo '<p><label>' . esc_html( $label ) . ' <input type="number" step="any" name="' . esc_attr( $key ) . '" value="' . esc_attr( $row[$key] ?? '' ) . '"></label></p>'; }
         echo '<p><label>Estado <select name="status">'; foreach ( FTUY_Publications::labels() as $key => $label ) { echo '<option value="' . esc_attr( $key ) . '" ' . selected( $row['status'], $key, false ) . '>' . esc_html( $label ) . '</option>'; }

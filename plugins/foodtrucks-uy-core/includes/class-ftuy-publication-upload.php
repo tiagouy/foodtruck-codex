@@ -24,6 +24,7 @@ class FTUY_Publication_Upload {
         $find = function () use ( $wpdb, $key ) { return $wpdb->get_var( $wpdb->prepare( 'SELECT publication_id FROM ' . FTUY_Publications::table( 'publication_uploads' ) . ' WHERE request_key=%s', $key ) ); };
         if ( $existing = $find() ) { return self::receipt( $existing ); }
         $input = array( 'caption' => $request['caption'], 'address' => $request['address'], 'latitude' => $request['latitude'] ?? '', 'longitude' => $request['longitude'] ?? '', 'status' => 'published' );
+        $input['street_address'] = $request['street_address'] ?? '';
         $data = FTUY_Publications::validate( $input );
         if ( is_wp_error( $data ) ) { return self::error( $data->get_error_message() ); }
         if ( ! trim( $data['caption'] ) || ! trim( $data['address'] ) ) { return self::error( 'Completá el texto y la dirección de la foto.' ); }

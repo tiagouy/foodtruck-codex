@@ -21,9 +21,10 @@ try {
     list( $code ) = $upload( $source, array(), false ); $assert( $code === 401, 'Sin sesión rechazada.' );
     list( $code ) = $upload( $source, array( 'caption' => '' ) ); $assert( $code === 400, 'Texto vacío rechazado.' );
     list( $code ) = $upload( $source, array( 'latitude' => '200' ) ); $assert( $code === 400, 'Coordenadas inválidas rechazadas.' );
-    list( $code, $data ) = $upload( $source ); $id = (int) ( $data['publication_id'] ?? 0 );
+    list( $code, $data ) = $upload( $source, array( 'address' => 'Expo Café Uruguay', 'street_address' => 'Calle de prueba 123' ) ); $id = (int) ( $data['publication_id'] ?? 0 );
     $assert( $code === 201 && $id, 'Foto publicada.' );
     $row = FTUY_Publications::get( $id ); $attachment = (int) $row['image_id']; $path = get_attached_file( $attachment ); $info = wp_getimagesize( $path );
+    $assert( $row['address'] === 'Expo Café Uruguay' && $row['street_address'] === 'Calle de prueba 123', 'Conserva nombre del lugar y dirección postal por separado.' );
     $assert( (int) $row['author_user_id'] === $user && $row['status'] === 'published' && (int) get_post( $attachment )->post_author === $user, 'Autor real y publicación directa; ignora manipulación.' );
     $assert( $info[0] === 900 && $info[1] < 900 && $info['mime'] === 'image/jpeg' && filesize( $path ) <= 300 * 1024, 'Optimiza y conserva proporción; sin crop.' );
     $assert( strpos( $path, '/media/publicaciones/' ) !== false && hash_file( 'sha256', $source ) === $hash, 'Almacenamiento independiente; fuente sin modificar.' );

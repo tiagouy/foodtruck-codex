@@ -47,7 +47,7 @@ test('autocomplete uses plain rows and selecting one fills the address', async (
             ],
           }
         : {
-            address: 'Villa Dolores, Montevideo',
+            address: 'Calle de prueba 123, Montevideo',
             latitude: -34.9,
             longitude: -56.2,
           },
@@ -88,7 +88,7 @@ test('autocomplete uses plain rows and selecting one fills the address', async (
     expect(
       tree.root.findByProps({ accessibilityLabel: 'Dirección de la foto' })
         .props.value,
-    ).toBe('Villa Dolores, Montevideo');
+    ).toBe('Villa Dolores');
     expect(
       (request as jest.Mock).mock.calls.some(
         c => c[0] === 'places/details' && c[2].place_id === 'fixture-place',
@@ -231,6 +231,27 @@ test('guest is invited to sign in instead of seeing upload controls', async () =
     screen: 'Cuenta',
   });
   await act(async () => tree.unmount());
+});
+test('upload keeps selected place name, postal address and coordinates separately', async () => {
+  (request as jest.Mock).mockResolvedValue({ publication_id: 25 });
+  await publishPhoto(
+    'fixture',
+    'request-fixture-123456',
+    photo,
+    'Texto',
+    'Expo Café Uruguay',
+    {
+      name: 'Expo Café Uruguay',
+      address: 'Calle 123, Montevideo',
+      latitude: -34.9,
+      longitude: -56.2,
+    },
+  );
+  const form = (request as jest.Mock).mock.calls[0][2];
+  expect(form.get('address')).toBe('Expo Café Uruguay');
+  expect(form.get('street_address')).toBe('Calle 123, Montevideo');
+  expect(form.get('latitude')).toBe('-34.9');
+  expect(form.get('longitude')).toBe('-56.2');
 });
 test('upload validates, publishes directly and retries unknown outcome with the same request id', async () => {
   let tree!: Renderer.ReactTestRenderer;
