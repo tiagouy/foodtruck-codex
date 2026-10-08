@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Image, ScrollView, Share, StyleSheet, Text } from 'react-native';
+import { Image, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Content, detail, Event, Foodtruck, Publication } from '../lib/api';
@@ -9,6 +9,7 @@ import { openLink } from '../lib/links';
 import { RootStack } from '../navigation';
 import { colors } from '../components/AppHeader';
 import State, { Button } from '../components/State';
+import Avatar from '../components/Avatar';
 
 export default function DetailScreen({
   route,
@@ -79,9 +80,18 @@ export default function DetailScreen({
           resizeMode="contain"
         />
       )}
-      <Text accessibilityRole="header" style={styles.title}>
-        {plain(event?.title || truck?.name || photo?.author.name)}
-      </Text>
+      {photo ? (
+        <View style={styles.authorRow}>
+          <Avatar url={photo.author.avatar} size={44} />
+          <Text accessibilityRole="header" style={styles.authorName}>
+            {plain(photo.author.name)}
+          </Text>
+        </View>
+      ) : (
+        <Text accessibilityRole="header" style={styles.title}>
+          {plain(event?.title || truck?.name)}
+        </Text>
+      )}
       {event && (
         <>
           <Text style={styles.meta}>
@@ -205,4 +215,6 @@ const styles = StyleSheet.create({
   title: { fontSize: 25, fontWeight: '800', color: colors.dark },
   text: { fontSize: 16, lineHeight: 26, color: colors.dark },
   meta: { fontSize: 15, color: colors.muted, lineHeight: 23 },
+  authorRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  authorName: { flex: 1, fontSize: 20, fontWeight: '600', color: colors.dark },
 });

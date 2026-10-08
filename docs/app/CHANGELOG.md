@@ -1,5 +1,11 @@
 # Changelog de la app
 
+## 0.5.2 — 2026-10-07
+
+- Avatar circular del autor junto al nombre en tarjetas de fotos de la comunidad (Inicio/Fotos) y detalle.
+- Sin avatar o si falla su imagen, icono de persona consistente con Mi cuenta. Una URL de reemplazo vuelve a cargar normalmente.
+- Usa `author.avatar` de la API existente, sin consultas adicionales ni cambios de identidad. 40 pruebas Jest; QA visual con avatar nuevo de Santi y autor sin foto.
+
 ## 0.5.1 — 2026-10-07
 
 - Corrige JPEG de iOS reportados por el selector como `image/jpg`: se normalizan a `image/jpeg` antes de validar y subir. La validación anterior rechazaba fotos válidas antes de crear la vista previa.

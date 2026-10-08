@@ -12,6 +12,7 @@ import { Content, Kind, Publication } from '../lib/api';
 import { cardData, plain } from '../lib/presentation';
 import { mediaURL } from '../lib/config';
 import { colors } from './AppHeader';
+import Avatar from './Avatar';
 
 export default function ContentCard({
   kind,
@@ -56,7 +57,16 @@ export default function ContentCard({
         )}
       </View>
       <View style={styles.body}>
-        <Text style={styles.title}>{plain(data.title)}</Text>
+        {kind === 'publications' ? (
+          <View style={styles.authorRow}>
+            <Avatar url={(item as Publication).author.avatar} size={36} />
+            <Text style={[styles.title, styles.authorName]}>
+              {plain(data.title)}
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.title}>{plain(data.title)}</Text>
+        )}
         <Text style={styles.meta}>{plain(data.subtitle)}</Text>
         {kind === 'publications' && (
           <Text numberOfLines={3} style={styles.caption}>
@@ -88,4 +98,6 @@ const styles = StyleSheet.create({
   title: { fontSize: 19, fontWeight: '700', color: colors.dark },
   meta: { fontSize: 13, color: colors.muted, marginTop: 6 },
   caption: { color: colors.dark, marginTop: 12, lineHeight: 22 },
+  authorRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  authorName: { flex: 1, fontSize: 17 },
 });
