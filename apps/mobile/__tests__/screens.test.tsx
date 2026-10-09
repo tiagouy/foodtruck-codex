@@ -117,6 +117,7 @@ test('home works without community activity and distinguishes empty directory/hi
   );
   expect(logo.props.resizeMode).toBe('contain');
   expect(StyleSheet.flatten(logo.props.style).alignSelf).toBe('center');
+  expect(StyleSheet.flatten(logo.props.style).width).toBe(80);
   await act(async () => tree.unmount());
 });
 test('photo header confirms report and sends only authenticated publication reference', async () => {

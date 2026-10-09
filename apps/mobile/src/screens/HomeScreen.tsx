@@ -173,11 +173,11 @@ const styles = StyleSheet.create({
   body: { backgroundColor: colors.background },
   content: { padding: 18 },
   logo: {
-    width: 160,
+    width: 80,
     maxWidth: '100%',
     aspectRatio: 1,
     alignSelf: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   section: { marginBottom: 32 },
   carousel: { marginHorizontal: -18 },

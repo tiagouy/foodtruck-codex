@@ -1,5 +1,9 @@
 # Changelog de la app
 
+## 0.10.7 — 2026-10-09
+
+- Logo de Home reducido a 80 (antes 160), centrado arriba de los eventos, con separación de 16. Tratamiento de marca discreto, sin cambiar el cabezal.
+
 ## 0.10.6 — 2026-10-09
 
 - Home reemplaza la frase introductoria por el logo con nombre del splash, centrado a 160 y completo sin recorte. Reutiliza el asset local; no cambia el cabezal ni las secciones.
