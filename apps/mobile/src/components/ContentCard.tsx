@@ -35,12 +35,12 @@ export default function ContentCard({
       onPress={onPress}
       style={styles.card}
     >
-      <View style={styles.imageWrap}>
+      <View style={[styles.imageWrap, kind === 'events' && styles.eventImage]}>
         {uri && !failed ? (
           <Image
             source={{ uri }}
             style={styles.image}
-            resizeMode="cover"
+            resizeMode={kind === 'events' ? 'contain' : 'cover'}
             onLoadEnd={() => setLoading(false)}
             onError={() => {
               setFailed(true);
@@ -83,6 +83,7 @@ export default function ContentCard({
   );
 }
 const styles = StyleSheet.create({
+  eventImage: { aspectRatio: 4 / 5 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,

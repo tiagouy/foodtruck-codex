@@ -21,7 +21,7 @@ const events = [1, 2, 3].map(
     } as Event),
 );
 
-test('carousel centers square posters with room for neighboring cards at phone and tablet widths', () => {
+test('carousel centers portrait posters with room for neighboring cards at phone and tablet widths', () => {
   [320, 402, 820].forEach(width => {
     const { card, step, inset } = carouselGeometry(width);
     expect(card).toBeLessThanOrEqual(360);
@@ -46,7 +46,8 @@ test('carousel opens the chosen real event, shows date and uses snap intervals',
   expect(open).toHaveBeenCalledWith(events[1]);
   expect(tree.root.findAllByType(Image).length).toBe(3);
   const imageWrap = tree.root.findAllByType(Image)[0].parent!;
-  expect(StyleSheet.flatten(imageWrap.props.style).aspectRatio).toBe(1);
+  expect(StyleSheet.flatten(imageWrap.props.style).aspectRatio).toBe(4 / 5);
+  expect(tree.root.findAllByType(Image)[0].props.resizeMode).toBe('contain');
   await act(async () =>
     list.props.onMomentumScrollEnd({
       nativeEvent: { contentOffset: { x: list.props.snapToInterval } },

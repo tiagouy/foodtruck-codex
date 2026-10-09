@@ -1,6 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { Text, Image, Alert } from 'react-native';
+import { Text, Image, Alert, StyleSheet } from 'react-native';
 import HomeScreen from '../src/screens/HomeScreen';
 import AccountScreen from '../src/screens/AccountScreen';
 import AccountSettingsScreen from '../src/screens/AccountSettingsScreen';
@@ -68,6 +68,39 @@ beforeEach(() => {
   mockDetail.mockReset();
   (accountRequest as jest.Mock).mockReset();
 });
+test.each(['events', 'publications'] as const)(
+  '%s detail keeps the complete image with its own aspect ratio',
+  async kind => {
+    mockDetail.mockResolvedValue({
+      id: 12,
+      title: 'Evento',
+      slug: 'evento',
+      author: { id: 2, name: 'Fixture' },
+      image: { full: 'https://example.com/poster.jpg' },
+      caption: 'Foto',
+      created_at: '',
+      address: '',
+      start_date: '2026-10-10',
+      end_date: '2026-10-11',
+    });
+    let tree!: Renderer.ReactTestRenderer;
+    await act(async () => {
+      tree = Renderer.create(
+        <DetailScreen
+          route={{ params: { kind, contentKey: '12' } }}
+          navigation={{ setOptions: jest.fn(), navigate: jest.fn() } as any}
+          {...({} as any)}
+        />,
+      );
+    });
+    const image = tree.root.findAllByType(Image)[0];
+    expect(image.props.resizeMode).toBe('contain');
+    expect(StyleSheet.flatten(image.props.style).aspectRatio).toBe(
+      kind === 'events' ? 4 / 5 : 1,
+    );
+    await act(async () => tree.unmount());
+  },
+);
 test('home works without community activity and distinguishes empty directory/history', async () => {
   mockList.mockResolvedValue({ items: [], total: 0, page: 1 });
   let tree!: Renderer.ReactTestRenderer;

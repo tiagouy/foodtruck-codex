@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.10.5 — 2026-10-09
+
+- Afiches de eventos en marco vertical 4:5, completos sin recorte: carrusel Home/agenda, detalle y tarjeta genérica de eventos. Los archivos originales no cambian; otras proporciones se contienen en el marco.
+- Web ya utiliza 4:5/object-fit contain; no se modifica plugin ni procesamiento de imágenes. Fotos de usuarios y foodtrucks sin cambios. QA visual con los dos eventos nuevos pendiente.
+
 ## 0.10.4 — 2026-10-09
 
 - Botones compartidos con naranja oscuro #C94308, texto blanco y tamaño 17 px (antes 15). Contraste mínimo 4.5:1 verificado; el naranja original del logo no cambia.

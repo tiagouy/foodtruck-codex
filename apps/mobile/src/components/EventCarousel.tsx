@@ -30,7 +30,7 @@ function Poster({ event }: { event: Event }) {
         <Image
           source={{ uri }}
           style={styles.image}
-          resizeMode="cover"
+          resizeMode="contain"
           onError={() => setFailed(true)}
         />
       ) : (
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
   },
   poster: {
-    aspectRatio: 1,
+    aspectRatio: 4 / 5,
     backgroundColor: colors.soft,
     alignItems: 'center',
     justifyContent: 'center',

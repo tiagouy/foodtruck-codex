@@ -169,7 +169,7 @@ export default function DetailScreen({
       {image && (
         <Image
           source={{ uri: image }}
-          style={styles.image}
+          style={[styles.image, event && styles.eventImage]}
           resizeMode="contain"
         />
       )}
@@ -313,6 +313,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.soft,
     borderRadius: 16,
   },
+  eventImage: { aspectRatio: 4 / 5 },
   title: { fontSize: 25, fontWeight: '800', color: colors.dark },
   text: { fontSize: 16, lineHeight: 26, color: colors.dark },
   meta: { fontSize: 15, color: colors.muted, lineHeight: 23 },
