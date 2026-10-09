@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-09 · app 0.10.0
+
+[Pushv3 cliente](app/pushv3-integracion.md) integrado con Firebase histórico, guest/login/refresh/logout y credenciales locales excluidas. Falta Android físico e instalación limpia, registro real en servidor, envío dirigido desde panel y confirmación de success/failure/provider=fcm_v1. APNs/firma iOS también pendientes. Ningún service account en la app, sin publicación productiva.
+
 ## Actualización · 2026-10-08 · app 0.9.0 / plugin 0.19.1
 
 Home y agenda incorporan [carrusel de eventos](app/carrusel-eventos-0.9.0.md) con imágenes cuadradas, centro destacado y vecinos escalados. Conserva próximos/pasados y paginación. QA visual con históricos, 53 pruebas; pendiente gesto manual y Android. Subida real de la foto de flores confirmada por el usuario; nombre del lugar, dirección postal y coordenadas guardados. Lista/detalle de fotos alineados con enlaces Maps. No hay despliegue productivo ni envío a tiendas.

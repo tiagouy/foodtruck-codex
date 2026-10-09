@@ -184,7 +184,7 @@ test('native login opens own photo grid and moves logout out of the main account
       .props.onChangeText('fixture-password');
   });
   await act(async () => tree.root.findAllByType(Button)[0].props.onPress());
-  expect(saveSession).toHaveBeenCalledWith('fixture-token');
+  expect(saveSession).toHaveBeenCalledWith('fixture-token', 9);
   expect(texts(tree)).toContain('Fixture');
   expect(texts(tree)).toContain('Mis fotos');
   expect(texts(tree)).not.toContain('Cerrar sesión');

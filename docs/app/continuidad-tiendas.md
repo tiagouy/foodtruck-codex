@@ -1,5 +1,9 @@
 # Actualizar las apps existentes · 2026-10-07
 
+## Decisión posterior · 2026-10-09
+
+El usuario autoriza usar las apps Firebase reales porque están despublicadas. Android Debug usa `org.useful_media_app.foodtruck` sin sufijo `.dev`, conservando certificado Debug. iOS usa `org.useful-media-app.foodtruck` del plist histórico, con entitlements de simulador derivados del bundle. No se cambia Team/firma ni se publica. Si Android ya está instalado con otra firma, no puede actualizarse con el APK Debug; no desinstalar automáticamente. Confirmar bundle iOS en App Store Connect sigue siendo requisito antes de distribuir. Las referencias a IDs provisionales abajo son históricas.
+
 Santi confirmó que la reconstrucción debe subir como actualización de las fichas actuales, no como aplicaciones nuevas. La identidad provisional de la base no es la identidad de publicación.
 
 ## Datos verificados en el respaldo

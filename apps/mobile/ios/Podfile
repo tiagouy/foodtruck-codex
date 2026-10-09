@@ -15,6 +15,8 @@ if linkage != nil
 end
 
 target 'FoodtrucksUY' do
+  use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
   config = use_native_modules!
 
   use_react_native!(
@@ -30,5 +32,17 @@ target 'FoodtrucksUY' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    # RNFirebase 23 public headers import React headers from static frameworks.
+    # Scope compatibility to these pods, not the app or every dependency.
+    installer.pods_project.targets.each do |target|
+      if ['RNFBApp', 'RNFBMessaging'].include?(target.name)
+        target.build_configurations.each do |build_config|
+          build_config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+          # These Objective-C pods need textual React headers with RN 0.84;
+          # do not assign bridge declarations to another RNFB clang module.
+          build_config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
+        end
+      end
+    end
   end
 end

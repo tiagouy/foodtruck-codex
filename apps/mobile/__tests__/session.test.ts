@@ -1,6 +1,10 @@
 import * as Keychain from 'react-native-keychain';
 import { APIError, request } from '../src/lib/api';
 import {
+  deleteUserPushToken,
+  syncPushTokenForUser,
+} from '../src/lib/push/pushToken';
+import {
   login,
   restoreSession,
   saveSession,
@@ -16,6 +20,10 @@ jest.mock('react-native-keychain', () => ({
 jest.mock('../src/lib/api', () => ({
   ...jest.requireActual('../src/lib/api'),
   request: jest.fn(),
+}));
+jest.mock('../src/lib/push/pushToken', () => ({
+  syncPushTokenForUser: jest.fn().mockResolvedValue(true),
+  deleteUserPushToken: jest.fn().mockResolvedValue(undefined),
 }));
 const token = '7.' + 'a'.repeat(64);
 const user = {
@@ -83,4 +91,19 @@ test('logout revokes server session before clearing storage', async () => {
   await logout(token);
   expect(request).toHaveBeenCalledWith('accounts/logout', undefined, {}, token);
   expect(Keychain.resetGenericPassword).toHaveBeenCalled();
+});
+test('saving authenticated session associates push without failing login on push outage', async () => {
+  (syncPushTokenForUser as jest.Mock).mockRejectedValueOnce(
+    new Error('offline'),
+  );
+  await expect(saveSession(token, user.id)).resolves.toBeUndefined();
+  expect(syncPushTokenForUser).toHaveBeenCalledWith('7');
+});
+test('push deletion failure prevents revocation and local clearing', async () => {
+  (deleteUserPushToken as jest.Mock).mockRejectedValueOnce(
+    new Error('offline'),
+  );
+  await expect(logout(token)).rejects.toThrow('offline');
+  expect(request).not.toHaveBeenCalled();
+  expect(Keychain.resetGenericPassword).not.toHaveBeenCalled();
 });

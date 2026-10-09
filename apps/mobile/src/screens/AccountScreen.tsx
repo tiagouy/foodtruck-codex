@@ -96,7 +96,7 @@ export default function AccountScreen() {
     let created: AppSession | null = null;
     try {
       created = await login(email, password);
-      await saveSession(created.token);
+      await saveSession(created.token, created.user.id);
       if (mounted.current) {
         setSession(created);
         setEmail('');

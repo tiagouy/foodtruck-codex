@@ -1,5 +1,6 @@
 import * as Keychain from 'react-native-keychain';
 import { APIError, request } from './api';
+import { deleteUserPushToken, syncPushTokenForUser } from './push/pushToken';
 
 export type AccountUser = {
   id: number;
@@ -82,13 +83,16 @@ export async function login(
   }
   return { token: result.token, user: userFrom(result.user) };
 }
-export async function saveSession(token: string) {
+export async function saveSession(token: string, userId?: number) {
   const saved = await Keychain.setGenericPassword('session', token, {
     service,
     accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
   });
   if (!saved) {
     throw new Error('No pudimos guardar la sesión de forma segura.');
+  }
+  if (userId) {
+    await syncPushTokenForUser(String(userId)).catch(() => false);
   }
 }
 export async function restoreSession(): Promise<AppSession | null> {
@@ -97,7 +101,9 @@ export async function restoreSession(): Promise<AppSession | null> {
     return null;
   }
   try {
-    return await validateSession(saved.password);
+    const session = await validateSession(saved.password);
+    await syncPushTokenForUser(String(session.user.id)).catch(() => false);
+    return session;
   } catch (error) {
     if (error instanceof APIError && error.status === 401) {
       await forgetSession();
@@ -106,10 +112,14 @@ export async function restoreSession(): Promise<AppSession | null> {
     throw error;
   }
 }
-export async function forgetSession() {
+export async function forgetSession(pushAlreadyDeleted = false) {
+  if (!pushAlreadyDeleted) {
+    await deleteUserPushToken();
+  }
   await Keychain.resetGenericPassword({ service });
 }
 export async function logout(token: string) {
+  await deleteUserPushToken();
   try {
     await request('accounts/logout', undefined, {}, token);
   } catch (error) {
@@ -117,5 +127,5 @@ export async function logout(token: string) {
       throw error;
     }
   }
-  await forgetSession();
+  await forgetSession(true);
 }

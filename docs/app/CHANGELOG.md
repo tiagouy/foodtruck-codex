@@ -1,5 +1,12 @@
 # Changelog de la app
 
+## 0.10.0 — 2026-10-09
+
+- Integración cliente pushv3 basada en kit 8ec6ee9: bootstrap guest, login/restauración con ID WordPress, refresh con tokenAnterior y asociación, eliminación antes de logout. Estado separado en Keychain, operaciones serializadas, sin logs de claves/tokens. Error de delete conserva sesión para reintentar; logout confirmado no re-registra guest al reiniciar.
+- Firebase App/Messaging 23.8.8, Android Google Services/permisos e iOS FirebaseCore/plist/pods/background/APNs. Por pedido del usuario se usan IDs históricos y no `.dev`; firma de tiendas/APNs reales pendientes. Configuración local ignorada, service account sin usar.
+- [Detalle, configuración y validación pendiente](pushv3-integracion.md). Android Google Services y manifiesto verificados; sin Android conectado ni token real/envío de panel. No es validación productiva ni publicación de tiendas.
+- 64 pruebas, TypeScript/lint e iOS Debug compilado con parches reproducibles de imports Firebase y headers textuales limitados a sus dos pods. Binario nuevo no instalado; recepción física/APNs y resultado fcm_v1 pendientes.
+
 ## 0.9.0 — 2026-10-08
 
 - Home y agenda usan EventCarousel: poster cuadrado, tarjeta centrada y vecinos reducidos que crecen progresivamente al desplazarse, con snap y animación nativa. Sin autoplay ni duplicar eventos para simular un bucle.

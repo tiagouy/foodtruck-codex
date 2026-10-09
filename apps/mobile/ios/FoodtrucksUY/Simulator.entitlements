@@ -3,8 +3,8 @@
 <plist version="1.0">
 <dict>
   <key>application-identifier</key>
-  <string>com.foodtrucksuy.dev</string>
+  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
   <key>keychain-access-groups</key>
-  <array><string>com.foodtrucksuy.dev</string></array>
+  <array><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string></array>
 </dict>
 </plist>

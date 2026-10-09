@@ -14,6 +14,13 @@
 .env
 .env.*
 !.env.example
+# Local push/Firebase configuration. Never bundle server credentials.
+/food-trucks-uy-fcm.json
+/apps/mobile/android/app/google-services.json
+/apps/mobile/ios/FoodtrucksUY/GoogleService-Info.plist
+/apps/mobile/pushv3.local.json
+/dato.txt.rtf
+/dato.txt
 wp-config.php
 node_modules/
 vendor/

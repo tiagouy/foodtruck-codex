@@ -1,5 +1,6 @@
-import React from 'react';
-import { StatusBar } from 'react-native';
+import React, { useEffect } from 'react';
+import { Alert, AppState, StatusBar } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,6 +15,12 @@ import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
 import PublicationUploadScreen from './src/screens/PublicationUploadScreen';
 import { colors } from './src/components/AppHeader';
 import { RootStack, Tabs } from './src/navigation';
+import { restoreSession } from './src/lib/session';
+import {
+  initializePush,
+  retryPush,
+  setupPushTokenRefresh,
+} from './src/lib/push/pushToken';
 
 const Tab = createBottomTabNavigator<Tabs>();
 const Stack = createNativeStackNavigator<RootStack>();
@@ -59,6 +66,41 @@ function MainTabs() {
   );
 }
 export default function App() {
+  useEffect(() => {
+    let live = true;
+    let ready = false;
+    let unsubscribe = () => {};
+    const foreground = messaging().onMessage(async message => {
+      if (message.notification) {
+        Alert.alert(
+          message.notification.title || 'Foodtrucks UY',
+          message.notification.body || '',
+        );
+      }
+    });
+    // A network error restoring authentication must not downgrade a saved user to guest.
+    restoreSession()
+      .then(async session => {
+        if (!live) {
+          return;
+        }
+        unsubscribe = setupPushTokenRefresh();
+        await initializePush(session ? String(session.user.id) : undefined);
+        ready = true;
+      })
+      .catch(() => undefined);
+    const subscription = AppState.addEventListener('change', state => {
+      if (ready && state === 'active') {
+        retryPush().catch(() => undefined);
+      }
+    });
+    return () => {
+      live = false;
+      unsubscribe();
+      foreground();
+      subscription.remove();
+    };
+  }, []);
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" backgroundColor={colors.dark} />
