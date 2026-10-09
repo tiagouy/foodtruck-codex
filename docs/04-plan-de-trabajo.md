@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-09 · app 0.10.1
+
+[Iconos](app/iconos-0.10.1.md) iPhone/iPad/tiendas y Android legacy/adaptativo/monocromático/notificaciones derivados del logo aprobado. Android actualizado en emulador sin borrar datos, iOS compilado; 64 pruebas y lint pasan. Usuario confirmó token guest, asociación a cuenta 100 y recepción push; logout/refresh real, Android físico e iOS push siguen pendientes.
+
 ## Actualización · 2026-10-09 · app 0.10.0
 
 [Pushv3 cliente](app/pushv3-integracion.md) integrado con Firebase histórico, guest/login/refresh/logout y credenciales locales excluidas. Falta Android físico e instalación limpia, registro real en servidor, envío dirigido desde panel y confirmación de success/failure/provider=fcm_v1. APNs/firma iOS también pendientes. Ningún service account en la app, sin publicación productiva.

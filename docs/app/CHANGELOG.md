@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.10.1 — 2026-10-09
+
+- Icono aprobado integrado: iPhone/iPad/App Store, Android cinco densidades legacy/round, adaptativo/monocromático y pequeño para notificaciones FCM. Exportación Play 512 y master 1024, sin redibujar la marca.
+- [Generación reproducible y validación](iconos-0.10.1.md). Android e iOS aceptan recursos; recepción con icono pequeño pendiente. No se publicaron fichas ni se cambió firma.
+
 ## 0.10.0 — 2026-10-09
 
 - Integración cliente pushv3 basada en kit 8ec6ee9: bootstrap guest, login/restauración con ID WordPress, refresh con tokenAnterior y asociación, eliminación antes de logout. Estado separado en Keychain, operaciones serializadas, sin logs de claves/tokens. Error de delete conserva sesión para reintentar; logout confirmado no re-registra guest al reiniciar.

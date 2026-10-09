@@ -67,6 +67,8 @@ Adaptaciones necesarias, preservando ese contrato HTTP:
 
 ### Ensayo Android Emulator · 2026-10-09
 
+Confirmación posterior del usuario: pushv3 guardó token Android activo inicialmente como invitado (`0`); al iniciar sesión el mismo token quedó asociado al ID WordPress `100`. El usuario envió una notificación y confirmó su recepción. No se guardan tokens completos en documentación. Logout, rotación real, prueba física e iOS siguen pendientes; no se aportó el resultado JSON exacto de success/failure/provider.
+
 Medium_Phone_API_35 (`emulator-5554`), Google Play Services presente. APK Debug compilado con `-PreactNativeArchitectures=arm64-v8a`: BUILD SUCCESSFUL; instalación nueva exitosa sin borrar BuenCafé ni otras apps. ID histórico `org.useful_media_app.foodtruck`, numeración nativa de desarrollo 40201/4.2.1-dev (distinta de versión del código 0.10.0). Metro 8081 y backend local `10.0.2.2:8888/foodtruck`.
 
 Home visible con eventos reales y carrusel. Permiso POST_NOTIFICATIONS verificado granted=true/USER_SET. Sin errores AndroidRuntime/ReactNativeJS al consultar inicio; aviso de warnings de desarrollo visible. Control UI del emulador no soportado por CUA, revisión visual mediante captura de ventana. Navegación/login y registro real en pushv3 aún por verificar; permiso concedido no demuestra asociación/backend ni recepción. No sustituye Android físico, logout/refresh ni envío dirigido desde panel.
