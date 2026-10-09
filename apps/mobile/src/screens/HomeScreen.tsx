@@ -103,13 +103,15 @@ export default function HomeScreen() {
           />
         }
       >
-        <Image
-          source={require('../../assets/branding/splash-logo-1024.png')}
-          accessibilityLabel="Food Truck UY"
-          accessible
-          resizeMode="contain"
-          style={styles.logo}
-        />
+        <View style={styles.logo}>
+          <Image
+            source={require('../../assets/branding/home-logo-horizontal.png')}
+            accessibilityLabel="Food Truck UY"
+            accessible
+            resizeMode="contain"
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
         {blocks.map(block => {
           const result = results[block.kind];
           return (
@@ -173,8 +175,8 @@ const styles = StyleSheet.create({
   body: { backgroundColor: colors.background },
   content: { padding: 18 },
   logo: {
-    width: 80,
-    height: 80,
+    width: '90%',
+    aspectRatio: 760 / 200,
     alignSelf: 'center',
     marginBottom: 16,
   },

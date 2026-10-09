@@ -1,5 +1,9 @@
 # Changelog de la app
 
+## 0.10.9 — 2026-10-09
+
+- Home usa el logo horizontal aprobado (760 × 200), centrado al 90% del ancho del contenido. Marco proporcional separado de la imagen para evitar que el tamaño intrínseco desplace las secciones. Splash e iconos sin cambios.
+
 ## 0.10.8 — 2026-10-09
 
 - Corrige el alto del logo local en Home con dimensiones explícitas 80 × 80, evitando que las dimensiones intrínsecas del PNG desplacen los eventos. Regresión automatizada para ancho y alto.

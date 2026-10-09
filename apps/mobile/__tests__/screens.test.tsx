@@ -113,12 +113,14 @@ test('home works without community activity and distinguishes empty directory/hi
   expect(texts(tree)).not.toContain('Eventos, foodtrucks y momentos');
   const logo = tree.root.findByProps({ accessibilityLabel: 'Food Truck UY' });
   expect(logo.props.source).toBe(
-    require('../assets/branding/splash-logo-1024.png'),
+    require('../assets/branding/home-logo-horizontal.png'),
   );
   expect(logo.props.resizeMode).toBe('contain');
-  expect(StyleSheet.flatten(logo.props.style).alignSelf).toBe('center');
-  expect(StyleSheet.flatten(logo.props.style).width).toBe(80);
-  expect(StyleSheet.flatten(logo.props.style).height).toBe(80);
+  const logoFrame = StyleSheet.flatten(logo.parent!.props.style);
+  expect(logoFrame.alignSelf).toBe('center');
+  expect(logoFrame.width).toBe('90%');
+  expect(logoFrame.aspectRatio).toBe(760 / 200);
+  expect(StyleSheet.flatten(logo.props.style).position).toBe('absolute');
   await act(async () => tree.unmount());
 });
 test('photo header confirms report and sends only authenticated publication reference', async () => {
