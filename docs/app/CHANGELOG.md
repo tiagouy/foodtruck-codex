@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.10.8 — 2026-10-09
+
+- Corrige el alto del logo local en Home con dimensiones explícitas 80 × 80, evitando que las dimensiones intrínsecas del PNG desplacen los eventos. Regresión automatizada para ancho y alto.
+- QA visual en Android: logo pequeño centrado y próximos eventos visibles debajo; 68 pruebas correctas.
+
 ## 0.10.7 — 2026-10-09
 
 - Logo de Home reducido a 80 (antes 160), centrado arriba de los eventos, con separación de 16. Tratamiento de marca discreto, sin cambiar el cabezal.

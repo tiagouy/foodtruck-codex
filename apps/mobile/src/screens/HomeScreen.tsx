@@ -174,8 +174,7 @@ const styles = StyleSheet.create({
   content: { padding: 18 },
   logo: {
     width: 80,
-    maxWidth: '100%',
-    aspectRatio: 1,
+    height: 80,
     alignSelf: 'center',
     marginBottom: 16,
   },
