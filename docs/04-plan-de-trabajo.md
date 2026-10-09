@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-09 · app 0.10.6
+
+Home: logo con nombre del splash en lugar de la frase introductoria, centrado y sin recorte. Cabezal y bloques conservados.
+
 ## Actualización · 2026-10-09 · app 0.10.5
 
 Afiches de eventos en formato vertical 4:5 sin recorte en carrusel y detalle de la app, compatible con los originales para los posteos del fin de semana. Web ya usa esta proporción. Sin alterar archivos ni formatos de otras categorías; QA visual pendiente.

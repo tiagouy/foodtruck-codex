@@ -1,5 +1,9 @@
 # Changelog de la app
 
+## 0.10.6 — 2026-10-09
+
+- Home reemplaza la frase introductoria por el logo con nombre del splash, centrado a 160 y completo sin recorte. Reutiliza el asset local; no cambia el cabezal ni las secciones.
+
 ## 0.10.5 — 2026-10-09
 
 - Afiches de eventos en marco vertical 4:5, completos sin recorte: carrusel Home/agenda, detalle y tarjeta genérica de eventos. Los archivos originales no cambian; otras proporciones se contienen en el marco.

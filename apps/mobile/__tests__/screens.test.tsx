@@ -110,6 +110,13 @@ test('home works without community activity and distinguishes empty directory/hi
   expect(texts(tree)).toContain('no hay próximos eventos');
   expect(texts(tree)).toContain('preparando el directorio');
   expect(texts(tree)).toContain('Todavía no hay fotos');
+  expect(texts(tree)).not.toContain('Eventos, foodtrucks y momentos');
+  const logo = tree.root.findByProps({ accessibilityLabel: 'Food Truck UY' });
+  expect(logo.props.source).toBe(
+    require('../assets/branding/splash-logo-1024.png'),
+  );
+  expect(logo.props.resizeMode).toBe('contain');
+  expect(StyleSheet.flatten(logo.props.style).alignSelf).toBe('center');
   await act(async () => tree.unmount());
 });
 test('photo header confirms report and sends only authenticated publication reference', async () => {

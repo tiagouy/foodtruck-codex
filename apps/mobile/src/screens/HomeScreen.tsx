@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
+  Image,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -102,9 +103,13 @@ export default function HomeScreen() {
           />
         }
       >
-        <Text style={styles.intro}>
-          Eventos, foodtrucks y momentos compartidos en Uruguay.
-        </Text>
+        <Image
+          source={require('../../assets/branding/splash-logo-1024.png')}
+          accessibilityLabel="Food Truck UY"
+          accessible
+          resizeMode="contain"
+          style={styles.logo}
+        />
         {blocks.map(block => {
           const result = results[block.kind];
           return (
@@ -167,11 +172,12 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.dark },
   body: { backgroundColor: colors.background },
   content: { padding: 18 },
-  intro: {
-    fontSize: 17,
-    lineHeight: 25,
-    color: colors.muted,
-    marginBottom: 25,
+  logo: {
+    width: 160,
+    maxWidth: '100%',
+    aspectRatio: 1,
+    alignSelf: 'center',
+    marginBottom: 24,
   },
   section: { marginBottom: 32 },
   carousel: { marginHorizontal: -18 },
