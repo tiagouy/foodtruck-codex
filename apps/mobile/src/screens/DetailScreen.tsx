@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: '#EEE5DB',
+    backgroundColor: colors.soft,
     borderRadius: 16,
   },
   title: { fontSize: 25, fontWeight: '800', color: colors.dark },

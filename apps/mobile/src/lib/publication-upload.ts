@@ -2,6 +2,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import { APIError, request } from './api';
 import { ProfilePhoto } from './session';
+import { colors } from '../theme';
 
 // A retry identifier, not an authentication secret. Identity always comes from Keychain.
 export const uploadID = () =>
@@ -55,11 +56,11 @@ export async function choosePublicationPhoto(): Promise<ProfilePhoto | null> {
       cropperToolbarTitle: 'Encuadrá tu foto',
       cropperChooseText: 'Usar foto',
       cropperCancelText: 'Cancelar',
-      cropperChooseColor: '#C34416',
+      cropperChooseColor: colors.accent,
       cropperCancelColor: '#FFFFFF',
-      cropperToolbarColor: '#28231F',
+      cropperToolbarColor: colors.dark,
       cropperToolbarWidgetColor: '#FFFFFF',
-      cropperActiveWidgetColor: '#C34416',
+      cropperActiveWidgetColor: colors.accent,
       showCropGuidelines: true,
       showCropFrame: true,
     });

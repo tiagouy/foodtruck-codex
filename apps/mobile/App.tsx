@@ -41,7 +41,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.accentText,
         tabBarInactiveTintColor: colors.muted,
         tabBarIcon: tabIcons[route.name],
         tabBarStyle: { backgroundColor: '#FFFFFF' },

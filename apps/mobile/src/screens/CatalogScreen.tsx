@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: '#EEE5DB',
+    backgroundColor: colors.soft,
     padding: 4,
     borderRadius: 28,
     marginBottom: 10,

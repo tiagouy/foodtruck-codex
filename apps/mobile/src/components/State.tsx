@@ -58,6 +58,6 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     alignItems: 'center',
   },
-  buttonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 15 },
+  buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 15 },
   disabled: { opacity: 0.5 },
 });

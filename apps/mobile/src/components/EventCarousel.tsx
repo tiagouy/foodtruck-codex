@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   poster: {
     aspectRatio: 1,
-    backgroundColor: '#EEE5DB',
+    backgroundColor: colors.soft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   badgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
   info: { padding: 16, minHeight: 134 },
   date: {
-    color: colors.accent,
+    color: colors.accentText,
     fontSize: 12,
     fontWeight: '700',
     marginBottom: 7,

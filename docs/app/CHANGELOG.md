@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.10.3 — 2026-10-09
+
+- Paleta exacta del logo: naranja #FC590B, azul #05204B y fondo #F8F8F8. Se retiran marrones/cremas de cabezales, tarjetas y recorte.
+- Botones naranjas con texto azul y navegación/textos pequeños azules para conservar contraste. [Tokens y alcance](paleta-0.10.3.md); pruebas automáticas de contraste. WordPress sin cambios.
+
 ## 0.10.2 — 2026-10-09
 
 - Splash nativo con logo y nombre: storyboard iOS centrado/responsivo y starting theme Android, adaptado al círculo del sistema Android12+. Fondo claro común, sin segunda pantalla ni demora artificial.

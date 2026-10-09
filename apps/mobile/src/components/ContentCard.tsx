@@ -53,7 +53,7 @@ export default function ContentCard({
         {loading && (
           <ActivityIndicator
             style={StyleSheet.absoluteFill}
-            color={colors.accent}
+            color={colors.accentText}
           />
         )}
       </View>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1.35,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EEE5DB',
+    backgroundColor: colors.soft,
   },
   image: { width: '100%', height: '100%' },
   placeholder: { fontSize: 20, color: colors.muted, fontWeight: '700' },

@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-09 · app 0.10.3
+
+[Paleta del logo](app/paleta-0.10.3.md) aplicada a la app: naranja/azul exactos, fondos claros y textos con contraste verificado. 66 pruebas, TypeScript y lint. WordPress sin cambios; QA visual pendiente.
+
 ## Actualización · 2026-10-09 · app 0.10.2
 
 [Splash de marca](app/splash-0.10.2.md) con logo/nombre en Android e iOS. Compilaciones verificadas, Android actualizado y arranque frío correcto; 64 pruebas y lint. Sin segundo splash JS ni espera artificial. Android12+ respeta máscara del sistema; QA visual en más dispositivos pendiente.
