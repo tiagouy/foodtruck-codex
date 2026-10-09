@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.10.2 — 2026-10-09
+
+- Splash nativo con logo y nombre: storyboard iOS centrado/responsivo y starting theme Android, adaptado al círculo del sistema Android12+. Fondo claro común, sin segunda pantalla ni demora artificial.
+- [Assets reproducibles y límites](splash-0.10.2.md). No cambia sesiones ni push; icono launcher sigue siendo la variante sin texto de 0.10.1.
+
 ## 0.10.1 — 2026-10-09
 
 - Icono aprobado integrado: iPhone/iPad/App Store, Android cinco densidades legacy/round, adaptativo/monocromático y pequeño para notificaciones FCM. Exportación Play 512 y master 1024, sin redibujar la marca.

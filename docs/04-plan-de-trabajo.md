@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-09 · app 0.10.2
+
+[Splash de marca](app/splash-0.10.2.md) con logo/nombre en Android e iOS. Compilaciones verificadas, Android actualizado y arranque frío correcto; 64 pruebas y lint. Sin segundo splash JS ni espera artificial. Android12+ respeta máscara del sistema; QA visual en más dispositivos pendiente.
+
 ## Actualización · 2026-10-09 · app 0.10.1
 
 [Iconos](app/iconos-0.10.1.md) iPhone/iPad/tiendas y Android legacy/adaptativo/monocromático/notificaciones derivados del logo aprobado. Android actualizado en emulador sin borrar datos, iOS compilado; 64 pruebas y lint pasan. Usuario confirmó token guest, asociación a cuenta 100 y recepción push; logout/refresh real, Android físico e iOS push siguen pendientes.

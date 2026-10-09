@@ -1,6 +1,6 @@
 {
   "name": "foodtrucks-uy-mobile",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "private": true,
   "scripts": {
     "postinstall": "patch-package",
