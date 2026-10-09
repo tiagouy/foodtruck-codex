@@ -55,9 +55,9 @@ export const styles = StyleSheet.create({
   button: {
     padding: 14,
     borderRadius: 12,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.button,
     alignItems: 'center',
   },
-  buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 15 },
+  buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 17 },
   disabled: { opacity: 0.5 },
 });

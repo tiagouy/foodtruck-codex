@@ -26,6 +26,6 @@ test('normal text and button labels keep sufficient contrast', () => {
       expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
     }
   }
-  expect(contrast(colors.onAccent, colors.accent)).toBeGreaterThanOrEqual(4.5);
+  expect(contrast(colors.onAccent, colors.button)).toBeGreaterThanOrEqual(4.5);
   expect(contrast(colors.accent, colors.dark)).toBeGreaterThanOrEqual(4.5);
 });

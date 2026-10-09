@@ -1,5 +1,9 @@
 # Changelog de la app
 
+## 0.10.4 — 2026-10-09
+
+- Botones compartidos con naranja oscuro #C94308, texto blanco y tamaño 17 px (antes 15). Contraste mínimo 4.5:1 verificado; el naranja original del logo no cambia.
+
 ## 0.10.3 — 2026-10-09
 
 - Paleta exacta del logo: naranja #FC590B, azul #05204B y fondo #F8F8F8. Se retiran marrones/cremas de cabezales, tarjetas y recorte.

@@ -1,5 +1,9 @@
 # Paleta de marca — app 0.10.3
 
+Actualización 0.10.4: por ajuste visual solicitado, los botones usan naranja oscuro
+`#C94308`, texto blanco y tamaño 17 (antes 15). El contraste se verifica contra
+este fondo, no contra el naranja original. La descripción siguiente documenta 0.10.3.
+
 Se reemplaza la paleta marrón/crema heredada por los colores del logo aprobado
 (`assets/branding/splash-logo-1024.png`). Muestreo de los píxeles dominantes:
 

@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-09 · app 0.10.4
+
+Botones con naranja más oscuro, texto blanco y tipografía aumentada a 17. Se conserva la paleta del logo para la marca y se verifica contraste automáticamente.
+
 ## Actualización · 2026-10-09 · app 0.10.3
 
 [Paleta del logo](app/paleta-0.10.3.md) aplicada a la app: naranja/azul exactos, fondos claros y textos con contraste verificado. 66 pruebas, TypeScript y lint. WordPress sin cambios; QA visual pendiente.

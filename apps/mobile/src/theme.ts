@@ -7,7 +7,8 @@ export const colors = {
   muted: '#526079',
   line: '#DCE2EA',
   soft: '#EDF1F6',
-  // Orange is for fills/decorations; small text on light surfaces needs navy.
+  // Keep the logo orange for branding; darken action fills for white labels.
+  button: '#C94308',
   accentText: '#05204B',
-  onAccent: '#05204B',
+  onAccent: '#FFFFFF',
 };
