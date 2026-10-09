@@ -120,7 +120,8 @@ test('home works without community activity and distinguishes empty directory/hi
   expect(logoFrame.alignSelf).toBe('center');
   expect(logoFrame.width).toBe('90%');
   expect(logoFrame.aspectRatio).toBe(760 / 200);
-  expect(StyleSheet.flatten(logo.props.style).position).toBe('absolute');
+  expect(StyleSheet.flatten(logo.props.style).width).toBe('100%');
+  expect(StyleSheet.flatten(logo.props.style).height).toBe('100%');
   await act(async () => tree.unmount());
 });
 test('photo header confirms report and sends only authenticated publication reference', async () => {

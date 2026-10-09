@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.10.10 — 2026-10-09
+
+- Imagen horizontal dimensionada explícitamente al 100% de su marco 4:1 aproximado (760:200), en lugar de absoluteFill que no anulaba las dimensiones intrínsecas del asset en Android. Evita desbordamiento sobre título y eventos.
+- QA visual Android: logo horizontal completo, centrado al 90% del contenido, título y evento debajo sin superposición. 68 pruebas correctas.
+
 ## 0.10.9 — 2026-10-09
 
 - Home usa el logo horizontal aprobado (760 × 200), centrado al 90% del ancho del contenido. Marco proporcional separado de la imagen para evitar que el tamaño intrínseco desplace las secciones. Splash e iconos sin cambios.

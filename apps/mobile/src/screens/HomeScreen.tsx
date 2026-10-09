@@ -109,7 +109,7 @@ export default function HomeScreen() {
             accessibilityLabel="Food Truck UY"
             accessible
             resizeMode="contain"
-            style={StyleSheet.absoluteFill}
+            style={styles.logoImage}
           />
         </View>
         {blocks.map(block => {
@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 16,
   },
+  logoImage: { width: '100%', height: '100%' },
   section: { marginBottom: 32 },
   carousel: { marginHorizontal: -18 },
   title: {
