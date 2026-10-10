@@ -2,10 +2,16 @@
 
 Decisión del usuario: 2026-10-10. Sustituir Eventchamp por Astra gratuito y preferir
 Elementor para la Home. Astra 4.14.0 y Elementor 4.3.4 activos en local mediante
-tema hijo versionado `themes/foodtrucks-astra` 0.1.3. Nueva Home 4542 (o ID guardado
+tema hijo versionado `themes/foodtrucks-astra` 0.1.4. Nueva Home 4542 (o ID guardado
 en `ftuy_astra_home_id` al repetir instalación). Plugin Core 0.21.0.
 
 ## Cambio realizado
+
+Tema 0.1.4: encabezado de página común en `template-parts/page-header.php`,
+reutilizado por páginas WordPress y Novedades. Contacto hereda el mismo título
+sobre fondo claro, ancho y espaciado que las vistas del plugin. La Home no
+recibe esta barra de título: mantiene su slider. Es una plantilla del tema hijo,
+no una opción nueva de Astra ni un bloque que deba repetirse en Elementor.
 
 Tema 0.1.2: la página de entradas tiene plantilla `home.php` con el encabezado
 «Novedades», siguiendo la misma barra de título del resto de las secciones.

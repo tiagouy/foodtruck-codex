@@ -15,7 +15,10 @@ foreach ( array( '/', '/contacto/', '/blog/', '/eventos/', '/eventos/pasados/', 
     $response = wp_remote_get( home_url( $route ), array( 'timeout' => 20 ) );
     $assert( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200, 'Route ' . $route );
     $body = wp_remote_retrieve_body( $response );
-    if ( $route === '/contacto/' ) { $assert( strpos( $body, 'Formulario de contacto' ) !== false && strpos( $body, '[vc_row' ) === false, 'Contact shortcode renders without legacy builder' ); }
+    if ( $route === '/contacto/' ) {
+        $assert( strpos( $body, 'Formulario de contacto' ) !== false && strpos( $body, '[vc_row' ) === false, 'Contact shortcode renders without legacy builder' );
+        $assert( strpos( $body, '<h1>Contacto</h1>' ) !== false && strpos( $body, 'ft-titlebar' ) !== false, 'Contact uses standard page header' );
+    }
     $assert( strpos( $body, 'Fatal error' ) === false && strpos( $body, 'Array to string conversion' ) === false, 'No runtime error ' . $route );
     if ( $route === '/blog/' ) {
         $assert( strpos( $body, '<h1>Novedades</h1>' ) !== false && strpos( $body, 'ft-titlebar' ) !== false, 'Blog has shared page titlebar' );

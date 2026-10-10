@@ -1,14 +1,11 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 get_header();
+get_template_part( 'template-parts/page-header', null, array(
+    'title' => 'Novedades',
+    'description' => 'Noticias e historias de la comunidad gastronómica sobre ruedas.',
+) );
 ?>
-<section class="ft-titlebar">
-    <div class="ft-container">
-        <p class="ft-eyebrow">Comunidad Foodtrucks Uruguay</p>
-        <h1>Novedades</h1>
-        <p>Noticias e historias de la comunidad gastronómica sobre ruedas.</p>
-    </div>
-</section>
 <div class="ft-container ft-blog-layout">
 <?php if ( astra_page_layout() === 'left-sidebar' ) { get_sidebar(); } ?>
 <div id="primary" <?php astra_primary_class(); ?>>
