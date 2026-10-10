@@ -2,7 +2,7 @@
 
 Decisión del usuario: 2026-10-10. Sustituir Eventchamp por Astra gratuito y preferir
 Elementor para la Home. Astra 4.14.0 y Elementor 4.3.4 activos en local mediante
-tema hijo versionado `themes/foodtrucks-astra` 0.1.2. Nueva Home 4542 (o ID guardado
+tema hijo versionado `themes/foodtrucks-astra` 0.1.3. Nueva Home 4542 (o ID guardado
 en `ftuy_astra_home_id` al repetir instalación). Plugin Core 0.21.0.
 
 ## Cambio realizado
@@ -10,6 +10,8 @@ en `ftuy_astra_home_id` al repetir instalación). Plugin Core 0.21.0.
 Tema 0.1.2: la página de entradas tiene plantilla `home.php` con el encabezado
 «Novedades», siguiendo la misma barra de título del resto de las secciones.
 Conserva listado, paginación y configuración de columnas/sidebar de Astra.
+Tema 0.1.3: contenido del blog dentro del contenedor común de 1170 px máximo,
+centrado y con padding lateral responsive; barra de título y pie conservan su ancho.
 
 - Se conserva la Home 1321 completa como borrador. Backup SQL privado local:
   `/private/tmp/foodtruck-astra-backup-20261010/food-before-astra.sql` (0600).
