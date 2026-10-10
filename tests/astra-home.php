@@ -16,8 +16,22 @@ foreach ( array( '/', '/eventos/', '/eventos/pasados/', '/foodtrucks/', '/foodtr
     $body = wp_remote_retrieve_body( $response );
     $assert( strpos( $body, 'Fatal error' ) === false && strpos( $body, 'Array to string conversion' ) === false, 'No runtime error ' . $route );
     if ( $route === '/' ) {
-        foreach ( array( 'ft-hero-track', 'Próximos eventos', 'Los foodtrucks', 'ft-home-map', 'Descargá nuestra app', 'home.js' ) as $needle ) { $assert( strpos( $body, $needle ) !== false, 'Home block ' . $needle ); }
+        foreach ( array( 'ft-hero-track', 'ft-home-agenda', 'Los foodtrucks', 'ft-home-map', 'Descargá nuestra app', 'home.js' ) as $needle ) { $assert( strpos( $body, $needle ) !== false, 'Home block ' . $needle ); }
         foreach ( array( '[vc_row', '[eventchamp_', 'js_composer/assets', 'revslider/public', '/themes/eventchamp/' ) as $needle ) { $assert( strpos( $body, $needle ) === false, 'No old renderer ' . $needle ); }
     }
 }
+$now = FTUY_Events::now();
+foreach ( array( 'today', 'weekend', 'upcoming' ) as $filter ) {
+    $items = FTUY_Home::agenda_items( $filter );
+    $assert( count( $items ) <= 8, 'Home agenda capped at eight cards' );
+    foreach ( $items as $event ) {
+        $assert( $event['status'] === 'published' && ! $event['cancelled'], 'Only published non-cancelled agenda events' );
+        $assert( FTUY_Events::temporal( $event ) !== 'past', 'No past agenda event' );
+        if ( $filter === 'today' ) { $assert( $event['start_date'] <= $now->format( 'Y-m-d' ) && $event['end_date'] >= $now->format( 'Y-m-d' ), 'Today overlaps actual local date' ); }
+    }
+}
+$_GET['ft_agenda'] = 'upcoming';
+ob_start(); FTUY_Home::agenda(); $agenda = ob_get_clean(); unset( $_GET['ft_agenda'] );
+$assert( strpos( $agenda, 'Próximos eventos' ) !== false, 'Upcoming filter renders proper heading' );
+$assert( ( strpos( $agenda, '>Hoy</a>' ) !== false ) === (bool) FTUY_Home::agenda_items( 'today' ), 'Today tab conditional on real events' );
 echo "$checks checks passed; no content or user data changed.\n";

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.22.0 — 2026-10-10
+
+- Home con diseño Cartelera de sabores: hero compacto, agenda azul y títulos rectos sin adornos.
+- Afiches completos 4:5, fecha/nombre/lugar uniformes fuera de la imagen, carrusel mobile.
+- Filtros por fechas locales: Hoy condicional, Este finde y Próximos; enlace al mapa.
+- Conserva fotografías, archivos originales y datos. Implementación local, sin cambios en la app.
+
 ## 0.21.0 — 2026-10-10
 
 - Bloques de Home independientes de Eventchamp: slider nativo con fotos originales, próximos eventos 4:5, foodtrucks, novedades, app, amigos, contacto y mapa diferido por coordenadas.
