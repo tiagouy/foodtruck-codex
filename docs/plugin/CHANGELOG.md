@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.5 — 2026-10-10
+
+- Pie común con iconos SVG accesibles de Instagram y Facebook.
+- Dos botones visuales App Store/Google Play; muestran Próximamente y están deshabilitados mientras las tiendas no se habiliten en `ftuy_store_links`.
+- Conserva enlaces sociales y no activa URLs históricas de apps despublicadas.
+
 ## 0.22.4 — 2026-10-10
 
 - Contacto pasa de la Home a la página WordPress existente `/contacto/`, con `[ftuy_home_contact]` y el mismo formulario.

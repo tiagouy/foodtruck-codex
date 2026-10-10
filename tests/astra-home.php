@@ -45,6 +45,11 @@ $assert( strpos( $map, '<ul>' ) === false, 'No event link list below the Home ma
 ob_start(); include FTUY_PATH . 'templates/navigation.php'; $nav = ob_get_clean();
 $assert( strpos( $nav, '/eventos/pasados/' ) === false, 'Past events removed only from main menu' );
 $assert( strpos( $nav, '>Novedades</a>' ) !== false && strpos( $nav, '>Contacto</a>' ) !== false, 'Blog and contact menu links' );
+ob_start(); include FTUY_PATH . 'templates/footer.php'; $footer = ob_get_clean();
+$assert( strpos( $footer, 'aria-label="Instagram de Foodtrucks Uruguay"' ) !== false && strpos( $footer, 'aria-label="Facebook de Foodtrucks Uruguay"' ) !== false, 'Accessible social icons' );
+$assert( strpos( $footer, 'App Store' ) !== false && strpos( $footer, 'Google Play' ) !== false, 'Both store badges visible' );
+$store_links = get_option( 'ftuy_store_links', array() );
+if ( ! is_array( $store_links ) || empty( $store_links['enabled'] ) ) { $assert( substr_count( $footer, 'type="button" disabled' ) === 2, 'Store buttons remain disabled until publication' ); }
 $assert( strpos( file_get_contents( FTUY_PATH . 'templates/events.php' ), '>Eventos pasados</a>' ) !== false, 'Past events still accessible inside Events' );
 ob_start(); FTUY_Home::agenda(); $agenda = ob_get_clean(); unset( $_GET['ft_agenda'] );
 $assert( strpos( $agenda, 'Próximos eventos' ) !== false, 'Upcoming filter renders proper heading' );
