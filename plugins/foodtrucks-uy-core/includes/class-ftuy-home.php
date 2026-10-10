@@ -53,7 +53,7 @@ class FTUY_Home {
         }
         if ( $block === 'events' ) { self::agenda(); return; }
         $titles = array( 'events' => 'Próximos eventos', 'trucks' => 'Los foodtrucks', 'map' => '¿Dónde son los próximos eventos?', 'news' => 'Últimas novedades', 'app' => 'Llevá la comunidad con vos', 'friends' => 'Algunos amigos', 'contact' => 'Contactá con nosotros' );
-        echo '<section class="ft-home-section ft-container"' . ( $block === 'app' ? ' id="la-app"' : ( $block === 'map' ? ' id="mapa-eventos"' : '' ) ) . '><h2>' . esc_html( $titles[$block] ) . '</h2>';
+        echo '<section class="ft-home-section ft-container"' . ( $block === 'app' ? ' id="la-app"' : ( $block === 'map' ? ' id="mapa-eventos"' : ( $block === 'contact' ? ' id="contacto"' : '' ) ) ) . '><h2>' . esc_html( $titles[$block] ) . '</h2>';
         if ( $block === 'trucks' ) {
             $result = FTUY_Foodtruck_Public::listing(); echo '<div class="ft-cards ft-home-trucks">';
             foreach ( array_slice( $result['items'], 0, 4 ) as $truck ) {

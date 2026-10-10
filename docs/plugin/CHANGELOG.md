@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.3 — 2026-10-10
+
+- Menú principal en mayúsculas, sin Eventos pasados (conservado dentro de Eventos).
+- Novedades enlaza al blog configurado en WordPress; Contacto al formulario de la Home.
+- Menú compacto hasta 1050 px para evitar desbordamiento con los nuevos ítems.
+
 ## 0.22.2 — 2026-10-10
 
 - Encabezado web con el PNG transparente aprobado `logo1-tira2.png`, sin alterar la imagen ni el logo de la app.
