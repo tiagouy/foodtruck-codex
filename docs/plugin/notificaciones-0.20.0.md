@@ -5,6 +5,11 @@ Envío manual mediante PHP a pushv3, app 12. No altera el circuito móvil.
 
 ## Configuración por entorno
 
+Pendiente para el despliegue a producción (acordado el 2026-10-10): configurar las
+variables en el servicio PHP y comprobar un envío de prueba autorizado. No se
+configuran por ahora en MAMP ni se almacenan valores nuevos. El panel permanece
+sin envío habilitado mientras falte el entorno.
+
 El proceso que ejecuta PHP (Apache/PHP-FPM/MAMP) debe recibir:
 
 ```text

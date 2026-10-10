@@ -176,6 +176,7 @@ Resultado: app conectada desde sus primeras pantallas a la API existente.
 
 - [ ] Preparar entorno de pruebas en el hosting con base y credenciales separadas.
 - [ ] Validar compatibilidad PHP/base, correo, SSL, subidas y tareas programadas.
+- [ ] Al desplegar a producción, configurar `PUSH_API_KEY` y `FTUY_PUSH_TOKEN_APP` en el entorno del servicio PHP, fuera del repositorio/carpeta pública. Verificar disponibilidad en el panel y realizar un envío autorizado de prueba antes de habilitar envíos generales. Por decisión del usuario, configuración local pospuesta; sin valores guardados por ahora. Ver [notificaciones](plugin/notificaciones-0.20.0.md).
 - [ ] Medir API y procesamiento de fotos con carga representativa; ajustar índices, caché y límites.
 - [ ] Verificar permisos, sesiones, moderación, recuperación y actualización del esquema.
 - [ ] Preparar textos de privacidad, condiciones y reactivación, y metadatos de tiendas.
