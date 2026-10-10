@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.22.1 — 2026-10-10
+
+- Retira la lista de enlaces debajo del mapa de la Home; conserva enlaces desde los marcadores.
+- Ajusta el mensaje de error del mapa para que no haga referencia a la lista retirada.
+
 ## 0.22.0 — 2026-10-10
 
 - Home con diseño Cartelera de sabores: hero compacto, agenda azul y títulos rectos sin adornos.

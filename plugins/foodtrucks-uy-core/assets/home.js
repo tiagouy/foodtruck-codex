@@ -46,7 +46,7 @@ document.querySelectorAll('.ft-home-map').forEach(element => {
         });
       });
       if (points.length > 1) map.fitBounds(bounds, 40);
-    } catch (_) { element.textContent = 'No pudimos cargar el mapa. Podés abrir los eventos desde los enlaces debajo.'; }
+    } catch (_) { element.textContent = 'No pudimos cargar el mapa. Podés consultar los eventos en la agenda.'; }
   };
   element.querySelector('button').addEventListener('click', load);
   if ('IntersectionObserver' in window) {

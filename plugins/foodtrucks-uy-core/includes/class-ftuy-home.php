@@ -71,7 +71,6 @@ class FTUY_Home {
             if ( $points && $key ) {
                 echo '<div class="ft-home-map" data-points="' . esc_attr( wp_json_encode( $points ) ) . '" data-map-key="' . esc_attr( $key ) . '" data-map-id="' . esc_attr( get_option( 'ftuy_google_map_id', 'DEMO_MAP_ID' ) ) . '"><button class="ft-button" type="button">Cargar mapa</button></div>';
             } else { echo '<p>El mapa se mostrará cuando haya ubicaciones disponibles y Google Maps esté configurado.</p>'; }
-            echo '<ul>'; foreach ( $points as $point ) { echo '<li><a href="' . esc_url( $point['url'] ) . '">' . esc_html( $point['title'] ) . '</a></li>'; } echo '</ul>';
         } elseif ( $block === 'news' ) {
             $posts = get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 3 ) ); echo '<div class="ft-cards">';
             foreach ( $posts as $post ) { echo '<article class="ft-card"><a class="ft-card-image" href="' . esc_url( get_permalink( $post ) ) . '">' . get_the_post_thumbnail( $post, 'medium_large', array( 'loading' => 'lazy' ) ) . '</a><div class="ft-card-body"><h3><a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a></h3><p>' . esc_html( wp_trim_words( wp_strip_all_tags( $post->post_content ), 22 ) ) . '</p></div></article>'; }

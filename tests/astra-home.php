@@ -31,6 +31,8 @@ foreach ( array( 'today', 'weekend', 'upcoming' ) as $filter ) {
     }
 }
 $_GET['ft_agenda'] = 'upcoming';
+ob_start(); FTUY_Home::render( 'map' ); $map = ob_get_clean();
+$assert( strpos( $map, '<ul>' ) === false, 'No event link list below the Home map' );
 ob_start(); FTUY_Home::agenda(); $agenda = ob_get_clean(); unset( $_GET['ft_agenda'] );
 $assert( strpos( $agenda, 'Próximos eventos' ) !== false, 'Upcoming filter renders proper heading' );
 $assert( ( strpos( $agenda, '>Hoy</a>' ) !== false ) === (bool) FTUY_Home::agenda_items( 'today' ), 'Today tab conditional on real events' );
