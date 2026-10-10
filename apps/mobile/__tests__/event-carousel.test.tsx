@@ -1,6 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { Animated, Image, StyleSheet } from 'react-native';
+import { Animated, Image, StyleSheet, Text } from 'react-native';
 import EventCarousel, {
   carouselGeometry,
 } from '../src/components/EventCarousel';
@@ -28,6 +28,26 @@ test('carousel centers portrait posters with room for neighboring cards at phone
     expect(step + inset * 2).toBeCloseTo(width);
     expect(inset).toBeGreaterThan(0);
   });
+});
+
+test('calendar date remains outside full poster and controls contrast on navy', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = Renderer.create(
+      <EventCarousel items={events} onPress={jest.fn()} inverse />,
+    );
+  });
+  const labels = tree.root.findAllByType(Text);
+  expect(labels.some(node => node.props.children === 'LUN')).toBe(true);
+  expect(labels.some(node => node.props.children === 'OCT')).toBe(true);
+  const day = labels.find(node => node.props.children === '12')!;
+  expect(day.props.numberOfLines).toBe(1);
+  expect(day.props.adjustsFontSizeToFit).toBe(true);
+  const counter = labels.find(
+    node => StyleSheet.flatten(node.props.style)?.minWidth === 52,
+  )!;
+  expect(StyleSheet.flatten(counter.props.style).color).toBe('#FFFFFF');
+  await act(async () => tree.unmount());
 });
 
 test('carousel opens the chosen real event, shows date and uses snap intervals', async () => {

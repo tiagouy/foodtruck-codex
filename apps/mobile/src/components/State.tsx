@@ -31,17 +31,22 @@ export default function State({
   loading,
   message,
   retry,
+  inverse = false,
 }: {
   loading?: boolean;
   message?: string;
   retry?: () => void;
+  inverse?: boolean;
 }) {
   return (
     <View style={styles.state}>
       {loading ? (
-        <ActivityIndicator color={colors.accent} />
+        <ActivityIndicator color={inverse ? '#FFFFFF' : colors.accent} />
       ) : (
-        <Text accessibilityLiveRegion="polite" style={styles.message}>
+        <Text
+          accessibilityLiveRegion="polite"
+          style={[styles.message, inverse && styles.inverseMessage]}
+        >
           {message}
         </Text>
       )}
@@ -52,6 +57,7 @@ export default function State({
 export const styles = StyleSheet.create({
   state: { paddingVertical: 24, gap: 16 },
   message: { color: colors.muted, lineHeight: 23, fontSize: 16 },
+  inverseMessage: { color: '#FFFFFF' },
   button: {
     padding: 14,
     borderRadius: 12,

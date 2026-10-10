@@ -17,6 +17,40 @@ export function dateLabel(value: string): string {
   const [year, month, day] = date.split('-');
   return /^\d{4}-\d{2}-\d{2}$/.test(date) ? `${day}/${month}/${year}` : '';
 }
+// Calendar dates are not instants: UTC avoids shifting the displayed day on devices.
+export function eventDateParts(value: string) {
+  const date = value.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return null;
+  }
+  const parsed = new Date(`${date}T12:00:00Z`);
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.toISOString().slice(0, 10) !== date
+  ) {
+    return null;
+  }
+  return {
+    weekday: ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'][
+      parsed.getUTCDay()
+    ],
+    day: String(parsed.getUTCDate()),
+    month: [
+      'ENE',
+      'FEB',
+      'MAR',
+      'ABR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DIC',
+    ][parsed.getUTCMonth()],
+  };
+}
 export function cardData(kind: Kind, item: Content) {
   if (kind === 'events') {
     const event = item as Event;

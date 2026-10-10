@@ -12,13 +12,29 @@ import {
 } from 'react-native';
 import { Event } from '../lib/api';
 import { mediaURL } from '../lib/config';
-import { dateLabel, plain } from '../lib/presentation';
+import { dateLabel, eventDateParts, plain } from '../lib/presentation';
 import { colors } from './AppHeader';
 
 export function carouselGeometry(width: number) {
   const card = Math.min(360, width * 0.8);
   const step = card + 12;
   return { card, step, inset: (width - step) / 2 };
+}
+
+function CalendarDate({ date }: { date: string }) {
+  const parts = eventDateParts(date);
+  if (!parts) {
+    return null;
+  }
+  return (
+    <View style={styles.calendar}>
+      <Text style={styles.calendarLabel}>{parts.weekday}</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit style={styles.calendarDay}>
+        {parts.day}
+      </Text>
+      <Text style={styles.calendarLabel}>{parts.month}</Text>
+    </View>
+  );
 }
 
 function Poster({ event }: { event: Event }) {
@@ -36,15 +52,11 @@ function Poster({ event }: { event: Event }) {
       ) : (
         <Text style={styles.placeholder}>Foodtrucks UY</Text>
       )}
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>
-          {event.cancelled
-            ? 'Cancelado'
-            : event.entry_type === 'free'
-            ? 'Entrada libre'
-            : 'Evento'}
-        </Text>
-      </View>
+      {event.cancelled && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>Cancelado</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -52,9 +64,11 @@ function Poster({ event }: { event: Event }) {
 export default function EventCarousel({
   items,
   onPress,
+  inverse = false,
 }: {
   items: Event[];
   onPress: (event: Event) => void;
+  inverse?: boolean;
 }) {
   const dimensions = useWindowDimensions();
   const [width, setWidth] = useState(dimensions.width);
@@ -161,18 +175,21 @@ export default function EventCarousel({
             >
               <Poster event={item} />
               <View style={styles.info}>
-                <Text style={styles.date}>
-                  {dateLabel(item.start_date)}
-                  {item.end_date !== item.start_date
-                    ? ` — ${dateLabel(item.end_date)}`
-                    : ''}
-                </Text>
-                <Text numberOfLines={2} style={styles.title}>
-                  {plain(item.title)}
-                </Text>
-                <Text numberOfLines={2} style={styles.place}>
-                  {plain(item.venue || item.locality || item.department)}
-                </Text>
+                <CalendarDate date={item.start_date} />
+                <View style={styles.metadata}>
+                  <Text numberOfLines={2} style={styles.title}>
+                    {plain(item.title)}
+                  </Text>
+                  <Text numberOfLines={2} style={styles.place}>
+                    {plain(item.venue || item.locality || item.department)}
+                  </Text>
+                  <Text style={styles.date}>
+                    {dateLabel(item.start_date)}
+                    {item.end_date !== item.start_date
+                      ? ` — ${dateLabel(item.end_date)}`
+                      : ''}
+                  </Text>
+                </View>
               </View>
             </Pressable>
           </Animated.View>
@@ -193,9 +210,17 @@ export default function EventCarousel({
             }}
             style={styles.arrow}
           >
-            <Text style={index === 0 ? styles.disabled : styles.active}>‹</Text>
+            <Text
+              style={
+                index === 0
+                  ? styles.disabled
+                  : [styles.active, inverse && styles.inverse]
+              }
+            >
+              ‹
+            </Text>
           </Pressable>
-          <Text style={styles.counter}>
+          <Text style={[styles.counter, inverse && styles.inverse]}>
             {index + 1} / {items.length}
           </Text>
           <Pressable
@@ -213,7 +238,9 @@ export default function EventCarousel({
           >
             <Text
               style={
-                index === items.length - 1 ? styles.disabled : styles.active
+                index === items.length - 1
+                  ? styles.disabled
+                  : [styles.active, inverse && styles.inverse]
               }
             >
               ›
@@ -229,7 +256,7 @@ const styles = StyleSheet.create({
   slot: { paddingHorizontal: 6 },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
+    borderRadius: 10,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.line,
@@ -252,18 +279,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   badgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
-  info: { padding: 16, minHeight: 134 },
+  info: { padding: 14, minHeight: 134, flexDirection: 'row', gap: 12 },
+  calendar: {
+    width: 52,
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: colors.line,
+    paddingRight: 8,
+  },
+  calendarLabel: { color: colors.button, fontSize: 12, fontWeight: '800' },
+  calendarDay: {
+    color: colors.button,
+    fontSize: 30,
+    fontWeight: '800',
+    marginVertical: 2,
+  },
+  metadata: { flex: 1 },
   date: {
     color: colors.accentText,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    marginBottom: 7,
+    marginTop: 7,
   },
   title: {
     color: colors.dark,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    lineHeight: 25,
+    lineHeight: 23,
   },
   place: { color: colors.muted, fontSize: 13, lineHeight: 18, marginTop: 7 },
   controls: {
@@ -279,6 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   active: { fontSize: 28, color: colors.dark },
+  inverse: { color: '#FFFFFF' },
   disabled: { fontSize: 28, color: colors.line },
   counter: {
     fontSize: 12,

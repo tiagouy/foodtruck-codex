@@ -1,5 +1,13 @@
 # Changelog de la app
 
+## 0.11.0 — 2026-10-10
+
+- Concordancia con la web: logo horizontal transparente aprobado y bloque de próximos eventos azul en Home.
+- Agenda azul con pestañas rectas, selección naranja y texto blanco; mantiene Próximos/Pasados y paginación.
+- Tarjetas con afiche completo 4:5, radios más discretos y fecha de calendario destacada fuera del arte, nombre/lugar/rango completo.
+- Tipografía nativa legible; fechas sin desplazamiento por zona horaria, controles y estados vacíos/errores con contraste sobre azul.
+- Sin cambios de API, cuentas, fotos, push, splash, iconos ni filtros nuevos de fechas.
+
 ## 0.10.10 — 2026-10-09
 
 - Imagen horizontal dimensionada explícitamente al 100% de su marco 4:1 aproximado (760:200), en lugar de absoluteFill que no anulaba las dimensiones intrínsecas del asset en Android. Evita desbordamiento sobre título y eventos.

@@ -97,7 +97,7 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
       <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
         <AppHeader title="Tu próxima salida" />
         <ScrollView
-          style={styles.body}
+          style={styles.eventBody}
           contentContainerStyle={styles.eventContent}
           refreshControl={
             <RefreshControl
@@ -108,7 +108,7 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
         >
           <View style={styles.eventHeading}>
             <Text style={styles.eventTitle}>Agenda de eventos</Text>
-            <Text style={styles.notice}>
+            <Text style={[styles.notice, styles.eventNotice]}>
               Deslizá y descubrí dónde nos encontramos.
             </Text>
             <View style={styles.tabs}>
@@ -127,6 +127,7 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
           </View>
           {items.length ? (
             <EventCarousel
+              inverse
               key={view}
               items={items as Event[]}
               onPress={item =>
@@ -138,6 +139,7 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
             />
           ) : (
             <State
+              inverse
               loading={loading}
               message={error || empty.events}
               retry={error ? () => load(1) : undefined}
@@ -146,9 +148,9 @@ export default function CatalogScreen({ kind }: { kind: Kind }) {
           <View style={styles.eventHeading}>
             {items.length > 0 &&
               (error ? (
-                <State message={error} retry={() => load(page + 1)} />
+                <State inverse message={error} retry={() => load(page + 1)} />
               ) : loading ? (
-                <State loading />
+                <State inverse loading />
               ) : page * 12 < total ? (
                 <Button
                   label="Cargar más eventos"
@@ -225,31 +227,36 @@ const styles = StyleSheet.create({
   upload: { gap: 12 },
   screen: { flex: 1, backgroundColor: colors.dark },
   body: { backgroundColor: colors.background },
+  eventBody: { backgroundColor: colors.dark },
+  eventNotice: { color: '#FFFFFF' },
   content: { padding: 18 },
   eventContent: { paddingVertical: 22 },
   eventHeading: { paddingHorizontal: 20 },
   eventTitle: {
     fontSize: 26,
     fontWeight: '800',
-    color: colors.dark,
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
     marginBottom: 8,
   },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: colors.soft,
+    backgroundColor: 'transparent',
     padding: 4,
-    borderRadius: 28,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.line,
     marginBottom: 10,
   },
   tab: {
     flex: 1,
     textAlign: 'center',
     paddingVertical: 12,
-    borderRadius: 24,
-    color: colors.muted,
+    borderRadius: 3,
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
   },
-  selectedTab: { backgroundColor: colors.dark, color: '#FFFFFF' },
+  selectedTab: { backgroundColor: colors.button, color: '#FFFFFF' },
   notice: { lineHeight: 21, color: colors.muted, marginBottom: 18 },
 });

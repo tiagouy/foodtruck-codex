@@ -113,7 +113,7 @@ test('home works without community activity and distinguishes empty directory/hi
   expect(texts(tree)).not.toContain('Eventos, foodtrucks y momentos');
   const logo = tree.root.findByProps({ accessibilityLabel: 'Food Truck UY' });
   expect(logo.props.source).toBe(
-    require('../assets/branding/home-logo-horizontal.png'),
+    require('../assets/branding/home-logo-transparent.png'),
   );
   expect(logo.props.resizeMode).toBe('contain');
   const logoFrame = StyleSheet.flatten(logo.parent!.props.style);

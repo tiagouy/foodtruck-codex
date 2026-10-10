@@ -105,7 +105,7 @@ export default function HomeScreen() {
       >
         <View style={styles.logo}>
           <Image
-            source={require('../../assets/branding/home-logo-horizontal.png')}
+            source={require('../../assets/branding/home-logo-transparent.png')}
             accessibilityLabel="Food Truck UY"
             accessible
             resizeMode="contain"
@@ -115,21 +115,35 @@ export default function HomeScreen() {
         {blocks.map(block => {
           const result = results[block.kind];
           return (
-            <View key={block.kind} style={styles.section}>
-              <Text accessibilityRole="header" style={styles.title}>
+            <View
+              key={block.kind}
+              style={[
+                styles.section,
+                block.kind === 'events' && styles.eventSection,
+              ]}
+            >
+              <Text
+                accessibilityRole="header"
+                style={[
+                  styles.title,
+                  block.kind === 'events' && styles.eventTitle,
+                ]}
+              >
                 {block.title}
               </Text>
               {!result ? (
-                <State loading />
+                <State loading inverse={block.kind === 'events'} />
               ) : result.error ? (
                 <State
                   message={result.error}
                   retry={() => refresh(key => key + 1)}
+                  inverse={block.kind === 'events'}
                 />
               ) : result.items.length ? (
                 block.kind === 'events' ? (
                   <View style={styles.carousel}>
                     <EventCarousel
+                      inverse
                       items={result.items as Event[]}
                       onPress={item =>
                         navigation.navigate('Detalle', {
@@ -155,7 +169,10 @@ export default function HomeScreen() {
                   ))
                 )
               ) : (
-                <State message={block.empty} />
+                <State
+                  message={block.empty}
+                  inverse={block.kind === 'events'}
+                />
               )}
               <Button
                 label={`Ver ${block.tab.toLowerCase()}`}
@@ -182,11 +199,19 @@ const styles = StyleSheet.create({
   },
   logoImage: { width: '100%', height: '100%' },
   section: { marginBottom: 32 },
+  eventSection: {
+    backgroundColor: colors.dark,
+    marginHorizontal: -18,
+    paddingHorizontal: 18,
+    paddingVertical: 24,
+  },
+  eventTitle: { color: '#FFFFFF' },
   carousel: { marginHorizontal: -18 },
   title: {
     fontSize: 22,
     fontWeight: '800',
     color: colors.dark,
     marginBottom: 15,
+    textTransform: 'uppercase',
   },
 });
