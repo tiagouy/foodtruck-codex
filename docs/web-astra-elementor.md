@@ -13,6 +13,14 @@ Conserva listado, paginación y configuración de columnas/sidebar de Astra.
 Tema 0.1.3: contenido del blog dentro del contenedor común de 1170 px máximo,
 centrado y con padding lateral responsive; barra de título y pie conservan su ancho.
 
+Core 0.22.4: Contacto utiliza la página WordPress 875 `/contacto/` con
+`[ftuy_home_contact]`. El bloque se retiró de la Home sin reconstruir los demás
+elementos de Elementor (incluida la galería editada por el usuario). Migración
+local reproducible: `tools/move-contact-local.php` con WP-CLI; copia del contenido
+anterior y datos de Elementor en la opción `ftuy_before_contact_move`.
+El formulario sigue siendo CF7 2887; no se enviaron correos de prueba y la
+restricción reCAPTCHA de localhost sigue pendiente.
+
 - Se conserva la Home 1321 completa como borrador. Backup SQL privado local:
   `/private/tmp/foodtruck-astra-backup-20261010/food-before-astra.sql` (0600).
   Es temporal: trasladar a backup privado duradero antes de cualquier despliegue.

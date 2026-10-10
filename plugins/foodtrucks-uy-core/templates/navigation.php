@@ -4,7 +4,7 @@
 <a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Eventos</a>
 <a href="<?php echo esc_url( home_url( '/fotosusuarios/' ) ); ?>">Fotos</a>
 <a href="<?php echo esc_url( get_permalink( (int) get_option( 'page_for_posts' ) ) ?: home_url( '/blog/' ) ); ?>">Novedades</a>
-<a href="<?php echo esc_url( home_url( '/#contacto' ) ); ?>">Contacto</a>
+<a href="<?php echo esc_url( home_url( '/contacto/' ) ); ?>">Contacto</a>
 <details class="ft-account-menu"><summary>Mi cuenta</summary><div class="ft-account-links">
 <a href="<?php echo esc_url( home_url( '/mi-cuenta/' ) ); ?>">Mi perfil</a>
 <a href="<?php echo esc_url( home_url( '/mis-eventos/' ) ); ?>">Mis eventos</a>

@@ -3,7 +3,7 @@
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! in_array( wp_parse_url( home_url(), PHP_URL_HOST ), array( 'localhost', '127.0.0.1' ), true ) ) { throw new Exception( 'Solo CLI local' ); }
 if ( ! class_exists( '\Elementor\Plugin' ) ) { throw new Exception( 'Activar Elementor primero' ); }
 $existing = get_option( 'ftuy_astra_home_id' );
-$blocks = array( 'hero', 'events', 'trucks', 'app', 'news', 'friends', 'contact', 'map' );
+$blocks = array( 'hero', 'events', 'trucks', 'app', 'news', 'friends', 'map' );
 $elements = array();
 foreach ( $blocks as $i => $block ) {
     $elements[] = array( 'id' => substr( md5( 'ftuy-section-' . $block ), 0, 7 ), 'elType' => 'section', 'settings' => array( 'layout' => 'full_width', 'gap' => 'no' ), 'elements' => array( array( 'id' => substr( md5( 'ftuy-column-' . $block ), 0, 7 ), 'elType' => 'column', 'settings' => array( '_column_size' => 100 ), 'elements' => array( array( 'id' => substr( md5( 'ftuy-widget-' . $block ), 0, 7 ), 'elType' => 'widget', 'widgetType' => 'shortcode', 'settings' => array( 'shortcode' => '[ftuy_home_' . $block . ']' ), 'elements' => array() ) ) ) ) );

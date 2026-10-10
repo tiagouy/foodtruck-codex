@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.22.4 — 2026-10-10
+
+- Contacto pasa de la Home a la página WordPress existente `/contacto/`, con `[ftuy_home_contact]` y el mismo formulario.
+- Menú actualizado; migración local con copia previa y preservación de los demás bloques de Elementor.
+
 ## 0.22.3 — 2026-10-10
 
 - Menú principal en mayúsculas, sin Eventos pasados (conservado dentro de Eventos).
