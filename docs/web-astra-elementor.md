@@ -2,7 +2,7 @@
 
 Decisión del usuario: 2026-10-10. Sustituir Eventchamp por Astra gratuito y preferir
 Elementor para la Home. Astra 4.14.0 y Elementor 4.3.4 activos en local mediante
-tema hijo versionado `themes/foodtrucks-astra` 0.1.0. Nueva Home 4542 (o ID guardado
+tema hijo versionado `themes/foodtrucks-astra` 0.1.1. Nueva Home 4542 (o ID guardado
 en `ftuy_astra_home_id` al repetir instalación). Plugin Core 0.21.0.
 
 ## Cambio realizado
