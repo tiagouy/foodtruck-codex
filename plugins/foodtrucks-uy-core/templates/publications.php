@@ -42,4 +42,4 @@ $description = $row ? wp_trim_words( $row['caption'], 30 ) : 'Momentos compartid
 <?php if ( $list['page'] * 12 < $list['total'] ) : ?><a href="<?php echo esc_url( add_query_arg( 'pagina', $list['page'] + 1, $base ) ); ?>">Siguiente</a><?php endif; ?></nav>
 <?php else : ?><div class="ft-empty"><h2>Todavía no hay fotos publicadas<?php echo FTUY_Publication_Public::$author ? ' de esta persona' : ''; ?></h2><p>Las fotos aparecerán aquí cuando estén disponibles.</p></div><?php endif; ?>
 <?php endif; ?>
-</main><footer class="ft-footer"><div class="ft-container">Foodtrucks Uruguay · Una comunidad para encontrarnos alrededor de la comida.</div></footer></body></html>
+</main><?php include FTUY_PATH . 'templates/footer.php'; ?></body></html>

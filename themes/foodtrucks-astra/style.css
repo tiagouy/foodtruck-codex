@@ -1,0 +1,7 @@
+/*
+Theme Name: Foodtrucks UY Astra
+Template: astra
+Version: 0.1.0
+Description: Identidad Foodtrucks Uruguay sobre Astra; datos y bloques en el plugin Core.
+*/
+body.ft-site .elementor-section.elementor-section-boxed>.elementor-container{max-width:100%}body.ft-site .elementor-column-gap-default>.elementor-column>.elementor-element-populated{padding:0}body.ft-site .elementor-widget:not(:last-child){margin-bottom:0}

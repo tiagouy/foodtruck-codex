@@ -1,27 +1,9 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php defined( 'ABSPATH' ) || exit;
+wp_register_style( 'ftuy-brand', FTUY_URL . 'assets/brand.css', array( 'ftuy-events' ), FOODTRUCKS_UY_CORE_VERSION );
+wp_print_styles( 'ftuy-brand' );
+?>
 <header class="ft-header"><div class="ft-container ft-header-inner">
-<a class="ft-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">FOODTRUCKS<span>URUGUAY</span></a>
-<nav aria-label="Navegación principal">
-<a href="<?php echo esc_url( home_url( '/foodtrucks/' ) ); ?>">Foodtrucks</a>
-<a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Eventos</a>
-<a href="<?php echo esc_url( home_url( '/eventos/pasados/' ) ); ?>">Eventos pasados</a>
-<a href="<?php echo esc_url( home_url( '/fotosusuarios/' ) ); ?>">Fotos</a>
-<details class="ft-account-menu">
-<summary>Mi cuenta</summary>
-<div class="ft-account-links">
-<a href="<?php echo esc_url( home_url( '/mi-cuenta/' ) ); ?>">Mi perfil</a>
-<a href="<?php echo esc_url( home_url( '/mis-eventos/' ) ); ?>">Mis eventos</a>
-<a href="<?php echo esc_url( home_url( '/mis-foodtrucks/' ) ); ?>">Mis foodtrucks</a>
-<div class="ft-account-divider"></div>
-<a href="<?php echo esc_url( home_url( '/sugerir-evento/' ) ); ?>">Sugerir evento</a>
-<a href="<?php echo esc_url( home_url( '/agregar-foodtruck/' ) ); ?>">Agregar mi foodtruck</a>
-<div class="ft-account-divider"></div>
-<?php if ( is_user_logged_in() ) : ?>
-<a href="<?php echo esc_url( wp_nonce_url( home_url( '/salir/' ), 'ftuy_account_logout' ) ); ?>">Cerrar sesión</a>
-<?php else : ?>
-<a href="<?php echo esc_url( FTUY_Accounts::login_url() ); ?>">Iniciar sesión</a>
-<a class="ft-reactivate-link" href="<?php echo esc_url( home_url( '/reactivar-cuenta/' ) ); ?>">Reactivar cuenta</a>
-<?php if ( FTUY_Accounts::registration_enabled() ) : ?><a href="<?php echo esc_url( home_url( '/registro/' ) ); ?>">Crear cuenta</a><?php endif; ?>
-<?php endif; ?>
-</div></details>
-</nav></div></header>
+<a class="ft-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>"><img src="<?php echo esc_url( FTUY_URL . 'assets/logo-horizontal.png' ); ?>" width="760" height="200" alt="Foodtrucks Uruguay"></a>
+<div class="ft-desktop-nav"><?php include FTUY_PATH . 'templates/navigation.php'; ?></div>
+<details class="ft-primary-menu"><summary>Menú ☰</summary><?php include FTUY_PATH . 'templates/navigation.php'; ?></details>
+</div></header>

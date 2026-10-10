@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.21.0 — 2026-10-10
+
+- Bloques de Home independientes de Eventchamp: slider nativo con fotos originales, próximos eventos 4:5, foodtrucks, novedades, app, amigos, contacto y mapa diferido por coordenadas.
+- Encabezado y pie compartidos con tema hijo Astra 0.1.0, mobile y escritorio. Datos/Core/API intactos. [Transición y límites](../web-astra-elementor.md); 44 verificaciones HTTP/integración.
+
 ## 0.20.0 — 2026-10-10
 
 - Panel Notificaciones: envío PHP pushv3 para app 12, a usuarios de prueba o todos con confirmación. Credenciales solo en variables de entorno; historial propio y protección ante doble envío/resultados inciertos.

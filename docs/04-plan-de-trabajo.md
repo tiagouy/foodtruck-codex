@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-10 · plugin 0.21.0 / tema Astra 0.1.0
+
+[Home nueva con Astra/Elementor](web-astra-elementor.md) activa en local: fotos originales, datos del plugin, mapa diferido, cabecera y pie comunes. Dependencias Eventchamp/WPBakery retiradas de ejecución, originales y demos conservados como borradores. 44 comprobaciones; páginas institucionales antiguas y reCAPTCHA local pendientes. Online intacto.
+
 ## Actualización · 2026-10-10 · plugin 0.20.0
 
 [Notificaciones desde WordPress](plugin/notificaciones-0.20.0.md): panel para administradores, credenciales por entorno PHP, prueba por IDs y envío general con confirmación. Historial e idempotencia; 38 verificaciones con HTTP interceptado, sin push reales. Variables del servicio web y recepción real pendientes; integración móvil sin cambios.

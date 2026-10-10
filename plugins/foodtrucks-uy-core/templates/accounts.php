@@ -32,4 +32,4 @@ $title = $titles[$view];
 <p><button class="ft-button" type="submit"><?php echo $view === 'login' ? 'Ingresar' : ( $view === 'reset' ? 'Guardar contraseña' : 'Enviar enlace por email' ); ?></button></p></form>
 <?php endif; ?>
 <div class="ft-account-bottom"><a href="<?php echo esc_url( home_url( '/ingresar/' ) ); ?>">Iniciar sesión</a><?php if ( FTUY_Accounts::registration_enabled() ) : ?><a href="<?php echo esc_url( home_url( '/registro/' ) ); ?>">Crear cuenta</a><?php endif; ?><a href="<?php echo esc_url( home_url( '/recordar-contrasena/' ) ); ?>">Recordar contraseña</a><a href="<?php echo esc_url( home_url( '/reactivar-cuenta/' ) ); ?>">Reactivar cuenta</a></div>
-</div></main><footer class="ft-footer"><div class="ft-container">Foodtrucks Uruguay · Una comunidad para encontrarnos alrededor de la comida.</div></footer></body></html>
+</div></main><?php include FTUY_PATH . 'templates/footer.php'; ?></body></html>

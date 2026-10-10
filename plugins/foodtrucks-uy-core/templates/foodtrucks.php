@@ -43,4 +43,4 @@ $catalog_url = $preview ? FTUY_Foodtruck_Public::preview_url() : home_url( '/foo
 <?php if ( $truck['instagram'] ) : ?><a class="ft-button ft-outline" href="<?php echo esc_url( $truck['instagram'] ); ?>" target="_blank" rel="noopener">Ver Instagram ↗</a><?php endif; ?>
 <?php if ( ! $truck['whatsapp'] && ! $truck['instagram'] ) : ?><p>Este foodtruck todavía no tiene un contacto público cargado.</p><?php endif; ?>
 </aside></div>
-<?php endif; ?></main><footer class="ft-footer"><div class="ft-container"><strong>Foodtrucks Uruguay</strong><p>Una comunidad para encontrarnos alrededor de la comida.</p><a href="<?php echo esc_url( home_url( '/eventos/' ) ); ?>">Explorá los próximos eventos.</a></div></footer><?php if ( $view === 'add' && is_user_logged_in() ) { wp_print_scripts( 'ftuy-trucks' ); } ?></body></html>
+<?php endif; ?></main><?php include FTUY_PATH . 'templates/footer.php'; ?><?php if ( $view === 'add' && is_user_logged_in() ) { wp_print_scripts( 'ftuy-trucks' ); } ?></body></html>

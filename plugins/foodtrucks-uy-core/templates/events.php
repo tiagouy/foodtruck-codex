@@ -45,6 +45,6 @@ $title = $event ? $event['title'] : $titles[$view];
 <?php endif; ?>
 <?php elseif ( $view === 'mine' ) : FTUY_Public::mine(); endif; ?>
 </main>
-<footer class="ft-footer"><div class="ft-container"><strong>Foodtrucks Uruguay</strong><p>Una comunidad para encontrarnos alrededor de la comida.</p><a href="<?php echo esc_url( home_url( '/sugerir-evento/' ) ); ?>">¿Organizás un evento? Contanos.</a></div></footer>
+<?php include FTUY_PATH . 'templates/footer.php'; ?>
 <?php if ( $view === 'suggest' && is_user_logged_in() ) { wp_print_scripts( 'ftuy-event-form' ); } ?>
 </body></html>
