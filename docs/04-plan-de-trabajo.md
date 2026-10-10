@@ -2,6 +2,10 @@
 
 Estado inicial: 2026-10-05. Este checklist define el trabajo pendiente; las funcionalidades de cada etapa se ajustarán con el enfoque de producto y el MVP acordados.
 
+## Actualización · 2026-10-10 · plugin 0.20.0
+
+[Notificaciones desde WordPress](plugin/notificaciones-0.20.0.md): panel para administradores, credenciales por entorno PHP, prueba por IDs y envío general con confirmación. Historial e idempotencia; 38 verificaciones con HTTP interceptado, sin push reales. Variables del servicio web y recepción real pendientes; integración móvil sin cambios.
+
 ## Actualización · 2026-10-09 · app 0.10.6
 
 Home: logo con nombre del splash en lugar de la frase introductoria, centrado y sin recorte. Cabezal y bloques conservados.

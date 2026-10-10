@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.0 — 2026-10-10
+
+- Panel Notificaciones: envío PHP pushv3 para app 12, a usuarios de prueba o todos con confirmación. Credenciales solo en variables de entorno; historial propio y protección ante doble envío/resultados inciertos.
+- [Configuración y límites](notificaciones-0.20.0.md). Apps sin cambios; sin envíos reales ni programación automática.
+
 ## 0.19.1 — 2026-10-08
 
 - Lista y detalle web de fotos usan fecha/lugar juntos antes del texto, alineados con la app; tipografía/espaciado del detalle acercados a las tarjetas.
