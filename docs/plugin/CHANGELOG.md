@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.22.2 — 2026-10-10
+
+- Encabezado web con el PNG transparente aprobado `logo1-tira2.png`, sin alterar la imagen ni el logo de la app.
+- Conserva el recurso anterior; archivo nuevo evita caché del logo con fondo.
+
 ## 0.22.1 — 2026-10-10
 
 - Retira la lista de enlaces debajo del mapa de la Home; conserva enlaces desde los marcadores.
