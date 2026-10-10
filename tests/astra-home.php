@@ -10,11 +10,14 @@ $data = json_decode( get_post_meta( $page->ID, '_elementor_data', true ), true )
 $assert( count( $data ) === 8, 'Eight separate Elementor blocks' );
 $assert( get_post( 1321 ) && strpos( get_post( 1321 )->post_content, 'eventchamp_event_counter_slider' ) !== false, 'Original Home preserved' );
 foreach ( array( 2802, 2803, 2804, 2805 ) as $id ) { $assert( is_file( get_attached_file( $id ) ), 'Original hero photo intact' ); }
-foreach ( array( '/', '/eventos/', '/eventos/pasados/', '/foodtrucks/', '/foodtruck/robin-foodtruck/', '/fotosusuarios/', '/registro/', '/mi-cuenta/', '/wp-json/foodtrucks-uy/v1/events', '/wp-json/foodtrucks-uy/v1/foodtrucks', '/wp-json/foodtrucks-uy/v1/publications' ) as $route ) {
+foreach ( array( '/', '/blog/', '/eventos/', '/eventos/pasados/', '/foodtrucks/', '/foodtruck/robin-foodtruck/', '/fotosusuarios/', '/registro/', '/mi-cuenta/', '/wp-json/foodtrucks-uy/v1/events', '/wp-json/foodtrucks-uy/v1/foodtrucks', '/wp-json/foodtrucks-uy/v1/publications' ) as $route ) {
     $response = wp_remote_get( home_url( $route ), array( 'timeout' => 20 ) );
     $assert( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200, 'Route ' . $route );
     $body = wp_remote_retrieve_body( $response );
     $assert( strpos( $body, 'Fatal error' ) === false && strpos( $body, 'Array to string conversion' ) === false, 'No runtime error ' . $route );
+    if ( $route === '/blog/' ) {
+        $assert( strpos( $body, '<h1>Novedades</h1>' ) !== false && strpos( $body, 'ft-titlebar' ) !== false, 'Blog has shared page titlebar' );
+    }
     if ( $route === '/' ) {
         foreach ( array( 'ft-hero-track', 'ft-home-agenda', 'Los foodtrucks', 'ft-home-map', 'Descargá nuestra app', 'home.js' ) as $needle ) { $assert( strpos( $body, $needle ) !== false, 'Home block ' . $needle ); }
         foreach ( array( '[vc_row', '[eventchamp_', 'js_composer/assets', 'revslider/public', '/themes/eventchamp/' ) as $needle ) { $assert( strpos( $body, $needle ) === false, 'No old renderer ' . $needle ); }
