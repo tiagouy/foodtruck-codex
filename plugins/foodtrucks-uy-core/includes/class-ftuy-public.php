@@ -54,7 +54,11 @@ class FTUY_Public {
         if ( isset( $paths[$request_path] ) ) { self::$view = $paths[$request_path]; }
         elseif ( preg_match( '#^evento/([^/]+)$#', $request_path, $matches ) ) {
             self::$event = FTUY_Events::by_slug( sanitize_title( $matches[1] ) );
-            if ( ! self::$event ) { return; } // Los eventos no migrados siguen en Eventchamp.
+            if ( ! self::$event ) {
+                global $wpdb;
+                if ( $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . FTUY_Events::table() . ' WHERE slug=%s', sanitize_title( $matches[1] ) ) ) ) { wp_die( 'Evento no disponible.', '', array( 'response' => 404 ) ); }
+                return; // Solo los eventos no migrados pueden seguir en Eventchamp.
+            }
             self::$view = 'detail';
         } else { return; }
         if ( isset( $_GET['ft_preview'] ) ) {
@@ -81,7 +85,7 @@ class FTUY_Public {
         $id = absint( $_GET['edit'] ?? 0 );
         if ( $id ) {
             $existing = FTUY_Events::get( $id );
-            if ( ! $existing || (int) $existing['author_id'] !== get_current_user_id() ) { wp_die( 'No podés editar este evento.', '', array( 'response' => 403 ) ); }
+            if ( ! $existing || $existing['status'] === 'trash' || (int) $existing['author_id'] !== get_current_user_id() ) { wp_die( 'No podés editar este evento.', '', array( 'response' => 403 ) ); }
             $review = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Events::table( 'event_reviews' ) . ' WHERE event_id=%d ORDER BY id DESC LIMIT 1', $id ), ARRAY_A );
             self::$form_data = $review && $review['status'] !== 'published' ? array_merge( $existing, json_decode( $review['payload'], true ) ) : $existing;
         }

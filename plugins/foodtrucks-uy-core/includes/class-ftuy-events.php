@@ -101,6 +101,22 @@ class FTUY_Events {
         global $wpdb;
         return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id=%d', $id ), ARRAY_A );
     }
+    // Reversible removal. Keep originals, media and review history; never republish on restore.
+    public static function trash( $id, $restore = false ) {
+        if ( ! current_user_can( 'manage_ft_events' ) ) { return new WP_Error( 'permission', 'Sin permiso.' ); }
+        global $wpdb;
+        $wpdb->query( 'START TRANSACTION' );
+        $event = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id=%d FOR UPDATE', $id ), ARRAY_A );
+        if ( ! $event || ( $restore && $event['status'] !== 'trash' ) ) {
+            $wpdb->query( 'ROLLBACK' );
+            return new WP_Error( 'event', 'Evento inexistente o no está en papelera.' );
+        }
+        $saved = $wpdb->update( self::table(), array( 'status' => $restore ? 'pending' : 'trash', 'updated_at' => current_time( 'mysql', true ) ), array( 'id' => $id ) );
+        $closed = $restore ? 0 : $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table( 'event_reviews' ) . " SET status='superseded',reviewer_id=%d,reviewed_at=%s WHERE event_id=%d AND status IN ('pending','corrections')", get_current_user_id(), current_time( 'mysql', true ), $id ) );
+        if ( $saved === false || $closed === false ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'database', 'No se pudo guardar el cambio.' ); }
+        if ( $wpdb->query( 'COMMIT' ) === false ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'database', 'No se pudo confirmar el cambio.' ); }
+        return true;
+    }
     public static function by_slug( $slug ) {
         global $wpdb;
         return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE slug=%s AND status=%s', $slug, 'published' ), ARRAY_A );
@@ -192,7 +208,7 @@ class FTUY_Events {
         $events = self::table(); $reviews = self::table( 'event_reviews' );
         if ( $event_id ) {
             $existing = self::get( $event_id );
-            if ( ! $existing || (int) $existing['author_id'] !== (int) $author_id ) { return new WP_Error( 'owner', 'No podés modificar este evento.' ); }
+            if ( ! $existing || $existing['status'] === 'trash' || (int) $existing['author_id'] !== (int) $author_id ) { return new WP_Error( 'owner', 'No podés modificar este evento.' ); }
         }
         $data = self::validate( $data );
         if ( is_wp_error( $data ) ) { return $data; }
@@ -227,6 +243,7 @@ class FTUY_Events {
         $r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table( 'event_reviews' ) . ' WHERE id=%d FOR UPDATE', $id ), ARRAY_A );
         if ( ! $r || ! in_array( $r['status'], array( 'pending', 'corrections' ), true ) ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'review', 'Esta propuesta ya fue revisada.' ); }
         $data = array_merge( self::get( $r['event_id'] ), json_decode( $r['payload'], true ) );
+        if ( $data['status'] === 'trash' ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'trash', 'Restaurá el evento antes de revisarlo.' ); }
         if ( $decision === 'published' ) {
             $data = self::validate( $data );
             if ( is_wp_error( $data ) ) { $wpdb->query( 'ROLLBACK' ); return $data; }

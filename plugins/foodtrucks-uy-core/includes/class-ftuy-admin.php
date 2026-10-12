@@ -9,6 +9,7 @@ class FTUY_Admin {
             add_submenu_page( 'ftuy-events', 'Correos de eventos', 'Correos', 'manage_ft_events', 'ftuy-mail', array( __CLASS__, 'mail_page' ) );
         } );
         add_action( 'admin_post_ftuy_review', array( __CLASS__, 'handle' ) );
+        add_action( 'admin_post_ftuy_event_trash', array( __CLASS__, 'handle_trash' ) );
         add_action( 'admin_post_ftuy_retry_mail', function () {
             if ( ! current_user_can( 'manage_ft_events' ) ) { wp_die( 'Sin permiso.', '', array( 'response' => 403 ) ); }
             check_admin_referer( 'ftuy_retry_mail' );
@@ -17,7 +18,18 @@ class FTUY_Admin {
         } );
         add_action( 'ftuy_retry_mail', array( 'FTUY_Events', 'send_mail' ) );
     }
-    public static function labels() { return array( 'pending' => 'Pendiente', 'corrections' => 'Requiere correcciones', 'published' => 'Publicado', 'rejected' => 'Rechazado', 'superseded' => 'Reemplazado' ); }
+    public static function labels() { return array( 'pending' => 'Pendiente', 'corrections' => 'Requiere correcciones', 'published' => 'Publicado', 'rejected' => 'Rechazado', 'superseded' => 'Reemplazado', 'trash' => 'Papelera' ); }
+    public static function handle_trash() {
+        if ( ! current_user_can( 'manage_ft_events' ) ) { wp_die( 'Sin permiso.', '', array( 'response' => 403 ) ); }
+        if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' ) { wp_die( 'Método inválido.', '', array( 'response' => 405 ) ); }
+        $id = absint( $_POST['event_id'] ?? 0 );
+        check_admin_referer( 'ftuy_event_trash_' . $id );
+        $action = sanitize_key( $_POST['operation'] ?? '' );
+        if ( ! in_array( $action, array( 'trash', 'restore' ), true ) ) { wp_die( 'Acción inválida.' ); }
+        $result = FTUY_Events::trash( $id, $action === 'restore' );
+        if ( is_wp_error( $result ) ) { wp_die( esc_html( $result->get_error_message() ) ); }
+        wp_safe_redirect( admin_url( 'admin.php?page=ftuy-events&event_action=' . $action ) ); exit;
+    }
     public static function fields( $data = array(), $public = false ) {
         FTUY_Form::assets();
         $fields = array( 'title' => 'Nombre del evento', 'description' => 'Descripción', 'start_date' => 'Fecha de inicio', 'end_date' => 'Fecha de finalización', 'start_time' => 'Hora de apertura (opcional)', 'end_time' => 'Hora de cierre (opcional)', 'venue' => 'Nombre del lugar', 'address' => 'Dirección', 'department' => 'Departamento', 'locality' => 'Localidad', 'instagram' => 'Instagram (@usuario o enlace al perfil)', 'website' => 'Sitio web (opcional)', 'tickets_url' => 'Enlace de entradas', 'organizer' => 'Organizador (opcional)' );
@@ -83,6 +95,7 @@ class FTUY_Admin {
         } else {
             $original = $event_id ? FTUY_Events::get( $event_id ) : array();
             if ( $event_id && ! $original ) { wp_die( 'Evento inexistente.' ); }
+            if ( $original && $original['status'] === 'trash' ) { wp_die( 'Restaurá el evento antes de editarlo.' ); }
             if ( $review_id ) { wp_die( 'Propuesta inexistente.' ); }
         }
         $image = self::image( $original['image_id'] ?? 0 );
@@ -117,8 +130,11 @@ class FTUY_Admin {
         wp_enqueue_style( 'ftuy-events', FTUY_URL . 'assets/events.css', array(), FOODTRUCKS_UY_CORE_VERSION );
         echo '<div class="wrap ft-admin"><h1>Foodtrucks UY · Eventos</h1><p>Administración propia del sitio y la app. Los eventos originales de Eventchamp se conservan.</p>';
         if ( isset( $_GET['saved'] ) ) { echo '<div class="notice notice-success"><p>Revisión guardada.</p></div>'; }
+        if ( ( $_GET['event_action'] ?? '' ) === 'trash' ) { echo '<div class="notice notice-success"><p>Evento enviado a papelera. Ya no aparece en la web ni en la API. Sus imágenes se conservan.</p></div>'; }
+        if ( ( $_GET['event_action'] ?? '' ) === 'restore' ) { echo '<div class="notice notice-success"><p>Evento restaurado como pendiente. Revisalo y publicalo nuevamente si corresponde.</p></div>'; }
         $r = isset( $_GET['review'] ) ? FTUY_Events::review( absint( $_GET['review'] ) ) : null;
         $event = isset( $_GET['edit'] ) ? FTUY_Events::get( absint( $_GET['edit'] ) ) : null;
+        if ( $event && $event['status'] === 'trash' ) { echo '<p>Este evento está en papelera. Restauralo desde el listado antes de editarlo.</p></div>'; return; }
         if ( $r || $event || isset( $_GET['new'] ) ) {
             $data = $r ? array_merge( FTUY_Events::get( $r['event_id'] ), json_decode( $r['payload'], true ) ) : ( $event ?: array() );
             echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=ftuy-events' ) ) . '">← Todos los eventos</a></p>';
@@ -143,7 +159,11 @@ class FTUY_Admin {
         $page = max( 1, absint( $_GET['ft_page'] ?? 1 ) );
         $rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . FTUY_Events::table() . ' ORDER BY start_date DESC LIMIT 25 OFFSET %d', ( $page - 1 ) * 25 ), ARRAY_A );
         foreach ( $rows as $e ) {
-            echo '<tr><td>' . esc_html( $e['title'] ) . '</td><td>' . esc_html( $e['start_date'] . ' → ' . $e['end_date'] ) . '</td><td>' . esc_html( $e['department'] ) . '</td><td>' . esc_html( self::labels()[$e['status']] ?? $e['status'] ) . ( $e['status'] === 'published' && FTUY_Events::temporal( $e ) === 'past' ? ' · Pasado' : '' ) . '</td><td><a href="' . esc_url( admin_url( 'admin.php?page=ftuy-events&edit=' . $e['id'] ) ) . '">Editar</a>' . ( $e['status'] === 'published' ? ' · <a href="' . esc_url( FTUY_Events::url( $e ) ) . '">Ver</a>' : '' ) . '</td></tr>';
+            echo '<tr><td>' . esc_html( $e['title'] ) . '</td><td>' . esc_html( $e['start_date'] . ' → ' . $e['end_date'] ) . '</td><td>' . esc_html( $e['department'] ) . '</td><td>' . esc_html( self::labels()[$e['status']] ?? $e['status'] ) . ( $e['status'] === 'published' && FTUY_Events::temporal( $e ) === 'past' ? ' · Pasado' : '' ) . '</td><td>';
+            if ( $e['status'] !== 'trash' ) { echo '<a href="' . esc_url( admin_url( 'admin.php?page=ftuy-events&edit=' . $e['id'] ) ) . '">Editar</a>' . ( $e['status'] === 'published' ? ' · <a href="' . esc_url( FTUY_Events::url( $e ) ) . '">Ver</a>' : '' ); }
+            echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"' . ( $e['status'] !== 'trash' ? ' onsubmit="return confirm(\'¿Enviar este evento a papelera? Dejará de verse en la web y la app.\');"' : '' ) . '><input type="hidden" name="action" value="ftuy_event_trash"><input type="hidden" name="event_id" value="' . absint( $e['id'] ) . '"><input type="hidden" name="operation" value="' . ( $e['status'] === 'trash' ? 'restore' : 'trash' ) . '">';
+            wp_nonce_field( 'ftuy_event_trash_' . $e['id'] );
+            echo '<button class="button-link" type="submit">' . ( $e['status'] === 'trash' ? 'Restaurar como pendiente' : 'Enviar a papelera' ) . '</button></form></td></tr>';
         }
         echo '</tbody></table><p>' . paginate_links( array( 'base' => add_query_arg( 'ft_page', '%#%' ), 'current' => $page, 'total' => max( 1, (int) ceil( $wpdb->get_var( 'SELECT COUNT(*) FROM ' . FTUY_Events::table() ) / 25 ) ) ) ) . '</p></div>';
     }

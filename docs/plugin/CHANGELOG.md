@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.6 — 2026-10-11
+
+- Administración de eventos: enviar a papelera con confirmación y restaurar como pendiente, sin republicación automática.
+- POST con capacidad manage_ft_events y nonce por evento; cierre de revisiones pendientes en una transacción. La web/API solo exponen publicados.
+- Conserva imágenes, originales Eventchamp e historial; no agrega borrado físico ni elimina datos de producción automáticamente.
+
 ## 0.22.5 — 2026-10-10
 
 - Pie común con iconos SVG accesibles de Instagram y Facebook.
