@@ -7,8 +7,9 @@ $assert( ! preg_match( '/\bplanes?\b/iu', $hero ), 'No generic plan copy' );
 $assert( strpos( $hero, 'Foodtrucks, sabores' ) !== false && strpos( $hero, 'en tus eventos' ) !== false, 'Foodtruck identity in titles' );
 $assert( substr_count( $hero, 'data-hero-message=' ) === 4, 'Four messages' );
 $assert( substr_count( $hero, '<h1>' ) === 1, 'Single heading' );
-$assert( strpos( $hero, 'Con foodtrucks y mucho más.' ) !== false, 'Broad agenda' );
 preg_match_all( '/data-hero-message="([^"]+)"/', $hero, $matches );
+$messages = array_map( function ( $message ) { return json_decode( html_entity_decode( $message, ENT_QUOTES, 'UTF-8' ), true ); }, $matches[1] );
+$assert( strpos( $messages[1]['text'], 'Con foodtrucks y mucho más.' ) !== false, 'Broad agenda' );
 foreach ( $matches[1] as $message ) {
     $data = json_decode( html_entity_decode( $message, ENT_QUOTES, 'UTF-8' ), true );
     $assert( is_array( $data ) && isset( $data['title'], $data['text'], $data['label'], $data['url'] ), 'Valid slide message' );
