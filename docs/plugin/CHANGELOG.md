@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.22.11 — 2026-10-12
+
+- Etiqueta GA4 `G-RBK3ZR6ZWP` en wp_head, sin nuevos plugins, únicamente en el dominio público Foodtrucks Uruguay.
+- Excluye localhost, administración, administradores autenticados, recuperación/cuenta y vistas previas privadas. URL y referente sin query ni fragmento para no enviar claves de recuperación.
+- Medición básica del sitio, no Firebase Analytics de la app ni eventos personalizados de CTA. Verificar recepción en Tiempo real después del despliegue; revisar aviso de privacidad y consentimiento según corresponda antes de ampliar mediciones.
 ## 0.22.10 — 2026-10-12
 
 - Slide de Home a 450 px en escritorio/tablet desde 751 px; mantiene 350 px en móvil. Sin cambios de imágenes, textos ni base.
