@@ -1,5 +1,19 @@
 # Actualizar las apps existentes · 2026-10-07
 
+## Versiones de tienda confirmadas · 2026-10-11
+
+Santi confirmó el bundle explícito de Apple `org.useful-media-app.foodtruck` y la versión iOS anterior 4.2.0. En Google Play confirmó 4.2.0 / versionCode 40200, producción, lanzamiento completo del 14 de septiembre de 2021.
+
+La nueva versión será **5.0 en ambas plataformas**:
+
+- iOS: MARKETING_VERSION 5.0, build inicial 1 para esta versión (incrementar ante nuevas cargas).
+- Android: versionName 5.0, versionCode 50000, superior al 40200 publicado. Debug mantiene el sufijo `-dev`.
+- El versionado interno del código/package.json sigue en 0.11.0; es independiente de la numeración de tiendas.
+
+Para compilar Android Release, pasar explícitamente `-PFTUY_STORE_VERSION=5.0 -PFTUY_ANDROID_VERSION_CODE=50000`; se mantiene la protección de distribución. No se modificaron bundles ni firmas. Estas decisiones reemplazan las dudas y numeraciones provisionales históricas de este documento.
+
+Pendientes antes de TestFlight: equipo/firma Apple, backend HTTPS accesible desde el dispositivo y validación de push iOS. Todavía no se archivó ni subió un build a las tiendas.
+
 ## Decisión posterior · 2026-10-09
 
 El usuario autoriza usar las apps Firebase reales porque están despublicadas. Android Debug usa `org.useful_media_app.foodtruck` sin sufijo `.dev`, conservando certificado Debug. iOS usa `org.useful-media-app.foodtruck` del plist histórico, con entitlements de simulador derivados del bundle. No se cambia Team/firma ni se publica. Si Android ya está instalado con otra firma, no puede actualizarse con el APK Debug; no desinstalar automáticamente. Confirmar bundle iOS en App Store Connect sigue siendo requisito antes de distribuir. Las referencias a IDs provisionales abajo son históricas.

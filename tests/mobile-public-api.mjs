@@ -1,4 +1,4 @@
-// Read-only integration: run the actual mobile transport/parser against local WordPress.
+// Read-only integration: run the actual mobile transport/parser against WordPress.
 // Node substitutes only native configuration; it does not emulate iOS/Android networking.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -8,8 +8,10 @@ const ts = require('typescript');
 const source = readFileSync(new URL('../apps/mobile/src/lib/api.ts', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022}}).outputText;
 const exports = {};
+const backend = process.argv[2] || 'http://localhost:8888/foodtruck';
+assert.ok(['http://localhost:8888/foodtruck', 'https://foodtruckuruguay.com'].includes(backend));
 new Function('require', 'exports', compiled)(name => {
-  assert.equal(name, './config'); return {siteURL: () => 'http://localhost:8888/foodtruck'};
+  assert.equal(name, './config'); return {siteURL: () => backend};
 }, exports);
 let checks = 0;
 for (const view of ['upcoming', 'past']) {
@@ -36,4 +38,4 @@ if (photos.length) {
   for (const key of ['email', 'legacy_author_id', 'legacy_metadata', 'notes', 'reports']) { assert.equal(key in detail, false); checks++; }
 }
 await assert.rejects(exports.detail('publications', '999999999'), error => error.status === 404); checks++;
-console.log(JSON.stringify({checks, publications: total, upcomingAndHistory: true, publicOnly: true}));
+console.log(JSON.stringify({backend, checks, publications: total, upcomingAndHistory: true, publicOnly: true}));

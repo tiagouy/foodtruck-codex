@@ -1,5 +1,17 @@
 # Changelog de la app
 
+## 0.12.0 — 2026-10-12
+
+- App conectada a `https://foodtruckuruguay.com` tanto en Debug para pruebas como en Release; MAMP queda como opción explícita de desarrollo, nunca en Release.
+- Continúa usando la API del plugin, sin modificar usuarios ni datos de producción automáticamente. Numeración de tiendas 5.0, iOS build 1 y Android code 50000.
+- Prueba de contrato público adaptable al dominio real. Pendientes pruebas nativas de login, uploads, push y enlaces asociados; configurar firma Apple antes de archivar/subir TestFlight.
+
+## Preparación de tiendas 5.0 — 2026-10-11
+
+- Numeración pública 5.0 para iOS y Android, sin cambiar el versionado interno 0.11.0.
+- iOS build 1; Android versionCode 50000 (anterior publicado confirmado: 40200).
+- Bundle iOS confirmado por el usuario: `org.useful-media-app.foodtruck`. Identidades y firmas sin cambios; carga a tiendas pendiente.
+
 ## 0.11.0 — 2026-10-10
 
 - Concordancia con la web: logo horizontal transparente aprobado y bloque de próximos eventos azul en Home.

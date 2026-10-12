@@ -10,6 +10,12 @@ import { dateLabel, plain } from '../src/lib/presentation';
 import { mediaURL, siteURL } from '../src/lib/config';
 
 const mockFetch = jest.fn();
+test('uses the public HTTPS backend during current device testing', () => {
+  expect(siteURL()).toBe('https://foodtruckuruguay.com');
+  expect(mediaURL('https://foodtruckuruguay.com/media/photo.jpg')).toBe(
+    'https://foodtruckuruguay.com/media/photo.jpg',
+  );
+});
 globalThis.fetch = mockFetch;
 const photo = {
   address: '',

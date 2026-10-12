@@ -73,8 +73,8 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
-// Last local APK: 4.2.0 / 40200. These defaults are for development only.
-// Store values must be confirmed against Play Console before any release task.
+// Play Console confirmed by Santi: 4.2.0 / 40200 (2026-10-11).
+// New store version: 5.0 / 50000. Release tasks still require explicit values.
 def storeCode = providers.gradleProperty("FTUY_ANDROID_VERSION_CODE").orNull
 def storeVersion = providers.gradleProperty("FTUY_STORE_VERSION").orNull
 gradle.taskGraph.whenReady { graph ->
@@ -96,8 +96,8 @@ android {
         applicationId "org.useful_media_app.foodtruck"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode storeCode ? storeCode.toInteger() : 40201
-        versionName storeVersion ?: "4.2.1"
+        versionCode storeCode ? storeCode.toInteger() : 50000
+        versionName storeVersion ?: "5.0"
     }
     signingConfigs {
         debug {
