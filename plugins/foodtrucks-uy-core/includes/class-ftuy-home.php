@@ -46,10 +46,10 @@ class FTUY_Home {
     public static function render( $block ) {
         if ( $block === 'hero' ) {
             $messages = array(
-                array( 'title' => "Sabores, encuentros\ny buenos planes", 'text' => 'Una agenda de ferias, propuestas gastronómicas y encuentros de nuestra comunidad. Con foodtrucks y mucho más.', 'label' => 'Explorar la agenda →', 'path' => '/eventos/' ),
-                array( 'title' => "Un plan para\ncada finde", 'text' => 'Descubrí dónde encontrarnos: eventos gastronómicos, foodtrucks y propuestas de amigos de la comunidad.', 'label' => 'Ver próximos eventos →', 'path' => '/eventos/' ),
-                array( 'title' => "Foodtrucks para\ntu próximo evento", 'text' => 'Conocé qué sirven y cómo contactar a los foodtrucks para eventos, catering y encuentros privados.', 'label' => 'Conocer foodtrucks →', 'path' => '/foodtrucks/' ),
-                array( 'title' => "La comunidad\nse encuentra acá", 'text' => 'Planes, sabores y momentos compartidos. Mirá las fotos de quienes salen a disfrutar.', 'label' => 'Ver fotos de la comunidad →', 'path' => '/fotosusuarios/' ),
+                array( 'title' => "Foodtrucks, sabores\ny encuentros", 'text' => 'Somos una comunidad sobre ruedas. Compartimos dónde encontrarnos y qué disfrutar en Uruguay.', 'label' => 'Ver la agenda →', 'path' => '/eventos/' ),
+                array( 'title' => "El finde\ntiene sabor", 'text' => 'Ferias, eventos gastronómicos y encuentros de amigos de la comunidad. Con foodtrucks y mucho más.', 'label' => 'Descubrir eventos →', 'path' => '/eventos/' ),
+                array( 'title' => "Foodtrucks\nen tus eventos", 'text' => '¿Organizás una fiesta, feria o encuentro? Conocé nuestra comunidad de foodtrucks y encontrá propuestas para sumar sabor.', 'label' => 'Conocer foodtrucks →', 'path' => '/foodtrucks/' ),
+                array( 'title' => "Una comunidad\npara compartir", 'text' => 'Los sabores nos reúnen. Descubrí las fotos y los momentos de quienes forman parte de Foodtrucks Uruguay.', 'label' => 'Ver nuestras fotos →', 'path' => '/fotosusuarios/' ),
             );
             echo '<section class="ft-hero" aria-label="Foodtrucks Uruguay"><div class="ft-hero-track">';
             foreach ( array( 2802, 2803, 2804, 2805 ) as $i => $id ) {
@@ -95,7 +95,7 @@ class FTUY_Home {
     }
     public static function participate() {
         $cards = array(
-            array( 'eyebrow' => 'Para quienes organizan', 'title' => 'Tu evento también tiene lugar', 'text' => '¿Una feria, un encuentro gastronómico o un buen plan de la comunidad? Envianos tu evento: lo revisamos antes de sumarlo a la agenda.', 'label' => 'Publicar mi evento', 'path' => '/sugerir-evento/' ),
+            array( 'eyebrow' => 'Para quienes organizan', 'title' => 'Tu evento también tiene lugar', 'text' => '¿Una feria, un encuentro gastronómico o una propuesta para compartir? Envianos tu evento: lo revisamos antes de sumarlo a la agenda.', 'label' => 'Publicar mi evento', 'path' => '/sugerir-evento/' ),
             array( 'eyebrow' => 'Para quienes cocinan', 'title' => 'Que encuentren tu foodtruck', 'text' => 'Contá qué servís y sumá tu foodtruck al catálogo para que puedan contactarte para eventos, catering y encuentros privados.', 'label' => 'Registrar mi foodtruck', 'path' => '/agregar-foodtruck/' ),
             array( 'eyebrow' => 'Para armar equipo', 'title' => '¿Buscás foodtrucks para tu evento?', 'text' => 'Escribinos con tu propuesta. Te ayudamos a difundir la convocatoria entre los foodtrucks registrados y nuestra lista de difusión.', 'label' => 'Contarnos la propuesta', 'path' => '/contacto/' ),
         );

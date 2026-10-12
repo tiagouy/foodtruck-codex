@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.9 — 2026-10-12
+
+- Cuatro mensajes aprobados para el slide: Foodtrucks, sabores y encuentros; El finde tiene sabor; Foodtrucks en tus eventos; Una comunidad para compartir.
+- Foodtrucks como comunidad protagonista, manteniendo lugar para encuentros gastronómicos relacionados. Elimina plan/planes del hero y del CTA de eventos.
+- Conserva fotografías, destinos, bloque de participación y diseño. No requiere cambios en Elementor ni migración de base.
+
 ## 0.22.8 — 2026-10-12
 
 - Hero conserva las cuatro fotos originales y cambia título, frase y enlace con cada foto, ampliando la agenda a gastronomía y comunidad, no exclusivamente eventos con foodtrucks.
