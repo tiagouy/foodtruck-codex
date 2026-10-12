@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.22.8 — 2026-10-12
+
+- Hero conserva las cuatro fotos originales y cambia título, frase y enlace con cada foto, ampliando la agenda a gastronomía y comunidad, no exclusivamente eventos con foodtrucks.
+- Tres CTA entre agenda azul y catálogo: enviar evento para revisión, registrar foodtruck y contactar para difundir convocatorias. Tres columnas desktop, apilados en móvil, marca azul/naranja, sin títulos inclinados.
+- Integrados después de `[ftuy_home_events]`, sin reemplazar datos Elementor ni importar BD. `[ftuy_home_participate]` disponible para reutilizar por separado; no añadirlo de nuevo en Home porque duplicaría el bloque.
+- Convocatorias mediante contacto y gestión humana: no implementa envíos automáticos, avisos masivos ni nuevas promesas de contratación.
+
 ## 0.22.7 — 2026-10-11
 
 - Botón Despublicar foodtruck en listado y edición, independiente del formulario de propuesta, con confirmación, POST, permiso y nonce por ficha.

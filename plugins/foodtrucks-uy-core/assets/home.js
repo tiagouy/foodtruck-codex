@@ -1,6 +1,28 @@
 /* No slider framework; scroll snap, keyboard-accessible buttons, no autoplay. */
 document.querySelectorAll('.ft-hero').forEach(hero => {
   const track = hero.querySelector('.ft-hero-track');
+  const copy = hero.querySelector('.ft-hero-copy');
+  let visibleIndex = -1;
+  const updateCopy = () => {
+    if (!track.clientWidth) return;
+    const index = Math.max(0, Math.min(track.children.length - 1, Math.round(track.scrollLeft / track.clientWidth)));
+    if (index === visibleIndex) return;
+    const message = track.children[index].dataset.heroMessage;
+    if (!message || !copy) return;
+    const data = JSON.parse(message);
+    copy.querySelector('h1').textContent = data.title;
+    copy.querySelector('p').textContent = data.text;
+    copy.querySelector('a').textContent = data.label;
+    copy.querySelector('a').href = data.url;
+    visibleIndex = index;
+  };
+  let queued = false;
+  track.addEventListener('scroll', () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; updateCopy(); });
+  }, {passive: true});
+  updateCopy();
   const move = delta => {
     const count = track.children.length;
     const index = Math.round(track.scrollLeft / track.clientWidth);
