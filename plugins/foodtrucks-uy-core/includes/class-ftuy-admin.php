@@ -18,7 +18,7 @@ class FTUY_Admin {
         } );
         add_action( 'ftuy_retry_mail', array( 'FTUY_Events', 'send_mail' ) );
     }
-    public static function labels() { return array( 'pending' => 'Pendiente', 'corrections' => 'Requiere correcciones', 'published' => 'Publicado', 'rejected' => 'Rechazado', 'superseded' => 'Reemplazado', 'trash' => 'Papelera' ); }
+    public static function labels() { return array( 'pending' => 'Pendiente', 'corrections' => 'Requiere correcciones', 'published' => 'Publicado', 'rejected' => 'Rechazado', 'superseded' => 'Reemplazado', 'trash' => 'Papelera', 'unpublished' => 'Despublicado' ); }
     public static function handle_trash() {
         if ( ! current_user_can( 'manage_ft_events' ) ) { wp_die( 'Sin permiso.', '', array( 'response' => 403 ) ); }
         if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' ) { wp_die( 'Método inválido.', '', array( 'response' => 405 ) ); }

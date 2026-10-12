@@ -119,6 +119,18 @@ class FTUY_Foodtrucks {
         $review = $wpdb->insert_id; $wpdb->query( 'COMMIT' ); return $review;
     }
     public static function review( $id ) { global $wpdb; return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table( 'foodtruck_reviews' ) . ' WHERE id=%d', $id ), ARRAY_A ); }
+    public static function unpublish( $id ) {
+        if ( ! current_user_can( 'manage_ft_foodtrucks' ) ) { return new WP_Error( 'permission', 'Sin permiso.' ); }
+        global $wpdb;
+        $wpdb->query( 'START TRANSACTION' );
+        $row = $wpdb->get_row( $wpdb->prepare( 'SELECT status FROM ' . self::table() . ' WHERE id=%d FOR UPDATE', $id ), ARRAY_A );
+        if ( ! $row || $row['status'] !== 'published' ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'state', 'La ficha no está publicada.' ); }
+        $saved = $wpdb->update( self::table(), array( 'status' => 'unpublished', 'updated_at' => current_time( 'mysql', true ) ), array( 'id' => $id ) );
+        $closed = $wpdb->query( $wpdb->prepare( 'UPDATE ' . self::table( 'foodtruck_reviews' ) . " SET status='superseded',reviewer_id=%d,reviewed_at=%s WHERE foodtruck_id=%d AND status IN ('pending','corrections')", get_current_user_id(), current_time( 'mysql', true ), $id ) );
+        if ( $saved === false || $closed === false ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'save', 'No se pudo despublicar.' ); }
+        if ( $wpdb->query( 'COMMIT' ) === false ) { $wpdb->query( 'ROLLBACK' ); return new WP_Error( 'save', 'No se pudo confirmar el cambio.' ); }
+        return true;
+    }
     public static function moderate( $id, $decision, $note = '' ) {
         global $wpdb;
         if ( ! current_user_can( 'manage_ft_foodtrucks' ) || ! in_array( $decision, array( 'published', 'corrections', 'rejected' ), true ) ) { return new WP_Error( 'permission', 'Sin permiso o decisión inválida.' ); }

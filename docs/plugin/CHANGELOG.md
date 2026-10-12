@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.7 — 2026-10-11
+
+- Botón Despublicar foodtruck en listado y edición, independiente del formulario de propuesta, con confirmación, POST, permiso y nonce por ficha.
+- Estado Despublicado: no visible en catálogos ni API; conserva datos, fotos y responsable. Cierra propuestas pendientes para evitar republicación desde revisiones anteriores.
+- Explicación de Rechazar/Pedir correcciones: afectan propuestas, no retiran fichas publicadas. Republicación mediante revisión y Aprobar y publicar.
+
 ## 0.22.6 — 2026-10-11
 
 - Administración de eventos: enviar a papelera con confirmación y restaurar como pendiente, sin republicación automática.
