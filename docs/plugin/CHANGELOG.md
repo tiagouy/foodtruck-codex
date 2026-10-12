@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.22.10 — 2026-10-12
+
+- Slide de Home a 450 px en escritorio/tablet desde 751 px; mantiene 350 px en móvil. Sin cambios de imágenes, textos ni base.
+
 ## 0.22.9 — 2026-10-12
 
 - Cuatro mensajes aprobados para el slide: Foodtrucks, sabores y encuentros; El finde tiene sabor; Foodtrucks en tus eventos; Una comunidad para compartir.
