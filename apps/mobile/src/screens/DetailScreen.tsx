@@ -34,7 +34,7 @@ export default function DetailScreen({
   route,
   navigation,
 }: NativeStackScreenProps<RootStack, 'Detalle'>) {
-  const { kind, contentKey } = route.params;
+  const { kind, contentKey, publicationSlug = false } = route.params;
   const [item, setItem] = useState<Content | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -120,7 +120,7 @@ export default function DetailScreen({
       setItem(null);
       setError('');
       setLoading(true);
-      detail(kind, contentKey, controller.signal)
+      detail(kind, contentKey, controller.signal, publicationSlug)
         .then(value => {
           if (live) {
             setItem(value);
@@ -142,7 +142,7 @@ export default function DetailScreen({
       };
       // Explicit refresh is an invalidation trigger, not a value read by the request.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [kind, contentKey, refreshKey]),
+    }, [kind, contentKey, publicationSlug, refreshKey]),
   );
   if (!item) {
     return (

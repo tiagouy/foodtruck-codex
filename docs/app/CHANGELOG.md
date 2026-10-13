@@ -1,5 +1,10 @@
 # Changelog de la app
 
+## 0.13.0 — 2026-10-13
+
+- Enlaces HTTPS de fotos conectados al detalle, incluidos slugs históricos y `/fotosusuarios/oferta.php?slug=...`; listado abre pestaña Fotos. No confunde IDs antiguos con nuevos IDs.
+- Revalida siempre contra API pública: fotos despublicadas siguen devolviendo no disponible, sin caché local que las republique.
+- Universal Links iOS: Associated Domains y puente NSUserActivity en AppDelegate. Requiere plugin 0.22.12 online y validar asociación/firma en dispositivo real. Android no se da por integrado aún.
 ## 0.12.0 — 2026-10-12
 
 - App conectada a `https://foodtruckuruguay.com` tanto en Debug para pruebas como en Release; MAMP queda como opción explícita de desarrollo, nunca en Release.

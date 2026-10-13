@@ -9,7 +9,7 @@ export type Tabs = {
 };
 export type RootStack = {
   Principal: NavigatorScreenParams<Tabs> | undefined;
-  Detalle: { kind: Kind; contentKey: string };
+  Detalle: { kind: Kind; contentKey: string; publicationSlug?: boolean };
   CuentaSolicitud: { action: AccountAction };
   ConfiguracionCuenta: undefined;
   SubirFoto: undefined;

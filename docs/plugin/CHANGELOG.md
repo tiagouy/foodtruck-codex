@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.22.12 — 2026-10-13
+
+- Sirve AASA JSON sin redirección en raíz y `.well-known`, para el bundle iOS confirmado con prefijo de equipo 3Y7GC99X3J; rutas limitadas a fotos públicas, sin asociaciones de cuentas o recuperación.
+- Debe verificarse el application-identifier de la firma de distribución antes de TestFlight. No crea certificados ni activa capacidades en el portal Apple; Android pendiente del SHA-256 de Play App Signing.
 ## 0.22.11 — 2026-10-12
 
 - Etiqueta GA4 `G-RBK3ZR6ZWP` en wp_head, sin nuevos plugins, únicamente en el dominio público Foodtrucks Uruguay.

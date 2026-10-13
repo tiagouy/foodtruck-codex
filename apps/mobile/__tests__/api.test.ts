@@ -54,6 +54,13 @@ test('uses only the new plugin API and page/per_page, never legacy limit', async
   );
   expect(mockFetch.mock.calls[0][1].headers['Cache-Control']).toBe('no-cache');
 });
+test('shared photo slugs resolve via the public alias endpoint', async () => {
+  response(photo);
+  await detail('publications', '123', undefined, true);
+  expect(mockFetch.mock.calls[0][0]).toBe(
+    `${siteURL()}/wp-json/foodtrucks-uy/v1/publications/by-slug/123`,
+  );
+});
 test('my photos use the WordPress author filter and reject another author', async () => {
   response({ items: [photo], total: 1, page: 1 });
   await list('publications', 1, '', 12, undefined, 2);

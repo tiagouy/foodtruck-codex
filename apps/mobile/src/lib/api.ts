@@ -298,8 +298,10 @@ export async function detail(
   kind: Kind,
   key: string,
   signal?: AbortSignal,
+  publicationSlug = false,
 ): Promise<Content> {
-  const value = await request(`${kind}/${encodeURIComponent(key)}`, signal);
+  const path = kind === 'publications' && publicationSlug ? `${kind}/by-slug` : kind;
+  const value = await request(`${path}/${encodeURIComponent(key)}`, signal);
   if (!validateContent(kind, value)) {
     throw new APIError('El servidor respondió con datos inesperados.');
   }

@@ -15,6 +15,7 @@ import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
 import PublicationUploadScreen from './src/screens/PublicationUploadScreen';
 import { colors } from './src/components/AppHeader';
 import { RootStack, Tabs } from './src/navigation';
+import { photoLinking } from './src/lib/deep-links';
 import { restoreSession } from './src/lib/session';
 import {
   initializePush,
@@ -105,6 +106,7 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" backgroundColor={colors.dark} />
       <NavigationContainer
+        linking={photoLinking}
         theme={{
           ...DefaultTheme,
           colors: {
