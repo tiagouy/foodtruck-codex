@@ -52,7 +52,7 @@ class FTUY_Accounts {
         add_action( 'rest_api_init', function () {
             foreach ( array( 'register', 'forgot-password', 'reactivate' ) as $action ) {
                 register_rest_route( 'foodtrucks-uy/v1', '/accounts/' . $action, array( 'methods' => 'POST', 'permission_callback' => '__return_true', 'callback' => function ( $request ) use ( $action ) {
-                    $result = self::request( $action, $request['email'], $request['name'] ?? '' );
+                    $result = self::request( $action, $request['email'], $request['name'] ?? '', $request['turnstile_token'] ?? '' );
                     return is_wp_error( $result ) ? $result : new WP_REST_Response( array( 'message' => self::confirmation() ), 202 );
                 } ) );
             }
@@ -74,12 +74,15 @@ class FTUY_Accounts {
         $count = (int) get_transient( $key ); if ( $count >= $limit ) { return true; }
         set_transient( $key, $count + 1, $seconds ); return false;
     }
-    public static function request( $action, $email, $name = '' ) {
+    public static function request( $action, $email, $name = '', $turnstile_token = '' ) {
         if ( ! in_array( $action, array( 'register', 'forgot-password', 'reactivate' ), true ) || ! is_string( $email ) || ! is_string( $name ) || ! is_email( $email ) || strlen( $email ) > 100 || strlen( $name ) > 200 ) { return new WP_Error( 'fields', 'Ingresá un email válido.', array( 'status' => 400 ) ); }
         $email = strtolower( trim( $email ) ); $name = sanitize_text_field( $name );
         if ( $action === 'register' && ( ! self::registration_enabled() || ! $name ) ) { return new WP_Error( 'register', self::registration_enabled() ? 'Ingresá tu nombre.' : 'El registro todavía no está habilitado.', array( 'status' => 400 ) ); }
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         if ( self::limited( 'request-ip-' . $ip, 10, HOUR_IN_SECONDS ) ) { return new WP_Error( 'rate', 'Hubo varios intentos. Probá nuevamente más tarde.', array( 'status' => 429 ) ); }
+        // Both web and REST must pass this gate before user lookup/creation or mail.
+        $verification = FTUY_Turnstile::verify( $action, $turnstile_token );
+        if ( is_wp_error( $verification ) ) { return $verification; }
         // A per-email limit returns the same confirmation to avoid disclosing accounts.
         if ( self::limited( 'request-email-' . $email, 3, HOUR_IN_SECONDS ) ) { return true; }
         $user = get_user_by( 'email', $email );
@@ -198,7 +201,7 @@ class FTUY_Accounts {
                 if ( ! self::$name || strlen( self::$name ) > 200 ) { self::$error = 'Ingresá tu nombre.'; }
                 else { wp_update_user( array( 'ID' => get_current_user_id(), 'display_name' => sanitize_text_field( self::$name ) ) ); self::$notice = 'Guardamos tu nombre.'; }
             } elseif ( in_array( self::$view, array( 'register', 'forgot-password', 'reactivate' ), true ) ) {
-                $result = self::request( self::$view, self::$email, self::$name );
+                $result = self::request( self::$view, self::$email, self::$name, $input['cf-turnstile-response'] ?? '' );
                 if ( is_wp_error( $result ) ) { self::$error = $result->get_error_message(); } else { self::$notice = self::confirmation(); }
             }
         }

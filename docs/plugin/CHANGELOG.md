@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.22.13 — integración Turnstile (pendiente de activar)
+
+- Registro, recuperación y reactivación: widget Managed y comprobación Siteverify HTTPS con hostname y acción esperados, antes de crear usuarios o generar claves/correos. Error cerrado ante token ausente, rechazado o servicio caído.
+- Mismo control para la API pública: no hay excepción por User-Agent, cabecera, plataforma o sesión. Se conservan los límites IP/email y los mensajes que no revelan existencia de cuentas.
+- Opción `ftuy_turnstile_enabled` apagada por defecto; claves solo en configuración privada. Login, perfiles y sesiones existentes sin cambios.
+- Al activar, los binarios actuales sin token no podrán solicitar registro/recuperación/reactivación por API: deberán completar el formulario web. No activar sin acordar esta transición. Ver `docs/plugin/turnstile.md`.
+
 ## 0.22.12 — 2026-10-13
 
 - Sirve AASA JSON sin redirección en raíz y `.well-known`, para el bundle iOS confirmado con prefijo de equipo 3Y7GC99X3J; rutas limitadas a fotos públicas, sin asociaciones de cuentas o recuperación.
