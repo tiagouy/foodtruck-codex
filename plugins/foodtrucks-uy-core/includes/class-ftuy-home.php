@@ -84,7 +84,8 @@ class FTUY_Home {
             foreach ( $posts as $post ) { echo '<article class="ft-card"><a class="ft-card-image" href="' . esc_url( get_permalink( $post ) ) . '">' . get_the_post_thumbnail( $post, 'medium_large', array( 'loading' => 'lazy' ) ) . '</a><div class="ft-card-body"><h3><a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $post->post_title ) . '</a></h3><p>' . esc_html( wp_trim_words( wp_strip_all_tags( $post->post_content ), 22 ) ) . '</p></div></article>'; }
             echo '</div>';
         } elseif ( $block === 'app' ) {
-            echo '<p>Eventos, foodtrucks y fotos de la comunidad en una misma app. Estamos preparando la nueva versión.</p><a class="ft-button" href="' . esc_url( home_url( '/fotosusuarios/' ) ) . '">Explorá la comunidad</a>';
+            echo '<p>Eventos, foodtrucks y fotos de la comunidad en una misma app. Descargala gratis para iPhone y Android.</p>';
+            include FTUY_PATH . 'templates/store-buttons.php';
         } elseif ( $block === 'friends' ) {
             echo '<p>Amigos que nos han acompañado en el camino.</p><div class="ft-friends">';
             foreach ( array( 2880, 2881, 2879, 2854, 2853, 2852 ) as $id ) { echo wp_get_attachment_image( $id, 'medium', false, array( 'loading' => 'lazy' ) ); } echo '</div>';

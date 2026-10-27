@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.14 — botones de descarga en la home
+
+- La sección «Llevá la comunidad con vos» muestra App Store y Google Play en lugar de «Explorá la comunidad». Texto actualizado para las apps disponibles.
+- Botones compartidos con el pie, con los mismos estilos responsive y la misma opción `ftuy_store_links`: no duplica URLs ni modifica opciones de producción. Conserva «Próximamente» si una tienda no está habilitada/configurada.
+- Requiere desplegar esta versión y tener ambas URLs configuradas. Verificación standalone: `php tests/store-buttons-unit.php` (12 comprobaciones, sin modificar datos).
+
 ## 0.22.13 — integración Turnstile (pendiente de activar)
 
 - Registro, recuperación y reactivación: widget Managed y comprobación Siteverify HTTPS con hostname y acción esperados, antes de crear usuarios o generar claves/correos. Error cerrado ante token ausente, rechazado o servicio caído.
